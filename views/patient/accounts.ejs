@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+        <title>TherapEase</title>
+		
+		<!-- Favicon -->
+        <link rel="shortcut icon" type="image/x-icon" href="/img/logo1.png">
+		
+		<!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="/css/bootstrap.min.css">
+		
+		<!-- Fontawesome CSS -->
+        <link rel="stylesheet" href="/css/font-awesome.min.css">
+		
+		<!-- Feathericon CSS -->
+        <link rel="stylesheet" href="/css/feathericon.min.css">
+		
+		<!-- Main CSS -->
+        <link rel="stylesheet" href="/css/style.css">
+		
+		<!--[if lt IE 9]>
+			<script src="assets/js/html5shiv.min.js"></script>
+			<script src="assets/js/respond.min.js"></script>
+		<![endif]-->
+    </head>
+    <body>
+	
+		<!-- Main Wrapper -->
+		<div class="main-wrapper">
+		
+			<!-- Header -->
+            <div class="header">
+			
+				<!-- Logo -->
+				<div class="header-left">
+					<a href="/client/dashboard" class="logo">
+					  <img src="/img/logo.png" alt="Logo" width="140" height="50" />
+					</a>
+					<a href="/client/dashboard" class="logo logo-small">
+					  <img src="/img/logo-small.png" alt="Logo" width="100" height="70" />
+					</a>
+				  </div>
+				  <!-- /Logo -->
+				
+				<a href="javascript:void(0);" id="toggle_btn">
+					<i class="fe fe-text-align-left"></i>
+				</a>
+				
+				
+				
+				<!-- Mobile Menu Toggle -->
+				<a class="mobile_btn" id="mobile_btn">
+					<i class="fa fa-bars"></i>
+				</a>
+				<!-- /Mobile Menu Toggle -->
+				
+				<!-- Header Right Menu -->
+				<ul class="nav user-menu">
+
+					<!-- Notifications -->
+					<li class="nav-item dropdown noti-dropdown">
+						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+							<i class="fe fe-bell"></i> <span class="badge badge-pill">3</span>
+						</a>
+						<div class="dropdown-menu notifications">
+							<div class="topnav-dropdown-header">
+								<span class="notification-title">Notifications</span>
+								<a href="javascript:void(0)" class="clear-noti"> Clear All </a>
+							</div>
+							<div class="noti-content">
+								<ul class="notification-list">
+									<li class="notification-message">
+										
+									</li>
+									<li class="notification-message">
+										
+									</li>
+									<li class="notification-message">
+										
+									</li>
+									<li class="notification-message">
+										
+									</li>
+								</ul>
+							</div>
+							<div class="topnav-dropdown-footer">
+								<a href="#">View all Notifications</a>
+							</div>
+						</div>
+					</li>
+					<!-- /Notifications -->
+					
+					<!-- User Menu -->
+					<li class="nav-item dropdown has-arrow">
+						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+							<span class="user-img"><img class="rounded-circle" src="/img/logo1.png" width="31" alt=""></span>
+						</a>
+						<div class="dropdown-menu">
+							<div class="user-header">
+								
+								<div class="user-text">
+									<h6>Name</h6>
+									<p class="text-muted mb-0">Loged in</p>
+								</div>
+							</div>
+							<a class="dropdown-item" href="/client/profile">My Profile</a>
+							<a class="dropdown-item" href="/client/logout">Logout</a>
+						</div>
+					</li>
+					<!-- /User Menu -->
+					
+				</ul>
+				<!-- /Header Right Menu -->
+				
+            </div>
+			<!-- /Header -->
+			
+			<!-- Sidebar -->
+			<div class="sidebar" id="sidebar">
+				<div class="sidebar-inner slimscroll">
+				  <div id="sidebar-menu" class="sidebar-menu">
+					<ul>
+					  <li>
+						<a href="/client/dashboard"
+						  ><i class="fe fe-home"></i> <span>Appointments</span></a
+						>
+					  </li>
+					  <li>
+						<a href="/client/profile"
+						  ><i class="fe fe-user"></i> <span>Profile</span></a
+						>
+					  </li>
+					 
+					  <li>
+						<a href="/client/therapist-search"
+						  ><i class="fe fe-user"></i> <span>Therapists</span></a
+						>
+					  </li>
+					  <li  class="active">
+						<a href="/client/accounts"
+						  ><i class="fe fe-user"></i> <span>Accounts</span></a
+						>
+					  </li>
+					  <li>
+						<a href="/client/invoices"
+						  ><i class="fe fe-user"></i> <span>Invoices</span></a
+						>
+					  </li>
+					  <li>
+						<a href="/client/pass-change"
+						  ><i class="fe fe-user"></i> <span>Change password</span></a
+						>
+					  </li>
+					  
+					</ul>
+				  </div>
+				</div>
+			  </div>
+			  <!-- /Sidebar -->
+			
+			<!-- Page Wrapper -->
+            <div class="page-wrapper">
+                <div class="content container-fluid">
+					
+					<!-- Page Header -->
+					<div class="page-header">
+						<div class="row">
+							<div class="col">
+								<h3 class="page-title">Accounts</h3>
+								<ul class="breadcrumb">
+									<li class="breadcrumb-item"><a href="/client/dashboard">Dashboard</a></li>
+									<li class="breadcrumb-item active">Accounts</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<!-- /Page Header -->
+					
+					<div class="row">
+						<div class="col-md-12">
+							<div class="profile-header">
+								<div class="row align-items-center">
+									
+									<div class="col ml-md-n2 profile-user-info" >
+										<h1 class="user-name mb-0">Statistics</h4>
+											
+											<div class="payment-amount" style="margin-top: 15px; display:flex; justify-content: space-evenly;">
+												
+												<div><h4 class="user-name mb-0">Total Balance</h4>
+												<span style="font-size: 30px;">PKR 10000</span>
+											</div>
+											
+
+											<div class="payment-amount">
+												<h4 class="user-name mb-0">Requested</h4>
+												<span style="font-size: 30px;">PKR 9000</span>
+											</div>
+									</div>
+										
+										
+									</div>
+									<div class="col-auto profile-btn">
+										
+										<a href="#" class="btn btn-primary">
+											Request
+										</a>
+									</div>
+								</div>
+							</div>
+							<div class="profile-menu">
+								<ul class="nav nav-tabs nav-tabs-solid">
+									<li class="nav-item">
+										<a class="nav-link active" data-toggle="tab" href="#per_details_tab">Details</a>
+									</li>
+									<li class="nav-item">
+										<a class="nav-link" data-toggle="tab" href="#password_tab">Accounts</a>
+									</li>
+								</ul>
+							</div>	
+							<div class="tab-content profile-tab-cont">
+								
+								<!-- Personal Details Tab -->
+								<div class="tab-pane fade show active" id="per_details_tab">
+								
+									<!-- Personal Details -->
+									<div class="row">
+										<div class="col-lg-12">
+											<div class="card">
+												<div class="card-body">
+													<h5 class="card-title d-flex justify-content-between">
+														<span>Bank Details</span> 
+														<a class="edit-link" data-toggle="modal" href="#edit_personal_details"><i class="fa fa-edit mr-1"></i>Edit</a>
+													</h5>
+													<div class="row">
+														<p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Bank Name</p>
+														<p class="col-sm-10">Meezan</p>
+													</div>
+													<div class="row">
+														<p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Branch Name</p>
+														<p class="col-sm-10">Meezan XXX</p>
+													</div>
+													<div class="row">
+														<p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Account Number</p>
+														<p class="col-sm-10">01234567890</p>
+													</div>
+													<div class="row">
+														<p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Account Name</p>
+														<p class="col-sm-10">Ahmed Usmani</p>
+													</div>
+													
+												</div>
+											</div>
+											
+											<!-- Edit Details Modal -->
+											<div class="modal fade" id="edit_personal_details" aria-hidden="true" role="dialog">
+												<div class="modal-dialog modal-dialog-centered" role="document" >
+													<div class="modal-content">
+														<div class="modal-header">
+															<h5 class="modal-title">Account Details</h5>
+															<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+																<span aria-hidden="true">&times;</span>
+															</button>
+														</div>
+														<div class="modal-body">
+															<form>
+																<div class="row form-row">
+																	<div class="col-12 col-sm-6">
+																		<div class="form-group">
+																			<label>Bank Name</label>
+																			<input type="text" class="form-control" value="Meezan">
+																		</div>
+																	</div>
+																	<div class="col-12 col-sm-6">
+																		<div class="form-group">
+																			<label>Branch Name</label>
+																			<input type="text"  class="form-control" value="Meezan XXX">
+																		</div>
+																	</div>
+																	
+																	<div class="col-12 col-sm-6">
+																		<div class="form-group">
+																			<label>Account Number</label>
+																			<input type="number" class="form-control" value="01234567890">
+																		</div>
+																	</div>
+																	<div class="col-12 col-sm-6">
+																		<div class="form-group">
+																			<label>Account Name</label>
+																			<input type="text" value="Ahmed Usmani" class="form-control">
+																		</div>
+																	</div>
+																	
+																	
+																</div>
+																<button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+															</form>
+														</div>
+													</div>
+												</div>
+											</div>
+											<!-- /Edit Details Modal -->
+											
+										</div>
+
+									
+									</div>
+									<!-- /Personal Details -->
+
+								</div>
+								<!-- /Personal Details Tab -->
+								
+								<!-- Change Password Tab -->
+								<div id="password_tab" class="tab-pane fade">
+								
+									<div class="row">
+						<div class="col-sm-12">
+							<div class="card">
+								<div class="card-body">
+									<div class="table-responsive">
+										<table class="datatable table table-hover table-center mb-0">
+											<thead>
+												<tr>
+													<th>ID</th>
+													<th>Requested Date</th>
+													<th>Account No</th>
+													<th>Credited On</th>
+													<th>Amount</th>
+													<th class="text-center">Status</th>
+													
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td><a href="">#AC-1234</td>
+													<td>24 Dec 2024</td>
+													<td>1234567890</td>
+													<td>26 Mar 2024</td>
+													<td>PKR 3000</td>
+													<td class="text-center">
+														<span class="badge badge-pill bg-success-light inv-badge">Pending</span>
+													</td>
+													
+												</tr>
+												<tr>
+													<tr>
+														<td><a href="">#AC-1234</td>
+														<td>24 Dec 2024</td>
+														<td>1234567890</td>
+														<td>26 Mar 2024</td>
+														<td>PKR 3000</td>
+														<td class="text-center">
+															<span class="badge badge-pill bg-danger-light inv-badge">Rejected</span>
+														</td>
+														
+													</tr>
+													
+													<tr>
+														<td><a href="">#AC-1234</td>
+														<td>24 Dec 2024</td>
+														<td>1234567890</td>
+														<td>26 Mar 2024</td>
+														<td>PKR 3000x	</td>
+														<td class="text-center">
+															<span class="badge badge-pill bg-success inv-badge">Completed</span>
+														</td>
+														
+													</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>			
+					</div>
+								</div>
+								<!-- /Change Password Tab -->
+								
+							</div>
+						</div>
+					</div>
+				
+				</div>			
+			</div>
+			<!-- /Page Wrapper -->
+		
+        </div>
+		<!-- /Main Wrapper -->
+		
+		<!-- jQuery -->
+        <script src="/js/jquery-3.2.1.min.js"></script>
+		
+		<!-- Bootstrap Core JS -->
+        <script src="/js/popper.min.js"></script>
+        <script src="/js/bootstrap.min.js"></script>
+		
+		<!-- Slimscroll JS -->
+        <script src="/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+		
+		<!-- Custom JS -->
+		<script  src="/js/script.js"></script>
+		
+    </body>
+
+</html>

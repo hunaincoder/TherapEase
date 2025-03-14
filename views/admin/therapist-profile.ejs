@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+        <title>TherapEase</title>
+		
+		<!-- Favicon -->
+        <link rel="shortcut icon" type="image/x-icon" href="/img/Logo.png">
+		
+		<!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="/css/bootstrap.min.css">
+		
+		<!-- Fontawesome CSS -->
+        <link rel="stylesheet" href="/css/font-awesome.min.css">
+
+		<!-- Feathericon CSS -->
+        <link rel="stylesheet" href="/css/feathericon.min.css">
+		
+		<!-- Main CSS -->
+        <link rel="stylesheet" href="/css/style.css">
+
+		<!-- Select2 CSS -->
+		<link rel="stylesheet" href="/plugins/select2/css/select2.min.css">
+
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="/plugins/bootstrap-tagsinput/css/bootstrap-tagsinput.css">
+
+		<link rel="stylesheet" href="/plugins/dropzone/dropzone.min.css">
+		
+
+		<!-- Main CSS -->
+		<link rel="stylesheet" href="/css/patient-style.css">
+
+
+		<!--[if lt IE 9]>
+			<script src="assets/js/html5shiv.min.js"></script>
+			<script src="assets/js/respond.min.js"></script>
+		<![endif]-->
+    </head>
+    <body>
+	
+		<!-- Main Wrapper -->
+		<div class="main-wrapper">
+		
+		      <!-- Header -->
+			  <div class="header">
+				<!-- Logo -->
+				<div class="header-left">
+				  <a href="/dashboard" class="logo">
+		  <img src="/img/logo.png" alt="Logo" width="140" height="50">
+		  </a>
+		  <a href="/dashboard" class="logo logo-small">
+		  <img src="/img/logo-small.png" alt="Logo" width="100" height="70">
+		  </a>
+			  </div>
+		  <!-- /Logo -->
+				  <a href="javascript:void(0);" id="toggle_btn">
+					<i class="fe fe-text-align-left"></i>
+				  </a>
+		  
+				 
+		  
+				  <!-- Mobile Menu Toggle -->
+				  <a class="mobile_btn" id="mobile_btn">
+					<i class="fa fa-bars"></i>
+				  </a>
+				  <!-- /Mobile Menu Toggle -->
+		  
+				  <!-- Header Right Menu -->
+				  <ul class="nav user-menu">
+				 
+					<!-- User Menu -->
+					<li class="nav-item dropdown has-arrow">
+					  <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+						<span class="user-img"
+						  ><img
+							class="rounded-circle"
+							src="/img/profiles/avatar-01.jpg"
+							width="31"
+							alt=""
+						/></span>
+					  </a>
+					  <div class="dropdown-menu">
+						<div class="user-header">
+						  <div class="avatar avatar-sm">
+							<img
+							  src="/img/profiles/avatar-01.jpg"
+							  alt="User Image"
+							  class="avatar-img rounded-circle"
+							/>
+						  </div>
+						  <div class="user-text">
+							<h6><%= admin.username %></h6>
+							<p class="text-muted mb-0">Administrator</p>
+						  </div>
+						</div>
+						<a class="dropdown-item" href="/dashboard">My Profile</a>
+						<a class="dropdown-item" href="/logout">Logout</a>
+					  </div>
+					</li>
+					<!-- /User Menu -->
+				  </ul>
+				  <!-- /Header Right Menu -->
+				</div>
+				<!-- /Header -->
+		  
+				<!-- Sidebar -->
+				<div class="sidebar" id="sidebar">
+				  <div class="sidebar-inner slimscroll">
+					<div id="sidebar-menu" class="sidebar-menu">
+					  <ul>
+						<li >
+						  <a href="/dashboard"
+							><i class="fe fe-home"></i> <span>Dashboard</span></a
+						  >
+						</li>
+						<li>
+						  <a href="/profile"
+							><i class="fe fe-user"></i> <span>Profile</span></a
+						  >
+						</li>
+		  
+						<li>
+						  <a href="/appointment-list"
+							><i class="fe fe-layout"></i> <span>Appointments</span></a
+						  >
+						</li>
+						<li class="active">
+						  <a href="/therapist-list"
+							><i class="fe fe-user"></i> <span>Therapists</span></a
+						  >
+						</li>
+						<li>
+						  <a href="/patient-list"
+							><i class="fe fe-user"></i> <span>Patients</span></a
+						  >
+						</li>
+						<li>
+						  <a href="/transactions-list"
+							><i class="fe fe-activity"></i> <span>Transactions</span></a
+						  >
+						</li>
+						<li>
+						  <a href="/Therapist-approval"><i class="fe fe-user-plus"></i> <span>Therapist Approval</span></a>
+		  
+						</li>
+						<li >
+						  <a href="/payment-approval"><i class="fe fe-file"></i> <span>Payment Approval</span></a>
+		  
+						</li>
+					  </ul>
+					</div>
+				  </div>
+				</div>
+				<!-- /Sidebar -->
+			
+			<!-- Page Wrapper -->
+            <div class="page-wrapper">
+                <div class="content container-fluid">
+					
+					<!-- Page Header -->
+					<div class="page-header">
+						<div class="row">
+							<div class="col">
+								<h3 class="page-title">Profile</h3>
+								<ul class="breadcrumb">
+									<li class="breadcrumb-item"><a href="/therapist/dashboard">Dashboard</a></li>
+									<li class="breadcrumb-item active">Profile</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<!-- /Page Header -->
+					
+					<!-- Doctor Widget -->
+					<div class="card">
+						<div class="card-body">
+						  <div class="doctor-widget">
+							<div class="doc-info-left">
+							  <div class="doctor-img">
+								<img
+								  src="<%= therapist.profilePicture %>"
+								  class="img-fluid"
+								  alt="User Image"
+								/>
+							  </div>
+							  <div class="doc-info-cont">
+								<h4 class="doc-name"><%= therapist.username %></h4>
+								<p class="doc-speciality">
+								  <% if (therapist.services && therapist.services.length >
+								  0) { %> <%= therapist.services.join(', ') %> <% } else {
+								  %> N/A <% } %>
+								</p>
+								<p class="doc-department">
+								  <% if (therapist.specialties &&
+								  therapist.specialties.length > 0) { %> <%=
+								  therapist.specialties.join(', ') %> <% } else { %> N/A
+								  <% } %>
+								</p>
+		  
+								<div class="clinic-details">
+								  <p class="doc-location">
+									<i class="fas fa-map-marker-alt"></i> <%=
+									therapist.city %>
+								  </p>
+								</div>
+							  </div>
+							</div>
+							<div class="doc-info-right">
+							  <div class="clini-infos">
+								<ul>
+								  <li>
+									<i class="fas fa-map-marker-alt"></i> <%=
+									therapist.city %>
+								  </li>
+								  <li>
+									<i class="far fa-money-bill-alt"></i> 5000PKR per session
+								  </li>
+								</ul>
+							  </div>
+		  
+							  
+							</div>
+						  </div>
+						</div>
+					  </div>
+					  <!-- /Doctor Widget -->
+					   <!-- Doctor Details Tab -->
+					   <div class="card">
+						<div class="card-body pt-0">
+						  <!-- Tab Menu -->
+						  <nav class="user-tabs mb-4">
+							<ul class="nav nav-tabs nav-tabs-bottom nav-justified">
+							  <li class="nav-item">
+								<a
+								  class="nav-link active"
+								  href="#doc_overview"
+								  data-toggle="tab"
+								  >Overview</a
+								>
+							  </li>
+							  <li class="nav-item">
+								<a
+								  class="nav-link"
+								  href="#doc_business_hours"
+								  data-toggle="tab"
+								  >Availability</a
+								>
+							  </li>
+							</ul>
+						  </nav>
+						  <!-- /Tab Menu -->
+		  
+						  <!-- Tab Content -->
+						  <div class="tab-content pt-0">
+							<!-- Overview Content -->
+							<div
+							  role="tabpanel"
+							  id="doc_overview"
+							  class="tab-pane fade show active"
+							>
+							  <div class="row">
+								<div class="col-md-12 col-lg-9">
+								  <!-- About Details -->
+								  <div class="widget about-widget">
+									<h4 class="widget-title">About Me</h4>
+									<p><%= therapist.bio || '' %></p>
+								  </div>
+								  <!-- /About Details -->
+		  
+								  <!-- Education Details -->
+								  <div class="widget education-widget">
+									<h4 class="widget-title">Education</h4>
+									<div class="experience-box">
+									  <ul class="experience-list">
+										<% therapist.education.forEach(edu => { %>
+										<li>
+										  <div class="experience-user">
+											<div class="before-circle"></div>
+										  </div>
+										  <div class="experience-content">
+											<div class="timeline-content">
+											  <a href="#/" class="name"
+												><%= edu.college %></a
+											  >
+											  <div><%= edu.degree %></div>
+											  <span class="time"
+												><%= edu.yearOfCompletion %></span
+											  >
+											</div>
+										  </div>
+										</li>
+										<% }); %>
+									  </ul>
+									</div>
+								  </div>
+								  <!-- /Education Details -->
+		  
+								  <!-- Experience Details -->
+								  <div class="widget experience-widget">
+									<h4 class="widget-title">Work & Experience</h4>
+									<div class="experience-box">
+									  <ul class="experience-list">
+										<% therapist.experience.forEach(exp => { %>
+										<li>
+										  <div class="experience-user">
+											<div class="before-circle"></div>
+										  </div>
+										  <div class="experience-content">
+											<div class="timeline-content">
+											  <a href="#/" class="name"
+												><%= exp.clinicExperience %></a
+											  >
+											  <div><%= exp.designation %></div>
+											  <span class="time"
+												><%= new Date(exp.from).getFullYear() %> -
+												<%= exp.to ? new
+												Date(exp.to).getFullYear() : 'Present'
+												%></span
+											  >
+											</div>
+										  </div>
+										</li>
+										<% }); %>
+									  </ul>
+									</div>
+								  </div>
+								  <!-- /Experience Details -->
+		  
+								  <!-- Awards Details -->
+								  <div class="widget awards-widget">
+									<h4 class="widget-title">Awards</h4>
+									<div class="experience-box">
+									  <ul class="experience-list">
+										<% therapist.awards.forEach(award => { %>
+										<li>
+										  <div class="experience-user">
+											<div class="before-circle"></div>
+										  </div>
+										  <div class="experience-content">
+											<div class="timeline-content">
+											  <p class="exp-year"><%= award.year %></p>
+											  <h4 class="exp-title"><%= award.name %></h4>
+											</div>
+										  </div>
+										</li>
+										<% }); %>
+									  </ul>
+									</div>
+								  </div>
+								  <!-- /Awards Details -->
+		  
+								  <!-- Services List -->
+								  <div class="service-list">
+									<h4>Services</h4>
+									<ul class="clearfix">
+									  <% therapist.services.forEach(service => { %>
+									  <li><%= service %></li>
+									  <% }); %>
+									</ul>
+								  </div>
+								  <!-- /Services List -->
+		  
+								  <!-- Specializations List -->
+								  <div class="service-list">
+									<h4>Specializations</h4>
+									<ul class="clearfix">
+									  <% therapist.specialties.forEach(specialty => { %>
+									  <li><%= specialty %></li>
+									  <% }); %>
+									</ul>
+								  </div>
+								  <!-- /Specializations List -->
+								</div>
+							  </div>
+							</div>
+							<!-- /Overview Content -->
+		  
+							<!-- Business Hours Content -->
+		  <div role="tabpanel" id="doc_business_hours" class="tab-pane fade">
+			  <div class="row">
+				  <div class="col-md-6 offset-md-3">
+					  <!-- Business Hours Widget -->
+					  <div class="widget business-widget">
+						  <div class="widget-content">
+							  <div class="listing-hours">
+								  <% 
+								  const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+								  
+								  if (availability && availability.length > 0) {
+									  weekdays.forEach(function(day) {
+										  const dayEntries = availability.filter(function(a) { 
+											  return a.day === day;
+										  });
+										  
+										  if (dayEntries.length > 0) {
+											  dayEntries.sort(function(a, b) { 
+												  return a.startTime.localeCompare(b.startTime);
+											  });
+											  
+											  const firstTime = dayEntries[0] && dayEntries[0].startTime ? dayEntries[0].startTime : "N/A";
+											  const lastTime = dayEntries[dayEntries.length - 1] && dayEntries[dayEntries.length - 1].endTime ? dayEntries[dayEntries.length - 1].endTime : "N/A";
+								  %>
+										  <div class="listing-day">
+											  <div class="day"><%= day %></div>
+											  <div class="time-items">
+												  <span class="time"><%= firstTime %> - <%= lastTime %></span>
+											  </div>
+										  </div>
+								  <%  } else { %>
+										  <div class="listing-day closed">
+											  <div class="day"><%= day %></div>
+											  <div class="time-items">
+												  <span class="time"><span class="badge bg-danger-light">Not available</span></span>
+											  </div>
+										  </div>
+								  <%  }
+									  });
+								  } else { %>
+									  <p class="text-center text-muted">No availability data found.</p>
+								  <% } %>
+							  </div>
+						  </div>
+					  </div>
+					  <!-- /Business Hours Widget -->
+				  </div>
+			  </div>
+		  </div>
+		  <!-- /Business Hours Content -->
+						  </div>
+						</div>
+					  </div>
+					  <!-- /Doctor Details Tab -->
+			<!-- /Page Wrapper -->
+		
+        </div>
+		<!-- /Main Wrapper -->
+		
+		<!-- jQuery -->
+        <script src="/js/jquery-3.2.1.min.js"></script>
+
+		<!-- jQuery -->
+		<script src="/js/jquery.min.js"></script>
+		
+		<!-- Bootstrap Core JS -->
+        <script src="/js/popper.min.js"></script>
+        <script src="/js/bootstrap.min.js"></script>
+		
+		<!-- Select2 JS -->
+		<script src="/plugins/select2/js/select2.min.js"></script>
+
+		<!-- Dropzone JS -->
+		<script src="/plugins/dropzone/dropzone.min.js"></script>
+
+		<!-- Bootstrap Tagsinput JS -->
+		<script src="/plugins/bootstrap-tagsinput/js/bootstrap-tagsinput.js"></script>
+
+		<!-- Profile Settings JS -->
+		<script src="/js/profile-settings.js"></script>
+
+		<!-- Slimscroll JS -->
+        <script src="/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+		
+		<!-- Custom JS -->
+		<script  src="/js/script.js"></script>
+		
+    </body>
+
+</html>

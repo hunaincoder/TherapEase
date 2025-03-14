@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+
+<head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+        <title>TherapEase</title>
+		
+		<!-- Favicon -->
+        <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png">
+		
+		<!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="/css/bootstrap.min.css">
+		
+		<!-- Fontawesome CSS -->
+        <link rel="stylesheet" href="/css/font-awesome.min.css">
+		
+		<!-- Feathericon CSS -->
+        <link rel="stylesheet" href="/css/feathericon.min.css">
+		
+		<link rel="stylesheet" href="/plugins/morris/morris.css">
+		
+		<!-- Main CSS -->
+        <link rel="stylesheet" href="/css/style.css">
+		
+
+    </head>
+    <body>
+	
+		<!-- Main Wrapper -->
+        <div class="main-wrapper">
+		
+			<!-- Header -->
+            <div class="header">
+			
+				<!-- Logo -->
+                <div class="header-left">
+                    <a href="/therapist/dashboard" class="logo">
+						<img src="/img/logo.png" alt="Logo" width="140" height="50">
+					</a>
+					<a href="/therapist/dashboard" class="logo logo-small">
+						<img src="/img/logo-small.png" alt="Logo" width="100" height="70">
+					</a>
+                </div>
+				<!-- /Logo -->
+				
+				<a href="javascript:void(0);" id="toggle_btn">
+					<i class="fe fe-text-align-left"></i>
+				</a>
+				
+				
+				
+				<!-- Mobile Menu Toggle -->
+				<a class="mobile_btn" id="mobile_btn">
+					<i class="fa fa-bars"></i>
+				</a>
+				<!-- /Mobile Menu Toggle -->
+				
+				<!-- Header Right Menu -->
+				<ul class="nav user-menu">
+
+					<!-- Notifications -->
+					<li class="nav-item dropdown noti-dropdown">
+						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+							<i class="fe fe-bell"></i> <span class="badge badge-pill">3</span>
+						</a>
+						<div class="dropdown-menu notifications">
+							<div class="topnav-dropdown-header">
+								<span class="notification-title">Notifications</span>
+								<a href="javascript:void(0)" class="clear-noti"> Clear All </a>
+							</div>
+							<div class="noti-content">
+								<ul class="notification-list">
+									<li class="notification-message">
+										
+									</li>
+									<li class="notification-message">
+										
+									</li>
+									<li class="notification-message">
+										
+									</li>
+									<li class="notification-message">
+										
+									</li>
+								</ul>
+							</div>
+							<div class="topnav-dropdown-footer">
+								<a href="#">View all Notifications</a>
+							</div>
+						</div>
+					</li>
+					<!-- /Notifications -->
+					
+					<!-- User Menu -->
+					<li class="nav-item dropdown has-arrow">
+						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+							<span class="user-img"><img class="rounded-circle" src="/img/logo-small.png" width="31" alt=""></span>
+						</a>
+						<div class="dropdown-menu">
+							<div class="user-header">
+								<div class="user-text">
+									<h6>Therapist Name</h6>
+									<p class="text-muted mb-0">Logged in</p>
+								</div>
+							</div>
+							<a class="dropdown-item" href="/therapist/profile">My Profile</a>
+							<a class="dropdown-item" href="/therapist/logout">Logout</a>
+						</div>
+					</li>
+					<!-- /User Menu -->
+					
+				</ul>
+				<!-- /Header Right Menu -->
+				
+            </div>
+			<!-- /Header -->
+			
+			<!-- Sidebar -->
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-inner slimscroll">
+					<div id="sidebar-menu" class="sidebar-menu">
+						<ul>
+							<li class="active"> 
+								<a href="/therapist/dashboard"><i class="fe fe-home"></i> <span>Dashboard</span></a>
+							</li>
+							<li >
+								<a href="/therapist/appointment-confirmation"><i class="fe fe-layout"></i> <span> Appointments</span></a>
+							</li>
+							<li> 
+								<a href="/therapist/availability"><i class="fe fe-layout"></i> <span>Availability</span></a>
+							</li>
+							<li> 
+								<a href="/therapist/invoices"><i class="fe fe-document"></i> <span>Invoice</span></a>
+							</li>
+							
+							<li> 
+								<a href="/therapist/profile"><i class="fe fe-user"></i> <span>Profile</span></a>
+							</li>
+							
+							<li> 
+								<a href="/therapist/payout"><i class="fe fe-activity"></i> <span>Payout</span></a>
+							</li>
+							<li> 
+								<a href="/therapist/change-pass"><i class="fe fe-vector"></i> <span>Change Password</span></a>
+							</li>
+							
+							
+								</ul>
+							</li>
+						</ul>
+					</div>
+                </div>
+            </div>
+			<!-- /Sidebar -->
+			
+			<!-- Page Wrapper -->
+            <div class="page-wrapper">
+			
+                <div class="content container-fluid">
+					
+					<!-- Page Header -->
+					<div class="page-header">
+						<div class="row">
+							<div class="col-sm-12">
+								<h3 class="page-title">Welcome Mr.Therapist!</h3>
+								<ul class="breadcrumb">
+									<li class="breadcrumb-item active">Dashboard</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<!-- /Page Header -->
+
+					<div class="row">
+						<div class="col-xl-3 col-sm-6 col-12">
+							<div class="card">
+								<div class="card-body">
+									<div class="dash-widget-header">
+										<span class="dash-widget-icon text-primary border-primary">
+											<i class="fe fe-users"></i>
+										</span>
+										<div class="dash-count">
+											<h3>5</h3>
+										</div>
+									</div>
+									<div class="dash-widget-info">
+										<h6 class="text-muted">Appointments Today</h6>
+										<div class="progress progress-sm">
+											<div class="progress-bar bg-primary w-50"></div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-xl-3 col-sm-6 col-12">
+							<div class="card">
+								<div class="card-body">
+									<div class="dash-widget-header">
+										<span class="dash-widget-icon text-success">
+											<i class="fe fe-credit-card"></i>
+										</span>
+										<div class="dash-count">
+											<h3>487</h3>
+										</div>
+									</div>
+									<div class="dash-widget-info">
+										
+										<h6 class="text-muted">Patients</h6>
+										<div class="progress progress-sm">
+											<div class="progress-bar bg-success w-50"></div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-xl-3 col-sm-6 col-12">
+							<div class="card">
+								<div class="card-body">
+									<div class="dash-widget-header">
+										<span class="dash-widget-icon text-danger border-danger">
+											<i class="fe fe-money"></i>
+										</span>
+										<div class="dash-count">
+											<h3>485</h3>
+										</div>
+									</div>
+									<div class="dash-widget-info">
+										
+										<h6 class="text-muted">Appointment</h6>
+										<div class="progress progress-sm">
+											<div class="progress-bar bg-danger w-50"></div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-xl-3 col-sm-6 col-12">
+							<div class="card">
+								<div class="card-body">
+									<div class="dash-widget-header">
+										<span class="dash-widget-icon text-warning border-warning">
+											<i class="fe fe-folder"></i>
+										</span>
+										<div class="dash-count">
+											<h3>$62523</h3>
+										</div>
+									</div>
+									<div class="dash-widget-info">
+										
+										<h6 class="text-muted">Revenue</h6>
+										<div class="progress progress-sm">
+											<div class="progress-bar bg-warning w-50"></div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12 col-lg-6">
+						
+							<!-- Sales Chart -->
+							<div class="card card-chart">
+								<div class="card-header">
+									<h4 class="card-title">Revenue</h4>
+								</div>
+								<div class="card-body">
+									<div id="morrisArea"></div>
+								</div>
+							</div>
+							<!-- /Sales Chart -->
+							
+						</div>
+						<div class="col-md-12 col-lg-6">
+						
+							<!-- Invoice Chart -->
+							<div class="card card-chart">
+								<div class="card-header">
+									<h4 class="card-title">Appointment</h4>
+								</div>
+								<div class="card-body">
+									<div id="morrisLine"></div>
+								</div>
+							</div>
+							<!-- /Invoice Chart -->
+							
+						</div>	
+					</div>
+					<div class="row">
+						<div class="col-md-6 d-flex">
+						
+							<!-- Recent Orders -->
+							<div class="card card-table flex-fill">
+								<div class="card-header">
+									<h4 class="card-title">Appointment Confirmation</h4>
+								</div>
+								<div class="card-body">
+									<div class="table-responsive">
+										<table class="table table-hover table-center mb-0">
+											<thead>
+												<tr>
+													<th>Patient Name</th>
+													<th>Appointment Date</th>
+													
+													<th class="text-center">Type of Appoinment</th>
+													<th></th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>
+														<h2 class="table-avatar">
+															<a href="/therpist/patient-profile">Umar <span>#PT0003</span></a>
+														</h2>
+													</td>
+													<td>30 Dec 2024 <span class="d-block text-info">9.00 AM</span></td>
+													
+													<td class="text-center">Video Call</td>
+													<td class="text-right">
+														<div class="table-action">
+															<a href="javascript:void(0);" class="btn btn-sm bg-info-light">
+																<i class="far fa-eye"></i> View
+															</a>
+															
+															
+														</div>
+													</td>
+												</tr>
+												<tr>
+													
+														<td>
+															<h2 class="table-avatar">
+																<a href="/therpist/patient-profile">Umar <span>#PT0003</span></a>
+															</h2>
+														</td>
+														<td>30 Dec 2024 <span class="d-block text-info">9.00 AM</span></td>
+														
+														<td class="text-center">Video Call</td>
+														<td class="text-right">
+															<div class="table-action">
+																<a href="javascript:void(0);" class="btn btn-sm bg-info-light">
+																	<i class="far fa-eye"></i> View
+																</a>
+																
+																
+															</div>
+														</td>
+												</tr>
+												<tr>
+													<td>
+														<h2 class="table-avatar">
+															<a href="/therpist/patient-profile">Umar <span>#PT0003</span></a>
+														</h2>
+													</td>
+													<td>30 Dec 2024 <span class="d-block text-info">9.00 AM</span></td>
+													
+													<td class="text-center">Video Call</td>
+													<td class="text-right">
+														<div class="table-action">
+															<a href="javascript:void(0);" class="btn btn-sm bg-info-light">
+																<i class="far fa-eye"></i> View
+															</a>
+															
+															
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<h2 class="table-avatar">
+															<a href="/therpist/patient-profile">Umar <span>#PT0003</span></a>
+														</h2>
+													</td>
+													<td>30 Dec 2024 <span class="d-block text-info">9.00 AM</span></td>
+													
+													<td class="text-center">Video Call</td>
+													<td class="text-right">
+														<div class="table-action">
+															<a href="javascript:void(0);" class="btn btn-sm bg-info-light">
+																<i class="far fa-eye"></i> View
+															</a>
+															
+															
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<h2 class="table-avatar">
+															<a href="/therpist/patient-profile">Umar <span>#PT0003</span></a>
+														</h2>
+													</td>
+													<td>30 Dec 2024 <span class="d-block text-info">9.00 AM</span></td>
+													
+													<td class="text-center">Video Call</td>
+													<td class="text-right">
+														<div class="table-action">
+															<a href="javascript:void(0);" class="btn btn-sm bg-info-light">
+																<i class="far fa-eye"></i> View
+															</a>
+															
+															
+														</div>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+							<!-- /Recent Orders -->
+							
+						</div>
+						<div class="col-md-6 d-flex">
+						
+							<!-- Feed Activity -->
+							<div class="card  card-table flex-fill">
+								<div class="card-header">
+									<h4 class="card-title">Recent Invoices</h4>
+									
+								</div>
+								<div class="card-body">
+									<div class="table-responsive">
+										<table class="table table-hover table-center mb-0">
+											<thead>
+												<tr>													
+													<th>Patient Name</th>
+													<th>Total Amount</th>
+													<th>Created Date</th>
+													<th class="text-right">Actions</th>												
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>
+														<h2 class="table-avatar">
+															<a href="/therpist/patient-profile">Ahmed</a>
+														</h2>
+													</td>
+													<td>$100.00</td>
+													<td>1 jan 2025</td>
+													
+													<td class="text-right">
+														<div class="actions">
+															
+															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
+																 View
+															</a>
+															
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<h2 class="table-avatar">
+															<a href="/therpist/patient-profile">Ahmed1</a>
+														</h2>
+													</td>
+													<td>$200.00</td>
+													<td>31 Dec 2024</td>
+													
+													<td class="text-right">
+														<div class="actions">
+															
+															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
+																 View
+															</a>
+															
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<h2 class="table-avatar">
+															<a href="/therpist/patient-profile">Ahmed3</a>
+														</h2>
+													</td>
+													<td>$250.00</td>
+													<td>30 Dec 2024</td>
+													
+													<td class="text-right">
+														<div class="actions">
+															
+															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
+																View
+															</a>
+															
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<h2 class="table-avatar">
+														<a href="/therpist/patient-profile">Ahmed4</a>
+														</h2>
+													</td>
+													<td>$150.00</td>
+													<td>29 Dec 2024</td>
+													
+													<td class="text-right">
+														<div class="actions">
+															
+															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
+																 View
+															</a>
+															
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<h2 class="table-avatar">
+															<a href="/therpist/patient-profile">Ahmed5</a>
+														</h2>
+													</td>
+													<td>$350.00</td>
+													<td>28 Dec 2024</td>
+													
+													<td class="text-right">
+														<div class="actions">
+															
+															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
+																 View
+															</a>
+															
+														</div>
+													</td>
+												</tr>
+												
+											</tbody>
+											
+										</table>
+									</div>
+								</div>
+							</div>
+							<!-- /Feed Activity -->
+							
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+						
+							<!-- Recent Orders -->
+							<div class="card card-table">
+								<div class="card-header">
+									<h4 class="card-title">Appointment List</h4>
+								</div>
+								<div class="card-body">
+									<div class="table-responsive">
+										<table class="table table-hover table-center mb-0">
+											<thead>
+												<tr>
+													<th>Patient Name</th>
+													<th>Type</th>
+													
+													<th>Apointment Time</th>
+													<th>Profile</th>
+													<th>Action</th>
+													
+												</tr>
+											</thead>
+											<tbody>
+												
+												<tr>
+													<td>
+														<h2>
+															<a href="/therpist/patient-profile">Ahmed</a>
+														</h2>
+													</td>
+													<td>Voice Call</td>
+												
+													<td>1 Jan 2025<span class="text-primary d-block">11.00 AM - 11.15 AM</span></td>
+													<td><a href="javascript:void(0);" class="btn btn-sm bg-info-light">
+														<i class="far fa-eye"></i> View
+													</a></td>
+													<td><u>Start Now</u>
+														
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<h2>
+															<a href="/therpist/patient-profile">Ahmed</a>
+														</h2>
+													</td>
+													<td>Voice Call</td>
+												
+													<td>1 Jan 2025<span class="text-primary d-block">11.00 AM - 11.15 AM</span></td>
+													<td><a href="javascript:void(0);" class="btn btn-sm bg-info-light">
+														<i class="far fa-eye"></i> View
+													</a></td>
+													<td><u>Start Now</u>
+														
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<h2>
+															<a href="/therpist/patient-profile">Ahmed</a>
+														</h2>
+													</td>
+													<td>Voice Call</td>
+												
+													<td>1 Jan 2025<span class="text-primary d-block">11.00 AM - 11.15 AM</span></td>
+													<td><a href="javascript:void(0);" class="btn btn-sm bg-info-light">
+														<i class="far fa-eye"></i> View
+													</a></td>
+													<td><u>Start Now</u>
+														
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<h2>
+															<a href="/therpist/patient-profile">Ahmed</a>
+														</h2>
+													</td>
+													<td>Voice Call</td>
+												
+													<td>1 Jan 2025<span class="text-primary d-block">11.00 AM - 11.15 AM</span></td>
+													<td><a href="javascript:void(0);" class="btn btn-sm bg-info-light">
+														<i class="far fa-eye"></i> View
+													</a></td>
+													<td><u>Start Now</u>
+														
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<h2>
+															<a href="/therpist/patient-profile">Ahmed</a>
+														</h2>
+													</td>
+													<td>Voice Call</td>
+												
+													<td>1 Jan 2025<span class="text-primary d-block">11.00 AM - 11.15 AM</span></td>
+													<td><a href="javascript:void(0);" class="btn btn-sm bg-info-light">
+														<i class="far fa-eye"></i> View
+													</a></td>
+													<td><u>Start Now</u>
+														
+													</td>
+												</tr>
+											
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+							<!-- /Recent Orders -->
+							
+						</div>
+					</div>
+					
+				</div>			
+			</div>
+			<!-- /Page Wrapper -->
+		
+        </div>
+		<!-- /Main Wrapper -->
+		
+		<!-- jQuery -->
+        <script src="/js/jquery-3.2.1.min.js"></script>
+		
+		<!-- Bootstrap Core JS -->
+        <script src="/js/popper.min.js"></script>
+        <script src="/js/bootstrap.min.js"></script>
+		
+		<!-- Slimscroll JS -->
+        <script src="/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+		
+		<script src="/plugins/raphael/raphael.min.js"></script>    
+		<script src="/plugins/morris/morris.min.js"></script>  
+		<script src="/js/chart.morris.js"></script>
+		
+		<!-- Custom JS -->
+		<script  src="/js/script.js"></script>
+		
+    </body>
+
+</html>
