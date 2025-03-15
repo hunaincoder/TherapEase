@@ -18,6 +18,7 @@ const TherapistSchema = new mongoose.Schema({
   clinicAddress: { type: String },
   specialties: [String], 
   services: [String],
+  fee: { type: Number },
   education: [
     {
       degree: { type: String },

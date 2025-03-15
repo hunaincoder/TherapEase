@@ -301,6 +301,8 @@ router.post(
         ];
       }
 
+      therapist.fee = req.body.fee || therapist.fee;
+
       console.log(
         "Received availability data:",
         req.body.availableDays,

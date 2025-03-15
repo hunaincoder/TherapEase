@@ -117,18 +117,14 @@ router.get("/therapist-search", isLoggedIn, async function (req, res) {
   try {
     const patient = await patientModel.findOne({ email: req.user.email });
 
-    // Define specialty options for the filter
     const specialtyOptions = ["PTSD", "OCD", "Depression", "Anxiety"];
 
-    // Build the search query object
     let query = { status: "Approved" };
 
-    // Add gender filter if provided
     if (req.query.gender) {
       query.gender = req.query.gender;
     }
 
-    // Add specialties filter if provided
     if (req.query.specialties) {
       const specialtiesParam = Array.isArray(req.query.specialties)
         ? req.query.specialties
