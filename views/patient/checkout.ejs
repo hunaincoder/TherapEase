@@ -1,352 +1,369 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
-	
-<head>
-		<meta charset="utf-8">
-		<title>TherapEase checkout</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-		
-		
+  <head>
+    <meta charset="utf-8" />
+    <title>TherapEase checkout</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=0"
+    />
 
-		<!-- Favicon -->
-        <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png">
-		
-		<!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="/css/bootstrap.min.css">
-		
-		
-		
-		<!-- Feathericon CSS -->
-        <link rel="stylesheet" href="/css/feathericon.min.css">
-		
-		<link rel="stylesheet" href="/plugins/morris/morris.css">
-		
-		<!-- Bootstrap CSS -->
-		<link rel="stylesheet" href="/css/bootstrap.min.css">
-		
-		<!-- Fontawesome CSS -->
-		<link rel="stylesheet" href="/plugins/fontawesome/css/fontawesome.min.css">
-		<link rel="stylesheet" href="/plugins/fontawesome/css/all.min.css">
-		
-		<!-- Fancybox CSS -->
-		<link rel="stylesheet" href="/plugins/fancybox/jquery.fancybox.min.css">
-		
-		<!-- Main CSS -->
-		<link rel="stylesheet" href="/css/style.css">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png" />
 
-		<!-- Main CSS -->
-		<link rel="stylesheet" href="/css/patient-style.css" />
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
 
+    <!-- Feathericon CSS -->
+    <link rel="stylesheet" href="/css/feathericon.min.css" />
 
-		
-		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-		<!--[if lt IE 9]>
-			<script src="assets/js/html5shiv.min.js"></script>
-			<script src="assets/js/respond.min.js"></script>
-		<![endif]-->
-	
-	</head>
-	<body>
+    <link rel="stylesheet" href="/plugins/morris/morris.css" />
 
-	
-		<!-- Main Wrapper -->
-        <div class="main-wrapper">
-		
-			<!-- Header -->
-            <div class="header">
-			
-				<!-- Logo -->
-                <div class="header-left">
-                    <a href="/client/dashboard" class="logo">
-						<img src="/img/logo.png" alt="Logo" width="140" height="50">
-					</a>
-					<a href="/client/dashboard" class="logo logo-small">
-						<img src="/img/logo-small.png" alt="Logo" width="100" height="70">
-					</a>
-                </div>
-				<!-- /Logo -->
-				
-				<a href="javascript:void(0);" id="toggle_btn">
-					<i class="fe fe-text-align-left"></i>
-				</a>
-				
-				
-				
-				<!-- Mobile Menu Toggle -->
-				<a class="mobile_btn" id="mobile_btn">
-					<i class="fa fa-bars"></i>
-				</a>
-				<!-- /Mobile Menu Toggle -->
-				
-				<!-- Header Right Menu -->
-				<ul class="nav user-menu">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
 
-					<!-- Notifications -->
-					<li class="nav-item dropdown noti-dropdown">
-						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
-							<i class="fe fe-bell"></i> <span class="badge badge-pill">3</span>
-						</a>
-						<div class="dropdown-menu notifications">
-							<div class="topnav-dropdown-header">
-								<span class="notification-title">Notifications</span>
-								<a href="javascript:void(0)" class="clear-noti"> Clear All </a>
-							</div>
-							<div class="noti-content">
-								<ul class="notification-list">
-									<li class="notification-message">
-										
-									</li>
-									<li class="notification-message">
-										
-									</li>
-									<li class="notification-message">
-										
-									</li>
-									<li class="notification-message">
-										
-									</li>
-								</ul>
-							</div>
-							<div class="topnav-dropdown-footer">
-								<a href="#">View all Notifications</a>
-							</div>
-						</div>
-					</li>
-					<!-- /Notifications -->
-					
-					<!-- User Menu -->
-					<li class="nav-item dropdown has-arrow">
-						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
-							<span class="user-img"><img class="rounded-circle" src="/img/logo1.png" width="31" alt=""></span>
-						</a>
-						<div class="dropdown-menu">
-							<div class="user-header">
-								<div class="user-text">
-									<h6>client Name</h6>
-									<p class="text-muted mb-0">Logged in</p>
-								</div>
-							</div>
-							<a class="dropdown-item" href="/client/profile">My Profile</a>
-							<a class="dropdown-item" href="/client/logout">Logout</a>
-						</div>
-					</li>
-					<!-- /User Menu -->
-					
-				</ul>
-				<!-- /Header Right Menu -->
-				
-            </div>
-			<!-- /Header -->
-			
-			
-			
-			 <!-- Page Content -->
-			 <div class="content" >
-				<div class="container" style="margin-top: 50px;">
-				
-					<div class="row">
-						<div class="col-md-7 col-lg-8">
-							<div class="card">
-								<div class="card-body">
-								
-									<!-- Checkout Form -->
-									<form action="">
-									
-										<!-- Personal Information -->
-										<div class="info-widget">
-											<h4 class="card-title">Personal Information</h4>
-											<div class="row">
-												<div class="col-md-6 col-sm-12">
-													<div class="form-group card-label">
-														<label>First Name</label>
-														<input class="form-control" type="text">
-													</div>
-												</div>
-												<div class="col-md-6 col-sm-12">
-													<div class="form-group card-label">
-														<label>Last Name</label>
-														<input class="form-control" type="text">
-													</div>
-												</div>
-												<div class="col-md-6 col-sm-12">
-													<div class="form-group card-label">
-														<label>Email</label>
-														<input class="form-control" type="email">
-													</div>
-												</div>
-												<div class="col-md-6 col-sm-12">
-													<div class="form-group card-label">
-														<label>Phone</label>
-														<input class="form-control" type="text">
-													</div>
-												</div>
-											</div>
-										</div>
-										<!-- /Personal Information -->
-										
-										<div class="payment-widget">
-											<h4 class="card-title">Payment Method</h4>
-											
-											<!-- Credit Card Payment -->
-											<div class="payment-list">
-												<label class="payment-radio credit-card-option">
-													<input type="radio" name="radio" checked>
-													<span class="checkmark"></span>
-													Credit card
-												</label>
-												<label class="payment-radio credit-card-option">
-													<input type="radio" name="radio" checked>
-													<span class="checkmark"></span>
-													jazzcash
-												</label>
-												<div class="row">
-													<div class="col-md-6">
-														<div class="form-group card-label">
-															<label for="card_name">Name on Card</label>
-															<input class="form-control" id="card_name" type="text">
-														</div>
-													</div>
-													<div class="col-md-6">
-														<div class="form-group card-label">
-															<label for="card_number">Card Number</label>
-															<input class="form-control" id="card_number" placeholder="1234  5678  9876  5432" type="text">
-														</div>
-													</div>
-													<div class="col-md-4">
-														<div class="form-group card-label">
-															<label for="expiry_month">Expiry Month</label>
-															<input class="form-control" id="expiry_month" placeholder="MM" type="text">
-														</div>
-													</div>
-													<div class="col-md-4">
-														<div class="form-group card-label">
-															<label for="expiry_year">Expiry Year</label>
-															<input class="form-control" id="expiry_year" placeholder="YY" type="text">
-														</div>
-													</div>
-													<div class="col-md-4">
-														<div class="form-group card-label">
-															<label for="cvv">CVV</label>
-															<input class="form-control" id="cvv" type="text">
-														</div>
-													</div>
-												</div>
-											</div>
-											<!-- /Credit Card Payment -->
-											
-											
-											
-											<!-- Terms Accept -->
-											<div class="terms-accept">
-												<div class="custom-checkbox">
-												   <input type="checkbox" id="terms_accept">
-												   <label for="terms_accept">I have read and accept <a href="#">Terms &amp; Conditions</a></label>
-												</div>
-											</div>
-											<!-- /Terms Accept -->
-											
-											<!-- Submit Section -->
-											<div class="submit-section mt-4">
-												<a type="submit" href="/client/booking-success" class="btn btn-primary submit-btn">Confirm and Pay</a>
-											</div>
-											<!-- /Submit Section -->
-											
-										</div>
-									</form>
-									<!-- /Checkout Form -->
-									
-								</div>
-							</div>
-							
-						</div>
-						
-						<div class="col-md-5 col-lg-4 theiaStickySidebar">
-						
-							<!-- Booking Summary -->
-							<div class="card booking-card">
-								<div class="card-header">
-									<h4 class="card-title">Booking Summary</h4>
-								</div>
-								<div class="card-body">
-								
-									<!-- Booking Doctor Info -->
-									<div class="booking-doc-info">
-										<a href="/client/therapist-profile" class="booking-doc-img">
-											<img src="/img/doctors/doctor-thumb-02.jpg" alt="User Image">
-										</a>
-										<div class="booking-info">
-											<h4><a href="/client/therapist-profile">therapist name</a></h4>
-											
-											<div class="clinic-details">
-												<p class="doc-location"><i class="fas fa-map-marker-alt"></i> karachi, PK</p>
-											</div>
-										</div>
-									</div>
-									<!-- Booking Doctor Info -->
-									
-									<div class="booking-summary">
-										<div class="booking-item-wrap">
-											<ul class="booking-date">
-												<li>Date <span>16 Nov 2024</span></li>
-												<li>Time <span>10:00 AM</span></li>
-											</ul>
-											<ul class="booking-fee">
-												<li>Consulting Fee <span>5000PKR</span></li>
-												<li>Booking Fee <span>400PKR</span></li>
-												<li>Video Call <span></span></li>
-											</ul>
-											<div class="booking-total">
-												<ul class="booking-total-list">
-													<li>
-														<span>Total</span>
-														<span class="total-cost">5400PKR</span>
-													</li>
-												</ul>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-							<!-- /Booking Summary -->
-							
-						</div>
-					</div>
-				</div>
+    <!-- Fontawesome CSS -->
+    <link
+      rel="stylesheet"
+      href="/plugins/fontawesome/css/fontawesome.min.css"
+    />
+    <link rel="stylesheet" href="/plugins/fontawesome/css/all.min.css" />
 
-			</div>		
-			<!-- /Page Content -->
-		
+    <!-- Fancybox CSS -->
+    <link rel="stylesheet" href="/plugins/fancybox/jquery.fancybox.min.css" />
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/patient-style.css" />
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="assets/js/html5shiv.min.js"></script>
+      <script src="assets/js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <!-- Header -->
+      <div class="header">
+        <!-- Logo -->
+        <div class="header-left">
+          <a href="/client/dashboard" class="logo">
+            <img src="/img/logo.png" alt="Logo" width="140" height="50" />
+          </a>
+          <a href="/client/dashboard" class="logo logo-small">
+            <img src="/img/logo-small.png" alt="Logo" width="100" height="70" />
+          </a>
         </div>
-		<!-- /Main Wrapper -->
-		
-		>
-		
-		
-		
-		<!-- jQuery -->
-		<script src="/js/jquery-3.2.1.min.js"></script>
+        <!-- /Logo -->
 
-		<script src="/js/jquery.min.js"></script>
-		
-		<!-- Bootstrap Core JS -->
-		<script src="/js/popper.min.js"></script>
-		<script src="/js/bootstrap.min.js"></script>
-		
-		<!-- Fancybox JS -->
-		<script src="/plugins/fancybox/jquery.fancybox.min.js"></script>
-		
-		
-		<!-- Slimscroll JS -->
-        <script src="/plugins/slimscroll/jquery.slimscroll.min.js"></script>
-		
-		<script src="/plugins/raphael/raphael.min.js"></script>    
-		<script src="/plugins/morris/morris.min.js"></script>  
-		<script src="/js/chart.morris.js"></script>
-		
+        <a href="javascript:void(0);" id="toggle_btn">
+          <i class="fe fe-text-align-left"></i>
+        </a>
 
-		<!-- Custom JS -->
-		<script src="/js/script.js"></script>
-		
-	</body>
+        <!-- Mobile Menu Toggle -->
+        <a class="mobile_btn" id="mobile_btn">
+          <i class="fa fa-bars"></i>
+        </a>
+        <!-- /Mobile Menu Toggle -->
 
+        <!-- Header Right Menu -->
+        <ul class="nav user-menu">
+          <!-- Notifications -->
+          <li class="nav-item dropdown noti-dropdown">
+            <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+              <i class="fe fe-bell"></i> <span class="badge badge-pill">3</span>
+            </a>
+            <div class="dropdown-menu notifications">
+              <div class="topnav-dropdown-header">
+                <span class="notification-title">Notifications</span>
+                <a href="javascript:void(0)" class="clear-noti"> Clear All </a>
+              </div>
+              <div class="noti-content">
+                <ul class="notification-list">
+                  <li class="notification-message"></li>
+                  <li class="notification-message"></li>
+                  <li class="notification-message"></li>
+                  <li class="notification-message"></li>
+                </ul>
+              </div>
+              <div class="topnav-dropdown-footer">
+                <a href="#">View all Notifications</a>
+              </div>
+            </div>
+          </li>
+          <!-- /Notifications -->
+
+          <!-- User Menu -->
+          <li class="nav-item dropdown has-arrow">
+            <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+              <span class="user-img"
+                ><img
+                  class="rounded-circle"
+                  src="/img/logo1.png"
+                  width="31"
+                  alt=""
+              /></span>
+            </a>
+            <div class="dropdown-menu">
+              <div class="user-header">
+                <div class="user-text">
+                  <h6>client Name</h6>
+                  <p class="text-muted mb-0">Logged in</p>
+                </div>
+              </div>
+              <a class="dropdown-item" href="/client/profile">My Profile</a>
+              <a class="dropdown-item" href="/client/logout">Logout</a>
+            </div>
+          </li>
+          <!-- /User Menu -->
+        </ul>
+        <!-- /Header Right Menu -->
+      </div>
+      <!-- /Header -->
+
+      <!-- Page Content -->
+      <div class="content">
+        <div class="container" style="margin-top: 50px">
+          <div class="row">
+            <!-- 		
+            <div class="col-md-7 col-lg-8">
+              <div class="card">
+                <div class="card-body">
+                  <form action="">
+                    <div class="info-widget">
+                      <h4 class="card-title">Personal Information</h4>
+                      <div class="row">
+                        <div class="col-md-6 col-sm-12">
+                          <div class="form-group card-label">
+                            <label>First Name</label>
+                            <input class="form-control" type="text" />
+                          </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                          <div class="form-group card-label">
+                            <label>Last Name</label>
+                            <input class="form-control" type="text" />
+                          </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                          <div class="form-group card-label">
+                            <label>Email</label>
+                            <input class="form-control" type="email" />
+                          </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                          <div class="form-group card-label">
+                            <label>Phone</label>
+                            <input class="form-control" type="text" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="payment-widget">
+                      <h4 class="card-title">Payment Method</h4>
+
+                      <div class="payment-list">
+                        <label class="payment-radio credit-card-option">
+                          <input type="radio" name="radio" checked />
+                          <span class="checkmark"></span>
+                          Credit card
+                        </label>
+                        <label class="payment-radio credit-card-option">
+                          <input type="radio" name="radio" checked />
+                          <span class="checkmark"></span>
+                          jazzcash
+                        </label>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group card-label">
+                              <label for="card_name">Name on Card</label>
+                              <input
+                                class="form-control"
+                                id="card_name"
+                                type="text"
+                              />
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group card-label">
+                              <label for="card_number">Card Number</label>
+                              <input
+                                class="form-control"
+                                id="card_number"
+                                placeholder="1234  5678  9876  5432"
+                                type="text"
+                              />
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group card-label">
+                              <label for="expiry_month">Expiry Month</label>
+                              <input
+                                class="form-control"
+                                id="expiry_month"
+                                placeholder="MM"
+                                type="text"
+                              />
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group card-label">
+                              <label for="expiry_year">Expiry Year</label>
+                              <input
+                                class="form-control"
+                                id="expiry_year"
+                                placeholder="YY"
+                                type="text"
+                              />
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group card-label">
+                              <label for="cvv">CVV</label>
+                              <input
+                                class="form-control"
+                                id="cvv"
+                                type="text"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="terms-accept">
+                        <div class="custom-checkbox">
+                          <input type="checkbox" id="terms_accept" />
+                          <label for="terms_accept"
+                            >I have read and accept
+                            <a href="#">Terms &amp; Conditions</a></label
+                          >
+                        </div>
+                      </div>
+
+                      <div class="submit-section mt-4">
+                        <a
+                          type="submit"
+                          href="/client/booking-success"
+                          class="btn btn-primary submit-btn"
+                          >Confirm and Pay</a
+                        >
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div> -->
+
+            <div class="col-md-6 col-md-8 mx-auto">
+              <!-- Booking Summary -->
+              <div class="card booking-card">
+                <div class="card-header">
+                  <h4 class="card-title">Booking Summary</h4>
+                </div>
+                <div class="card-body">
+                  <!-- Booking Doctor Info -->
+                  <div class="booking-doc-info">
+                    <a href="/client/therapist-profile" class="booking-doc-img">
+                      <img
+                        src="<%= therapist.profilePicture %>"
+                        alt="User Image"
+                      />
+                    </a>
+                    <div class="booking-info">
+                      <h4>
+                        <a href="/client/therapist-profile"
+                          ><%= therapist.username %></a
+                        >
+                      </h4>
+
+                      <div class="clinic-details">
+                        <p class="doc-location">
+                          <i class="fas fa-map-marker-alt"></i> <%=
+                          therapist.city %>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Booking Doctor Info -->
+
+                  <div class="booking-summary">
+                    <div class="booking-item-wrap">
+                      <ul class="booking-date">
+                        <li>
+                          Date
+                          <span><%= selectedDate %>th <%= selectedDay %> </span>
+                        </li>
+                        <li>Time <span><%= selectedTime %></span></li>
+                      </ul>
+                      <ul class="booking-fee">
+                        <li>
+                          Consulting Fee <span>PKR <%= therapist.fee %></span>
+                        </li>
+                        <li>
+                          Booking Fee (10%)
+                          <span>PKR <%= therapist.fee * 0.1 %></span>
+                        </li>
+                        <li>Video Call <span></span></li>
+                      </ul>
+                      <div class="booking-total">
+                        <ul class="booking-total-list">
+                          <li>
+                            <span>Total</span>
+                            <span class="total-cost"
+                              >PKR <%= therapist.fee + (therapist.fee * 0.1)
+                              %></span
+                            >
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+					<div class="submit-section mt-4">
+                        <a
+                          type="submit"
+                          href="/client/booking-success"
+                          class="btn btn-primary submit-btn"
+                          >Confirm and Pay</a
+                        >
+                      </div>	
+                  </div>
+                </div>
+              </div>
+              <!-- /Booking Summary -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /Page Content -->
+    </div>
+    <!-- /Main Wrapper -->
+
+    >
+
+    <!-- jQuery -->
+    <script src="/js/jquery-3.2.1.min.js"></script>
+
+    <script src="/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JS -->
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Fancybox JS -->
+    <script src="/plugins/fancybox/jquery.fancybox.min.js"></script>
+
+    <!-- Slimscroll JS -->
+    <script src="/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <script src="/plugins/raphael/raphael.min.js"></script>
+    <script src="/plugins/morris/morris.min.js"></script>
+    <script src="/js/chart.morris.js"></script>
+
+    <!-- Custom JS -->
+    <script src="/js/script.js"></script>
+  </body>
 </html>

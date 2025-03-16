@@ -5,6 +5,7 @@ const authRoutes = require("./patientOauth");
 const LocalStrategy = require("passport-local").Strategy;
 const patientModel = require("../models/patient");
 const TherapistModel = require("../models/therapist");
+const moment = require("moment-timezone");
 
 router.use(authRoutes);
 
@@ -171,7 +172,7 @@ router.get("/therapist-profile/:id", isLoggedIn, async (req, res) => {
     console.log("Fetched therapist availability:", therapist.availability);
 
     res.render("patient/therapist-profile", {
-      patient, 
+      patient,
       therapist: therapist,
       availability: therapist.availability || [],
     });
@@ -188,7 +189,13 @@ router.get("/therapist-booking/:id", isLoggedIn, async function (req, res) {
   try {
     const patient = await patientModel.findOne({ email: req.user.email });
     const therapist = await TherapistModel.findById(req.params.id);
-    const today = new Date();
+
+    if (!therapist) {
+      return res.status(404).send("Therapist not found");
+    }
+
+
+    const today = moment().tz("Asia/Karachi");
     const weekDays = [
       "Monday",
       "Tuesday",
@@ -199,101 +206,23 @@ router.get("/therapist-booking/:id", isLoggedIn, async function (req, res) {
       "Sunday",
     ];
     const weekDates = [];
-    const ttoday = new Date();
-
-    const pakistanOffset = 5 * 60 * 60 * 1000;
-    const pakistanToday = new Date(ttoday.getTime() + pakistanOffset);
 
     for (let i = 0; i < 7; i++) {
-      const date = new Date(pakistanToday);
-      date.setDate(pakistanToday.getDate() + i);
-
+      const date = today.clone().add(i, "days");
+      const dayIndex = date.day() === 0 ? 6 : date.day() - 1;
       weekDates.push({
-        day: weekDays[date.getDay()],
-        shortDay: weekDays[date.getDay()].substring(0, 3),
-        date: date.getDate(),
-        month: date.toLocaleString("en-US", {
-          month: "short",
-          timeZone: "Asia/Karachi",
-        }),
-        year: date.getFullYear(),
-        fullDate: date.toISOString().split("T")[0],
+        day: weekDays[dayIndex],
+        shortDay: weekDays[dayIndex].substring(0, 3),
+        date: date.date(),
+        month: date.format("MMM"),
+        year: date.year(),
+        fullDate: date.format("YYYY-MM-DD"),
       });
     }
+    const formattedAvailability = formatTherapistAvailability(
+      therapist.availability
+    );
 
-
-    console.log("Raw availability from DB:", therapist.availability);
-
-    const formattedAvailability = {};
-
-    weekDays.forEach((day) => {
-      formattedAvailability[day] = [];
-    });
-
-    if (therapist.availability && therapist.availability.length > 0) {
-      therapist.availability.forEach((slot) => {
-        const day = slot.day;
-
-        const startTimeParts = slot.startTime.split(":");
-        const endTimeParts = slot.endTime.split(":");
-
-        const startHour = parseInt(startTimeParts[0]);
-        const startMinute = parseInt(startTimeParts[1] || 0);
-        const endHour = parseInt(endTimeParts[0]);
-        const endMinute = parseInt(endTimeParts[1] || 0);
-
-        let currentHour = startHour;
-        let currentMinute = startMinute;
-
-        while (
-          currentHour < endHour ||
-          (currentHour === endHour && currentMinute < endMinute)
-        ) {
-          let slotEndHour = currentHour;
-          let slotEndMinute = currentMinute + 30;
-
-          if (slotEndMinute >= 60) {
-            slotEndHour += 1;
-            slotEndMinute -= 60;
-          }
-
-          if (
-            slotEndHour < endHour ||
-            (slotEndHour === endHour && slotEndMinute <= endMinute)
-          ) {
-            const displayStart = `${
-              currentHour > 12 ? currentHour - 12 : currentHour
-            }:${currentMinute.toString().padStart(2, "0")}`;
-            const displayEnd = `${
-              slotEndHour > 12 ? slotEndHour - 12 : slotEndHour
-            }:${slotEndMinute.toString().padStart(2, "0")}`;
-            const periodStart = currentHour >= 12 ? "PM" : "AM";
-            const periodEnd = slotEndHour >= 12 ? "PM" : "AM";
-
-            formattedAvailability[day].push({
-              time: `${currentHour}:${currentMinute
-                .toString()
-                .padStart(2, "0")}-${slotEndHour}:${slotEndMinute
-                .toString()
-                .padStart(2, "0")}`,
-              display: `${displayStart} - ${displayEnd}`,
-              period:
-                periodStart === periodEnd
-                  ? periodStart
-                  : `${periodStart}-${periodEnd}`,
-            });
-          }
-
-          currentMinute += 30;
-          if (currentMinute >= 60) {
-            currentHour += 1;
-            currentMinute -= 60;
-          }
-        }
-      });
-    }
-
-    console.log("Formatted availability:", formattedAvailability);
     res.render("patient/therapist-booking", {
       patient,
       therapist,
@@ -302,12 +231,102 @@ router.get("/therapist-booking/:id", isLoggedIn, async function (req, res) {
     });
   } catch (error) {
     console.error(error);
+    res.status(500).send("Internal Server Error");
   }
 });
 
-router.get("/checkout", isLoggedIn, function (req, res) {
-  res.render("patient/checkout");
+function formatTherapistAvailability(availability) {
+  const formattedAvailability = {};
+
+  const weekDays = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+  weekDays.forEach((day) => (formattedAvailability[day] = []));
+
+  if (availability && availability.length > 0) {
+    availability.forEach((slot) => {
+      const day = slot.day;
+      const [startHour, startMinute] = slot.startTime.split(":").map(Number);
+      const [endHour, endMinute] = slot.endTime.split(":").map(Number);
+
+      let currentHour = startHour;
+      let currentMinute = startMinute;
+
+      while (
+        currentHour < endHour ||
+        (currentHour === endHour && currentMinute < endMinute)
+      ) {
+        let slotEndHour = currentHour;
+        let slotEndMinute = currentMinute + 30;
+
+        if (slotEndMinute >= 60) {
+          slotEndHour += 1;
+          slotEndMinute -= 60;
+        }
+
+        if (
+          slotEndHour < endHour ||
+          (slotEndHour === endHour && slotEndMinute <= endMinute)
+        ) {
+          const displayStart = `${
+            currentHour > 12 ? currentHour - 12 : currentHour
+          }:${currentMinute.toString().padStart(2, "0")}`;
+          const displayEnd = `${
+            slotEndHour > 12 ? slotEndHour - 12 : slotEndHour
+          }:${slotEndMinute.toString().padStart(2, "0")}`;
+          const periodStart = currentHour >= 12 ? "PM" : "AM";
+          const periodEnd = slotEndHour >= 12 ? "PM" : "AM";
+
+          formattedAvailability[day].push({
+            time: `${currentHour}:${currentMinute
+              .toString()
+              .padStart(2, "0")}-${slotEndHour}:${slotEndMinute
+              .toString()
+              .padStart(2, "0")}`,
+            display: `${displayStart} - ${displayEnd}`,
+            period:
+              periodStart === periodEnd
+                ? periodStart
+                : `${periodStart}-${periodEnd}`,
+          });
+        }
+
+        currentMinute += 30;
+        if (currentMinute >= 60) {
+          currentHour += 1;
+          currentMinute -= 60;
+        }
+      }
+    });
+  }
+
+  return formattedAvailability;
+}
+
+router.get("/checkout/:id", isLoggedIn, async function (req, res) {
+  try {
+    const patient = await patientModel.findOne({ email: req.user.email });
+    const therapist = await TherapistModel.findById(req.params.id);
+
+    if (!therapist) {
+      return res.status(404).send("Therapist not found");
+    }
+
+    const {day ,date ,time} = req.query;
+
+    res.render("patient/checkout", { therapist, patient , selectedDay: day, selectedTime: time  , selectedDate : date });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
 });
+
 router.get("/booking-success", isLoggedIn, function (req, res) {
   res.render("patient/booking-success");
 });

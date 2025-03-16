@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="/css/bootstrap.min.css" />
 
     <!-- Fontawesome CSS -->
-    <link	
+    <link
       rel="stylesheet"
       href="/plugins/fontawesome/css/fontawesome.min.css"
     />
@@ -177,8 +177,7 @@
                           <% weekDates.forEach(day => { %>
                           <li>
                             <span><%= day.shortDay %></span>
-                            
-                            </span>
+                            <span><%= day.date %> <%= day.month %></span>
                           </li>
                           <% }) %>
                           <li class="right-arrow">
@@ -210,6 +209,7 @@
                               class="timing"
                               href="#"
                               data-day="<%= day.day %>"
+                              data-date="<%= day.date %>"
                               data-time="<%= slot.time %>"
                             >
                               <span><%= slot.display %></span>
@@ -232,7 +232,9 @@
 
               <!-- Submit Section -->
               <div class="submit-section proceed-btn text-right">
-                <a href="/client/checkout" class="btn btn-primary submit-btn"
+                <a
+                  href="/client/checkout/<%= therapist._id %>"
+                  class="btn btn-primary submit-btn"
                   >Proceed to Pay</a
                 >
               </div>
@@ -245,8 +247,28 @@
     </div>
     <!-- /Main Wrapper -->
 
-    >
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const timeSlots = document.querySelectorAll(".timing");
+        const proceedBtn = document.querySelector(".proceed-btn a");
 
+        timeSlots.forEach((slot) => {
+          slot.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            timeSlots.forEach((s) => s.classList.remove("active"));
+
+            slot.classList.add("active");
+
+            const day = slot.getAttribute("data-day");
+            const date = slot.getAttribute("data-date");
+            const time = slot.getAttribute("data-time");
+
+            proceedBtn.href = `/client/checkout/<%= therapist._id %>?day=${day}&time=${time}&date=${date}`;
+          });
+        });
+      });
+    </script>
     <!-- jQuery -->
     <script src="/js/jquery-3.2.1.min.js"></script>
 
