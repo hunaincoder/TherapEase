@@ -322,27 +322,43 @@
                         </ul>
                       </div>
                     </div>
-					<div class="submit-section mt-4">
-                        <a
+                    <div class="submit-section mt-4">
+                      <form action="/client/confirm-booking" method="POST">
+                        <input
+                          type="hidden"
+                          name="therapistId"
+                          value="<%= therapist._id %>"
+                        />
+                        <input
+                          type="hidden"
+                          name="selectedDate"
+                          value="<%= selectedDate %>"
+                        />
+                        <input
+                          type="hidden"
+                          name="selectedTime"
+                          value="<%= selectedTime %>"
+                        />
+                        <input type="hidden" name="sessionType" value="Video" />
+                        <button
                           type="submit"
-                          href="/client/booking-success"
                           class="btn btn-primary submit-btn"
-                          >Confirm and Pay</a
                         >
-                      </div>	
+                          Confirm and Pay
+                        </button>
+                      </form>
+                    </div>
                   </div>
                 </div>
               </div>
-              <!-- /Booking Summary -->
             </div>
+            <!-- /Booking Summary -->
           </div>
         </div>
       </div>
-      <!-- /Page Content -->
     </div>
+    <!-- /Page Content -->
     <!-- /Main Wrapper -->
-
-    >
 
     <!-- jQuery -->
     <script src="/js/jquery-3.2.1.min.js"></script>

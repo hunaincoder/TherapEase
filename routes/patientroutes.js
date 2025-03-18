@@ -6,6 +6,9 @@ const LocalStrategy = require("passport-local").Strategy;
 const patientModel = require("../models/patient");
 const TherapistModel = require("../models/therapist");
 const moment = require("moment-timezone");
+const AppointmentModel = require("../models/appointments");
+const TransactionModel = require("../models/transaction");
+const flash = require("connect-flash");
 
 router.use(authRoutes);
 
@@ -37,6 +40,13 @@ passport.use(
     }
   )
 );
+
+function getOrdinal(n) {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
 router.get("/login", function (req, res) {
   res.render("patient/login");
 });
@@ -185,6 +195,7 @@ router.get("/therapist-profile/:id", isLoggedIn, async (req, res) => {
 router.get("/therapist-profile", isLoggedIn, function (req, res) {
   res.render("patient/therapist-profile");
 });
+
 router.get("/therapist-booking/:id", isLoggedIn, async function (req, res) {
   try {
     const patient = await patientModel.findOne({ email: req.user.email });
@@ -193,7 +204,6 @@ router.get("/therapist-booking/:id", isLoggedIn, async function (req, res) {
     if (!therapist) {
       return res.status(404).send("Therapist not found");
     }
-
 
     const today = moment().tz("Asia/Karachi");
     const weekDays = [
@@ -237,6 +247,7 @@ router.get("/therapist-booking/:id", isLoggedIn, async function (req, res) {
 
 function formatTherapistAvailability(availability) {
   const formattedAvailability = {};
+  const today = moment().tz("Asia/Karachi");
 
   const weekDays = [
     "Monday",
@@ -318,21 +329,146 @@ router.get("/checkout/:id", isLoggedIn, async function (req, res) {
       return res.status(404).send("Therapist not found");
     }
 
-    const {day ,date ,time} = req.query;
+    const { day, date, time } = req.query;
 
-    res.render("patient/checkout", { therapist, patient , selectedDay: day, selectedTime: time  , selectedDate : date });
+    if (!day || !date || !time) {
+      return res.status(400).send("Missing booking parameters");
+    }
+
+    const dateMoment = moment.tz(req.query.date, "YYYY-MM-DD", "Asia/Karachi");
+    if (!dateMoment.isValid()) {
+      return res.status(400).send("Invalid date format");
+    }
+
+    res.render("patient/checkout", {
+      therapist,
+      patient,
+      selectedDay: day,
+      selectedTime: time,
+      selectedDate: dateMoment.format("YYYY-MM-DD"),
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
   }
 });
 
-router.get("/booking-success", isLoggedIn, function (req, res) {
-  res.render("patient/booking-success");
+router.post("/confirm-booking", isLoggedIn, async function (req, res) {
+  try {
+    const { therapistId, selectedDate, selectedTime, sessionType } = req.body;
+    const patientId = req.user._id;
+
+    if (!therapistId || !selectedDate || !selectedTime || !sessionType) {
+      return res.status(400).send("Missing required feilds");
+    }
+
+    const appointmentMoment = moment.tz(
+      selectedDate,
+      "YYYY-MM-DD",
+      "Asia/Karachi"
+    );
+
+    if (!appointmentMoment.isValid()) {
+      return res.status(400).send("Invalid date format");
+    }
+
+    const appointmentDate = appointmentMoment.utc().toDate();
+    const [startTime] = selectedTime.split("-");
+
+    const existing = await AppointmentModel.findOne({
+      therapistId,
+      date: appointmentDate,
+      time: startTime.trim(),
+    });
+    if (existing) {
+      req.flash("error", "This time slot is already booked");
+      return res.redirect("back");
+    }
+    const appointment = new AppointmentModel({
+      therapistId,
+      patientId,
+      date: appointmentDate,
+      time: startTime.trim(),
+      sessionType: sessionType || "video",
+      status: "Scheduled",
+    });
+
+    await appointment.save();
+
+    req.session.appointmentId = appointment._id;
+
+    const therapist = await TherapistModel.findById(therapistId);
+    const fee = therapist.fee;
+    const tax = fee * 0.1;
+
+    const transaction = new TransactionModel({
+      patient: patientId,
+      therapist: therapistId,
+      appointment: appointment._id,
+      amount: fee,
+      tax: tax,
+      totalAmount: fee + tax,
+      paymentMethod: "Credit Card",
+      status: "completed",
+      invoiceNumber: `INV-${Date.now()}`,
+    });
+    await transaction.save();
+
+    res.redirect("/client/booking-success");
+  } catch (error) {
+    console.error("Booking error:", error);
+    res.status(500).send("Error processing booking");
+  }
 });
+
+router.get("/booking-success", isLoggedIn, async function (req, res) {
+  try {
+    if (!req.session.appointmentId) {
+      return res.redirect("/client/dashboard");
+    }
+
+    const appointment = await AppointmentModel.findById(
+      req.session.appointmentId
+    )
+      .populate("therapistId")
+      .populate("patientId");
+
+    if (!appointment) {
+      return res.status(404).send("Appointment not found");
+    }
+
+    const dateObj = moment(appointment.date).tz("Asia/Karachi");
+    const formattedDate = `${getOrdinal(dateObj.date())} ${dateObj.format(
+      "dddd"
+    )}`;
+
+    const startTime = moment
+      .tz(appointment.time, "HH:mm", "Asia/Karachi")
+      .format("h:mm A");
+    const endTime = moment
+      .tz(appointment.time, "HH:mm", "Asia/Karachi")
+      .add(30, "minutes")
+      .format("h:mm A");
+
+    res.render("patient/booking-success", {
+      appointment: {
+        ...appointment._doc,
+        formattedDate,
+        time: `${startTime} to ${endTime}`,
+      },
+    });
+
+    delete req.session.appointmentId;
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error retrieving booking details");
+  }
+});
+
 router.get("/pass-change", isLoggedIn, function (req, res) {
   res.render("patient/pass-change");
 });
+
 router.get("/profile", isLoggedIn, async function (req, res) {
   const patient = await patientModel.findOne({ email: req.user.email });
   res.render("patient/profile", { patient });

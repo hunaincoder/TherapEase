@@ -1,203 +1,192 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
-	
-<head>
-		<meta charset="utf-8">
-		<title>TherapEase checkout</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-		
-		
+  <head>
+    <meta charset="utf-8" />
+    <title>TherapEase checkout</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=0"
+    />
 
-		<!-- Favicon -->
-        <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png">
-		
-		<!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="/css/bootstrap.min.css">
-		
-		
-		
-		<!-- Feathericon CSS -->
-        <link rel="stylesheet" href="/css/feathericon.min.css">
-		
-		<link rel="stylesheet" href="/plugins/morris/morris.css">
-		
-		<!-- Bootstrap CSS -->
-		<link rel="stylesheet" href="/css/bootstrap.min.css">
-		
-		<!-- Fontawesome CSS -->
-		<link rel="stylesheet" href="/plugins/fontawesome/css/fontawesome.min.css">
-		<link rel="stylesheet" href="/plugins/fontawesome/css/all.min.css">
-		
-		<!-- Fancybox CSS -->
-		<link rel="stylesheet" href="/plugins/fancybox/jquery.fancybox.min.css">
-		
-		<!-- Main CSS -->
-		<link rel="stylesheet" href="/css/style.css">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png" />
 
-		<!-- Main CSS -->
-		<link rel="stylesheet" href="/css/patient-style.css" />
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
 
+    <!-- Feathericon CSS -->
+    <link rel="stylesheet" href="/css/feathericon.min.css" />
 
-		
-		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-		<!--[if lt IE 9]>
-			<script src="assets/js/html5shiv.min.js"></script>
-			<script src="assets/js/respond.min.js"></script>
-		<![endif]-->
-	
-	</head>
-	<body>
+    <link rel="stylesheet" href="/plugins/morris/morris.css" />
 
-	
-		<!-- Main Wrapper -->
-        <div class="main-wrapper">
-		
-			<!-- Header -->
-            <div class="header">
-			
-				<!-- Logo -->
-                <div class="header-left">
-                    <a href="/client/dashboard" class="logo">
-						<img src="/img/logo.png" alt="Logo" width="140" height="50">
-					</a>
-					<a href="/client/dashboard" class="logo logo-small">
-						<img src="/img/logo-small.png" alt="Logo" width="100" height="70">
-					</a>
-                </div>
-				<!-- /Logo -->
-				
-				<a href="javascript:void(0);" id="toggle_btn">
-					<i class="fe fe-text-align-left"></i>
-				</a>
-				
-				
-				
-				<!-- Mobile Menu Toggle -->
-				<a class="mobile_btn" id="mobile_btn">
-					<i class="fa fa-bars"></i>
-				</a>
-				<!-- /Mobile Menu Toggle -->
-				
-				<!-- Header Right Menu -->
-				<ul class="nav user-menu">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
 
-					<!-- Notifications -->
-					<li class="nav-item dropdown noti-dropdown">
-						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
-							<i class="fe fe-bell"></i> <span class="badge badge-pill">3</span>
-						</a>
-						<div class="dropdown-menu notifications">
-							<div class="topnav-dropdown-header">
-								<span class="notification-title">Notifications</span>
-								<a href="javascript:void(0)" class="clear-noti"> Clear All </a>
-							</div>
-							<div class="noti-content">
-								<ul class="notification-list">
-									<li class="notification-message">
-										
-									</li>
-									<li class="notification-message">
-										
-									</li>
-									<li class="notification-message">
-										
-									</li>
-									<li class="notification-message">
-										
-									</li>
-								</ul>
-							</div>
-							<div class="topnav-dropdown-footer">
-								<a href="#">View all Notifications</a>
-							</div>
-						</div>
-					</li>
-					<!-- /Notifications -->
-					
-					<!-- User Menu -->
-					<li class="nav-item dropdown has-arrow">
-						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
-							<span class="user-img"><img class="rounded-circle" src="/img/logo1.png" width="31" alt=""></span>
-						</a>
-						<div class="dropdown-menu">
-							<div class="user-header">
-								<div class="user-text">
-									<h6>client</h6>
-									<p class="text-muted mb-0">Logged in</p>
-								</div>
-							</div>
-							<a class="dropdown-item" href="/client/profile">My Profile</a>
-							<a class="dropdown-item" href="/client/logout">Logout</a>
-						</div>
-					</li>
-					<!-- /User Menu -->
-					
-				</ul>
-				<!-- /Header Right Menu -->
-				
-            </div>
-			<!-- /Header -->
-			
-			
-			
-			 <!-- Page Content -->
-			<div class="content success-page-cont">
-				<div class="container-fluid">
-				
-					<div class="row justify-content-center" style="margin-top: 80px;">
-						<div class="col-lg-6">
-						
-							<!-- Success Card -->
-							<div class="card success-card">
-								<div class="card-body">
-									<div class="success-cont">
-										<i class="fas fa-check"></i>
-										<h3>Appointment booked Successfully!</h3>
-										<p>Appointment booked with <strong>hunain</strong><br> on <strong>12 Nov 2023 5:00PM to 6:00PM</strong></p>
-										<a href="/client/invoice" class="btn btn-primary view-inv-btn">View Invoice</a>
-									</div>
-								</div>
-							</div>
-							<!-- /Success Card -->
-							
-						</div>
-					</div>
-					
-				</div>
-			</div>		
-			<!-- /Page Content -->
-		
+    <!-- Fontawesome CSS -->
+    <link
+      rel="stylesheet"
+      href="/plugins/fontawesome/css/fontawesome.min.css"
+    />
+    <link rel="stylesheet" href="/plugins/fontawesome/css/all.min.css" />
+
+    <!-- Fancybox CSS -->
+    <link rel="stylesheet" href="/plugins/fancybox/jquery.fancybox.min.css" />
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/patient-style.css" />
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="assets/js/html5shiv.min.js"></script>
+      <script src="assets/js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <!-- Header -->
+      <div class="header">
+        <!-- Logo -->
+        <div class="header-left">
+          <a href="/client/dashboard" class="logo">
+            <img src="/img/logo.png" alt="Logo" width="140" height="50" />
+          </a>
+          <a href="/client/dashboard" class="logo logo-small">
+            <img src="/img/logo-small.png" alt="Logo" width="100" height="70" />
+          </a>
         </div>
-		<!-- /Main Wrapper -->
-		
-		>
-		
-		
-		
-		<!-- jQuery -->
-		<script src="/js/jquery-3.2.1.min.js"></script>
+        <!-- /Logo -->
 
-		<script src="/js/jquery.min.js"></script>
-		
-		<!-- Bootstrap Core JS -->
-		<script src="/js/popper.min.js"></script>
-		<script src="/js/bootstrap.min.js"></script>
-		
-		<!-- Fancybox JS -->
-		<script src="/plugins/fancybox/jquery.fancybox.min.js"></script>
-		
-		
-		<!-- Slimscroll JS -->
-        <script src="/plugins/slimscroll/jquery.slimscroll.min.js"></script>
-		
-		<script src="/plugins/raphael/raphael.min.js"></script>    
-		<script src="/plugins/morris/morris.min.js"></script>  
-		<script src="/js/chart.morris.js"></script>
-		
+        <a href="javascript:void(0);" id="toggle_btn">
+          <i class="fe fe-text-align-left"></i>
+        </a>
 
-		<!-- Custom JS -->
-		<script src="/js/script.js"></script>
-		
-	</body>
+        <!-- Mobile Menu Toggle -->
+        <a class="mobile_btn" id="mobile_btn">
+          <i class="fa fa-bars"></i>
+        </a>
+        <!-- /Mobile Menu Toggle -->
 
+        <!-- Header Right Menu -->
+        <ul class="nav user-menu">
+          <!-- Notifications -->
+          <li class="nav-item dropdown noti-dropdown">
+            <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+              <i class="fe fe-bell"></i> <span class="badge badge-pill">3</span>
+            </a>
+            <div class="dropdown-menu notifications">
+              <div class="topnav-dropdown-header">
+                <span class="notification-title">Notifications</span>
+                <a href="javascript:void(0)" class="clear-noti"> Clear All </a>
+              </div>
+              <div class="noti-content">
+                <ul class="notification-list">
+                  <li class="notification-message"></li>
+                  <li class="notification-message"></li>
+                  <li class="notification-message"></li>
+                  <li class="notification-message"></li>
+                </ul>
+              </div>
+              <div class="topnav-dropdown-footer">
+                <a href="#">View all Notifications</a>
+              </div>
+            </div>
+          </li>
+          <!-- /Notifications -->
+
+          <!-- User Menu -->
+          <li class="nav-item dropdown has-arrow">
+            <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+              <span class="user-img"
+                ><img
+                  class="rounded-circle"
+                  src="/img/logo1.png"
+                  width="31"
+                  alt=""
+              /></span>
+            </a>
+            <div class="dropdown-menu">
+              <div class="user-header">
+                <div class="user-text">
+                  <h6>client</h6>
+                  <p class="text-muted mb-0">Logged in</p>
+                </div>
+              </div>
+              <a class="dropdown-item" href="/client/profile">My Profile</a>
+              <a class="dropdown-item" href="/client/logout">Logout</a>
+            </div>
+          </li>
+          <!-- /User Menu -->
+        </ul>
+        <!-- /Header Right Menu -->
+      </div>
+      <!-- /Header -->
+
+      <!-- Page Content -->
+      <div class="content success-page-cont">
+        <div class="container-fluid">
+          <div class="row justify-content-center" style="margin-top: 80px">
+            <div class="col-lg-6">
+              <!-- Success Card -->
+              <div class="card success-card">
+                <div class="card-body">
+                  <div class="success-cont">
+                    <i class="fas fa-check"></i>
+                    <h3>Appointment booked Successfully!</h3>
+                    <% if (appointment) { %>
+                    <p>
+						Appointment booked with <strong><%= appointment.therapistId.username %></strong><br>
+						on <strong><%= appointment.formattedDate %> at <%= appointment.time %></strong>
+                    </p>
+                    <p>Appointment ID: <code><%= appointment._id %></code></p>
+                    <a
+                      href="/client/invoice/<%= appointment._id %>"
+                      class="btn btn-primary view-inv-btn"
+                    >
+                      View Invoice
+                    </a>
+                    <% } else { %>
+                    <p>No appointment details found</p>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+              <!-- /Success Card -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /Page Content -->
+    </div>
+    <!-- /Main Wrapper -->
+
+    >
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <!-- jQuery -->
+    <script src="/js/jquery-3.2.1.min.js"></script>
+
+    <script src="/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JS -->
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Fancybox JS -->
+    <script src="/plugins/fancybox/jquery.fancybox.min.js"></script>
+
+    <!-- Slimscroll JS -->
+    <script src="/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <script src="/plugins/raphael/raphael.min.js"></script>
+    <script src="/plugins/morris/morris.min.js"></script>
+    <script src="/js/chart.morris.js"></script>
+
+    <!-- Custom JS -->
+    <script src="/js/script.js"></script>
+  </body>
 </html>
