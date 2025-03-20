@@ -200,25 +200,24 @@
                       <!-- Time Slot -->
                       <div class="time-slot">
                         <ul class="clearfix">
-                          <% weekDates.forEach(day => { %>
-                          <li>
-                            <% if (formattedAvailability[day.day] &&
-                            formattedAvailability[day.day].length > 0) { %> <%
-                            formattedAvailability[day.day].forEach(slot => { %>
-                            <a
-                              class="timing"
-                              href="#"
-                              data-day="<%= day.day %>"
-                              data-date="<%= day.fullDate %>" 
-                              data-time="<%= slot.time %>"
-                            >
-                              <span><%= slot.display %></span>
-                              <span><%= slot.period %></span>
-                            </a>
-                            <% }); %> <% } else { %>
-                            <p class="text-center text-muted">Not available</p>
-                            <% } %>
-                          </li>
+                          <% weekDates.forEach(day => { 
+                            const availableSlots = formattedAvailability.find(d => d.fullDate === day.fullDate)?.slots || [];
+                          %>
+                            <li>
+                              <% if (availableSlots.length > 0) { %>
+                                <% availableSlots.forEach(slot => { %>
+                                  <a class="timing" href="#" 
+                                     data-day="<%= day.day %>" 
+                                     data-date="<%= day.fullDate %>" 
+                                     data-time="<%= slot.time %>">
+                                    <span><%= slot.display.split(' - ')[0] %></span>
+                                    <span><%= slot.display.split(' - ')[1] %></span>
+                                  </a>
+                                <% }); %>
+                              <% } else { %>
+                                <p class="text-center text-muted">Not available</p>
+                              <% } %>
+                            </li>
                           <% }); %>
                         </ul>
                       </div>
@@ -255,14 +254,12 @@
         timeSlots.forEach((slot) => {
           slot.addEventListener("click", function (e) {
             e.preventDefault();
-
             timeSlots.forEach((s) => s.classList.remove("active"));
-
             slot.classList.add("active");
 
-            const day = slot.getAttribute("data-day");
-            const date = slot.getAttribute("data-date");
-            const time = slot.getAttribute("data-time");
+            const day = slot.dataset.day;
+            const date = slot.dataset.date;
+            const time = slot.dataset.time;
 
             proceedBtn.href = `/client/checkout/<%= therapist._id %>?day=${day}&time=${time}&date=${date}`;
           });

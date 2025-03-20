@@ -197,123 +197,35 @@
 												</tr>
 											</thead>
 											<tbody>
-												
-												<tr>
-													<td><a href="/client/invoice">#IN0010</td>
-													
-													
-													<td>PKR 5005 </td>
-													<td>25 Dec 2024</td>																
-													
-													<td class="text-right">
+												<% if (transactions.length > 0) { %>
+												  <% transactions.forEach(transaction => { %>
+													<tr>
+													  <td>
+														<a href="/client/invoice/<%= transaction.appointment._id %>">
+														  <%= transaction.invoiceNumber %>
+														</a>
+													  </td>
+													  <td>PKR <%= transaction.totalAmount.toFixed(2) %></td>
+													  <td><%= transaction.formattedDate %></td>
+													  <td class="text-right">
 														<div class="actions">
-															
-															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
-																<i class="fe fe-pencil"></i> View
-															</a>
-															<a class="btn btn-sm bg-danger-light">
-																<i class="fe"></i> Print
-															</a>
+														  <a href="/client/invoice/<%= transaction.appointment._id %>" 
+															 class="btn btn-sm bg-success-light mr-2">
+															<i class="fe fe-eye"></i> View
+														  </a>
+														  <button class="btn btn-sm bg-danger-light" onclick="window.print()">
+															<i class="fe fe-printer"></i> Print
+														  </button>
 														</div>
-													</td>
-												</tr>
-												<tr>
-													<td><a href="/client/invoice">#IN0010</td>
-													
-													
-													<td>PKR 5005 </td>
-													<td>25 Dec 2024</td>																
-													
-													<td class="text-right">
-														<div class="actions">
-															
-															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
-																<i class="fe fe-pencil"></i> View
-															</a>
-															<a class="btn btn-sm bg-danger-light">
-																<i class="fe"></i> Print
-															</a>
-														</div>
-													</td>
-												</tr>
-												<tr>
-													<td><a href="/client/invoice">#IN0010</td>
-													
-													
-													<td>PKR 5005 </td>
-													<td>25 Dec 2024</td>																
-													
-													<td class="text-right">
-														<div class="actions">
-															
-															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
-																<i class="fe fe-pencil"></i> View
-															</a>
-															<a class="btn btn-sm bg-danger-light">
-																<i class="fe"></i> Print
-															</a>
-														</div>
-													</td>
-												</tr>
-												<tr>
-													<td><a href="/client/invoice">#IN0010</td>
-													
-													
-													<td>PKR 5005 </td>
-													<td>25 Dec 2024</td>																
-													
-													<td class="text-right">
-														<div class="actions">
-															
-															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
-																<i class="fe fe-pencil"></i> View
-															</a>
-															<a class="btn btn-sm bg-danger-light">
-																<i class="fe"></i> Print
-															</a>
-														</div>
-													</td>
-												</tr>
-												<tr>
-													<td><a href="/client/invoice">#IN0010</td>
-													
-													
-													<td>PKR 5005 </td>
-													<td>25 Dec 2024</td>																
-													
-													<td class="text-right">
-														<div class="actions">
-															
-															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
-																<i class="fe fe-pencil"></i> View
-															</a>
-															<a class="btn btn-sm bg-danger-light">
-																<i class="fe"></i> Print
-															</a>
-														</div>
-													</td>
-												</tr>
-												<tr>
-													<td><a href="/client/invoice">#IN0010</td>
-													
-													
-													<td>PKR 5005 </td>
-													<td>25 Dec 2024</td>																
-													
-													<td class="text-right">
-														<div class="actions">
-															
-															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
-																<i class="fe fe-pencil"></i> View
-															</a>
-															<a class="btn btn-sm bg-danger-light">
-																<i class="fe"></i> Print
-															</a>
-														</div>
-													</td>
-												</tr>
-												
-											</tbody>
+													  </td>
+													</tr>
+												  <% }); %>
+												<% } else { %>
+												  <tr>
+													<td colspan="4" class="text-center">No invoices found</td>
+												  </tr>
+												<% } %>
+											  </tbody>
 										</table>
 									</div>
 								</div>

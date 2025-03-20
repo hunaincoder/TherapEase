@@ -229,9 +229,70 @@ router.get("/therapist-booking/:id", isLoggedIn, async function (req, res) {
         fullDate: date.format("YYYY-MM-DD"),
       });
     }
-    const formattedAvailability = formatTherapistAvailability(
-      therapist.availability
-    );
+
+    const existingAppointments = await AppointmentModel.find({
+      therapistId: therapist._id,
+    });
+
+    const formattedAvailability = weekDates.map((dateInfo) => {
+      const dayAvailability = therapist.availability.find(
+        (slot) => slot.day === dateInfo.day
+      );
+
+      if (!dayAvailability) {
+        return { ...dateInfo, slots: [] };
+      }
+
+      const [startHour, startMinute] = dayAvailability.startTime
+        .split(":")
+        .map(Number);
+      const [endHour, endMinute] = dayAvailability.endTime
+        .split(":")
+        .map(Number);
+
+      let currentHour = startHour;
+      let currentMinute = startMinute;
+      const slots = [];
+
+      while (
+        currentHour < endHour ||
+        (currentHour === endHour && currentMinute < endMinute)
+      ) {
+        const slotStart = `${currentHour}:${currentMinute
+          .toString()
+          .padStart(2, "0")}`;
+        const slotEndMinute = currentMinute + 30;
+        const slotEndHour = currentHour + Math.floor(slotEndMinute / 60);
+        const formattedEndMinute = slotEndMinute % 60;
+
+        const isBooked = existingAppointments.some((appt) => {
+          const apptDate = moment(appt.date)
+            .tz("Asia/Karachi")
+            .format("YYYY-MM-DD");
+          return apptDate === dateInfo.fullDate && appt.time === slotStart;
+        });
+
+        if (!isBooked) {
+          slots.push({
+            time: `${slotStart}-${slotEndHour}:${formattedEndMinute
+              .toString()
+              .padStart(2, "0")}`,
+            display: `${moment(slotStart, "HH:mm").format("h:mm A")} - ${moment(
+              `${slotEndHour}:${formattedEndMinute}`,
+              "HH:mm"
+            ).format("h:mm A")}`,
+          });
+        }
+
+        currentMinute += 30;
+        if (currentMinute >= 60) {
+          currentHour += 1;
+          currentMinute = 0;
+        }
+      }
+
+      return { ...dateInfo, slots };
+    });
 
     res.render("patient/therapist-booking", {
       patient,
@@ -356,7 +417,8 @@ router.get("/checkout/:id", isLoggedIn, async function (req, res) {
 router.post("/confirm-booking", isLoggedIn, async function (req, res) {
   try {
     const { therapistId, selectedDate, selectedTime, sessionType } = req.body;
-    const patientId = req.user._id;
+    const patient = await patientModel.findOne({ email: req.user.email });
+    const patientId = patient._id;
 
     if (!therapistId || !selectedDate || !selectedTime || !sessionType) {
       return res.status(400).send("Missing required feilds");
@@ -377,6 +439,7 @@ router.post("/confirm-booking", isLoggedIn, async function (req, res) {
 
     const existing = await AppointmentModel.findOne({
       therapistId,
+      patientId,
       date: appointmentDate,
       time: startTime.trim(),
     });
@@ -497,12 +560,85 @@ router.post("/profile/update", isLoggedIn, async function (req, res) {
   }
 });
 
-router.get("/invoices", isLoggedIn, function (req, res) {
-  res.render("patient/invoices");
+router.get("/invoices", isLoggedIn, async function (req, res) {
+  try {
+    const patient = await patientModel.findOne({ email: req.user.email });
+    const patientId = patient._id;
+    
+    const transactions = await TransactionModel.find({ patient: patientId })
+      .populate({
+        path: "appointment",
+        populate: [
+          { path: "therapistId", model: "Therapist" },
+          { path: "patientId", model: "Patient" },
+        ],
+      })
+      .sort({ date: -1 });
+
+    res.render("patient/invoices", {
+      transactions: transactions.map((t) => ({
+        ...t._doc,
+        formattedDate: moment(t.date).format("MMM D, YYYY"),
+        appointmentDate: moment(t.appointment.date).format("MMM D, YYYY"),
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching invoices:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
-router.get("/invoice", isLoggedIn, function (req, res) {
-  res.render("patient/invoice");
+
+router.get("/invoice/:id", isLoggedIn, async function (req, res) {
+  try {
+    const appointmentId = req.params.id;
+
+    const appointment = await AppointmentModel.findById(appointmentId)
+      .populate("therapistId")
+      .populate("patientId");
+
+    if (!appointment) {
+      return res.status(400).send("appointment not found");
+    }
+
+    if (!appointment.patientId) {
+      return res.status(400).send("Patient details not found");
+    }
+
+    console.log("Appointment:", appointment);
+
+    const transaction = await TransactionModel.findOne({
+      appointment: appointmentId,
+    });
+
+    if (!transaction) {
+      return res.status(400).send("appointment not found");
+    }
+
+    res.render("patient/invoice", {
+      appointment: {
+        ...appointment._doc,
+        formattedDate: `${getOrdinal(moment(appointment.date).date())} ${moment(
+          appointment.date
+        ).format("dddd")}`,
+        time: `${moment(appointment.time, "HH:mm").format(
+          "h:mm A"
+        )} to ${moment(appointment.time, "HH:mm")
+          .add(30, "minutes")
+          .format("h:mm A")}`,
+      },
+      transaction: {
+        ...transaction._doc,
+        totalAmount: transaction.amount + transaction.tax,
+      },
+      patient: appointment.patientId,
+      therapist: appointment.therapistId,
+    });
+  } catch (error) {
+    console.error("Error fetching invoice details:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
+
 router.get("/accounts", isLoggedIn, function (req, res) {
   res.render("patient/accounts");
 });
