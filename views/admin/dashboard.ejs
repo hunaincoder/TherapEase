@@ -158,7 +158,7 @@
 											<i class="fe fe-users"></i>
 										</span>
 										<div class="dash-count">
-											<h3>168</h3>
+											<h3><%= counts.therapists %></h3>
 										</div>
 									</div>
 									<div class="dash-widget-info">
@@ -178,7 +178,7 @@
 											<i class="fe fe-credit-card"></i>
 										</span>
 										<div class="dash-count">
-											<h3>487</h3>
+											<h3><%= counts.patients %></h3>
 										</div>
 									</div>
 									<div class="dash-widget-info">
@@ -199,7 +199,7 @@
 											<i class="fe fe-money"></i>
 										</span>
 										<div class="dash-count">
-											<h3>485</h3>
+											<h3><%= counts.appointments %></h3>
 										</div>
 									</div>
 									<div class="dash-widget-info">
@@ -220,7 +220,7 @@
 											<i class="fe fe-folder"></i>
 										</span>
 										<div class="dash-count">
-											<h3>PKR 62523</h3>
+											<h3>PKR <%= counts.revenue %></h3>
 										</div>
 									</div>
 									<div class="dash-widget-info">
@@ -271,7 +271,7 @@
 							<div class="card card-table flex-fill">
 								<div class="card-header d-flex justify-content-between align-items-center">
 									<h4 class="card-title">Therapists List</h4>
-									<a href="doctor-list.html">Show all</a>
+									<a href="/therapist-list">Show all</a>
 								</div>
 								<div class="card-body">
 									<div class="table-responsive">
@@ -285,83 +285,30 @@
 												</tr>
 											</thead>
 											<tbody>
-												<tr>
+												<% latest.therapists.forEach(therapist => { %>
+												  <tr>
 													<td>
-														<h2 class="table-avatar">
-															<a href="/profile" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/img/doctors/doctor-thumb-01.jpg" alt="User Image"></a>
-															<a href="/profile">Name</a>
-														</h2>
+													  <h2 class="table-avatar">
+														<a href="/therapist-profile/<%= therapist._id %>" class="avatar avatar-sm mr-2">
+														  <img class="avatar-img rounded-circle" 
+															   src="<%= therapist.profilePicture || 'default-doctor.jpg' %>" 
+															   alt="User Image">
+														</a>
+														<a href="/therapist-profile/<%= therapist._id %>">
+														  <%= therapist.username %>
+														</a>
+													  </h2>
 													</td>
-													<td>Couple</td>
-													<td>PKR 3200.00</td>
+													<td><%= therapist.specialties?.[0] || 'General' %></td>
+													<td>PKR <%= therapist.fee?.toFixed(2) || '0.00' %></td>
 													<td>
+													  <% Array(therapist.badge || 0).fill().forEach(() => { %>
 														<i class="fe fe-star text-warning"></i>
-														<i class="fe fe-star text-warning"></i>
-													
+													  <% }); %>
 													</td>
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/img/doctors/doctor-thumb-02.jpg" alt="User Image"></a>
-															<a href="/profile">Name</a>
-														</h2>
-													</td>
-													<td>Child</td>
-													<td>PKR 3100.00</td>
-													<td>
-														<i class="fe fe-star text-warning"></i>
-														<i class="fe fe-star text-warning"></i>
-														<i class="fe fe-star text-warning"></i>
-													
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/img/doctors/doctor-thumb-03.jpg" alt="User Image"></a>
-															<a href="/profile">Name</a>
-														</h2>
-													</td>
-													<td>PTSD</td>
-													<td>PKR 4000.00</td>
-													<td>
-														<i class="fe fe-star text-warning"></i>
-														
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/img/doctors/doctor-thumb-04.jpg" alt="User Image"></a>
-															<a href="/profile">Child</a>
-														</h2>
-													</td>
-													<td>Couple</td>
-													<td>PKR 3200.00</td>
-													<td>
-														<i class="fe fe-star text-warning"></i>
-														<i class="fe fe-star text-warning"></i>
-														<i class="fe fe-star text-warning"></i>
-														
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/img/doctors/doctor-thumb-05.jpg" alt="User Image"></a>
-															<a href="/profile">name</a>
-														</h2>
-													</td>
-													<td>Child</td>
-													<td>PKR 3500.00</td>
-													<td>
-														<i class="fe fe-star text-warning"></i>
-														<i class="fe fe-star text-warning"></i>
-														
-													</td>
-												</tr>
-											</tbody>
+												  </tr>
+												<% }); %>
+											  </tbody>
 										</table>
 									</div>
 								</div>
@@ -375,7 +322,7 @@
 							<div class="card  card-table flex-fill">
 								<div class="card-header d-flex justify-content-between align-items-center">
 									<h4 class="card-title">Patients List</h4>
-									<a href="patient-list.html">Show all</a>
+									<a href="/patient-list">Show all</a>
 								</div>
 								<div class="card-body">
 									<div class="table-responsive">
@@ -389,57 +336,21 @@
 												</tr>
 											</thead>
 											<tbody>
-												<tr>
+												<% latest.patients.forEach(patient => { %>
+												  <tr>
 													<td>
-														<h2 class="table-avatar">
-															<a href="/profile">Name </a>
-														</h2>
+													  <h2 class="table-avatar">
+														<a href="/patient-profile/<%= patient._id %>">
+														  <%= patient.firstname %> <%= patient.lastname %>
+														</a>
+													  </h2>
 													</td>
-													<td>8286329170</td>
-													<td>20 Oct 2024</td>
-													<td class="text-right">PKR 100.00</td>
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile">Name</a>
-														</h2>
-													</td>
-													<td>2077299974</td>
-													<td>22 Oct 2024</td>
-													<td class="text-right">PKR 200.00</td>
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile">Name</a>
-														</h2>
-													</td>
-													<td>2607247769</td>
-													<td>21 Oct 2024</td>
-													<td class="text-right">PKR 250.00</td>
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile">Name</a>
-														</h2>
-													</td>
-													<td>5043686874</td>
-													<td>21 Sep 2024</td>
-													<td class="text-right">PKR 150.00</td>
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile">Name</a>
-														</h2>
-													</td>
-													<td>9548207887</td>
-													<td>18 Sep 2024</td>
-													<td class="text-right">PKR 350.00</td>
-												</tr>
-											</tbody>
+													<td><%= patient.mobile %></td>
+													<td><%= moment(patient.updatedAt).format("DD MMM YYYY") %></td>
+													<td class="text-right">PK</td>
+												  </tr>
+												<% }); %>
+											  </tbody>
 										</table>
 									</div>
 								</div>
@@ -455,14 +366,14 @@
 							<div class="card card-table">
 								<div class="card-header d-flex justify-content-between align-items-center">
 									<h4 class="card-title">Appointment List</h4>
-									<a href="patient-list.html">Show all</a>
+									<a href="appointment-list">Show all</a>
 								</div>
 								<div class="card-body">
 									<div class="table-responsive">
 										<table class="table table-hover table-center mb-0">
 											<thead>
 												<tr>
-													<th>Doctor Name</th>
+													<th>Therapist Name</th>
 													<th>Speciality</th>
 													<th>Patient Name</th>
 													<th>Apointment Time</th>
@@ -470,94 +381,37 @@
 												</tr>
 											</thead>
 											<tbody>
-												<tr>
+												<% latest.appointments.forEach(appointment => { %>
+												  <tr>
 													<td>
-														<h2 class="table-avatar">
-															<a href="/profile" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/img/doctors/doctor-thumb-01.jpg" alt="User Image"></a>
-															<a href="/profile">Name</a>
-														</h2>
+													  <h2 class="table-avatar">
+														<a href="/therapist-profile/<%= appointment.therapistId._id %>" class="avatar avatar-sm mr-2">
+														  <img class="avatar-img rounded-circle" 
+															   src="<%= appointment.therapistId.profilePicture || 'default-doctor.jpg' %>" 
+															   alt="User Image">
+														</a>
+														<a href="/therapist-profile/<%= appointment.therapistId._id %>">
+														  <%= appointment.therapistId.username %>
+														</a>
+													  </h2>
 													</td>
-													<td>Couple</td>
+													<td><%= appointment.therapistId.specialties?.[0] || 'General' %></td>
 													<td>
-														<h2 class="table-avatar">
-															<a href="/profile">Name</a>
-														</h2>
+													  <h2 class="table-avatar">
+														
+														<a href="/patient-profile/<%= appointment.patientId._id %>">
+															
+														  <%= appointment.patientId.firstname %> <%= appointment.patientId.lastname %>
+														</a>
+													  </h2>
 													</td>
-													<td>9 Nov 2024 <span class="text-primary d-block">11.00 AM - 11.15 AM</span></td>
-													
-													
-												</tr>
-												<tr>
 													<td>
-														<h2 class="table-avatar">
-															<a href="/profile" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/img/doctors/doctor-thumb-02.jpg" alt="User Image"></a>
-															<a href="/profile">name
-															</a>
-														</h2>
+													  <%= appointment.formattedDate %>
+													  <span class="text-primary d-block"><%= appointment.time %></span>
 													</td>
-													<td>Child</td>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile">Name</a>
-														</h2>
-													</td>
-													
-													<td>5 Nov 2024 <span class="text-primary d-block">11.00 AM - 11.35 AM</span></td>
-													
-													
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/img/doctors/doctor-thumb-03.jpg" alt="User Image"></a>
-															<a href="/profile">Name</a>
-														</h2>
-													</td>
-													<td>PTSD</td>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile">Name</a>
-														</h2>
-													</td>
-													<td>11 Nov 2024 <span class="text-primary d-block">12.00 PM - 12.15 PM</span></td>
-													
-													
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/img/doctors/doctor-thumb-04.jpg" alt="User Image"></a>
-															<a href="/profile">Dr. Sofia Brient</a>
-														</h2>
-													</td>
-													<td>Child</td>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile">name</a>
-														</h2>
-													</td>
-													<td>7 Nov 2024<span class="text-primary d-block">1.00 PM - 1.20 PM</span></td>
-													
-													
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/img/doctors/doctor-thumb-05.jpg" alt="User Image"></a>
-															<a href="/profile">Name</a>
-														</h2>
-													</td>
-													<td>Couple</td>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/profile">Name</a>
-														</h2>
-													</td>
-													
-													<td>15 Nov 2024 <span class="text-primary d-block">1.00 PM - 1.15 PM</span></td>
-													
-												</tr>
-											</tbody>
+												  </tr>
+												<% }); %>
+											  </tbody>
 										</table>
 									</div>
 								</div>

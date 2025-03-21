@@ -6,6 +6,9 @@ const passport = require("passport");
 const localStrategy = require("passport-local");
 const TherapistModel = require("../models/therapist");
 const PatientModel = require("../models/patient");
+const TransactionModel = require("../models/transaction");
+const AppointmentModel = require("../models/appointments");
+const moment = require("moment");
 
 router.use("/", authRoutes);
 
@@ -39,10 +42,61 @@ router.get("/", function (req, res) {
   res.render("index");
 });
 
-router.get("/dashboard", isLoggedIn, async function (req, res) {
-  const admin = await AdminModel.findOne({ email: req.user.email });
 
-  res.render("admin/dashboard", { admin });
+router.get("/dashboard", isLoggedIn, async function (req, res) {
+  try {
+    const admin = await AdminModel.findOne({ email: req.user.email });
+    
+    const therapistCount = await TherapistModel.countDocuments();
+    const patientCount = await PatientModel.countDocuments();
+    const appointmentCount = await AppointmentModel.countDocuments();
+    
+    const revenueResult = await TransactionModel.aggregate([
+      { $match: { status: "completed" } },
+      { $group: { _id: null, total: { $sum: "$totalAmount" } } }
+    ]);
+    const totalRevenue = revenueResult[0]?.total || 0;
+
+    const latestTherapists = await TherapistModel.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select("username specialties fee profilePicture badge");
+
+    const latestPatients = await PatientModel.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select("firstname lastname phone updatedAt");
+
+    const latestAppointments = await AppointmentModel.find()
+      .populate("patientId", "firstname lastname")
+      .populate("therapistId", "username specialties profilePicture")
+      .sort({ date: -1 })
+      .limit(5);
+
+    res.render("admin/dashboard", {
+      admin,
+      counts: {
+        therapists: therapistCount,
+        patients: patientCount,
+        appointments: appointmentCount,
+        revenue: totalRevenue
+      },
+      latest: {
+        therapists: latestTherapists,
+        patients: latestPatients,
+        appointments: latestAppointments.map(a => ({
+          ...a._doc,
+          formattedDate: moment(a.date).format("DD MMM YYYY"),
+          time: `${moment(a.time, "HH:mm").format("h:mm A")} - ${moment(a.time, "HH:mm")
+            .add(30, "minutes")
+            .format("h:mm A")}`
+        }))
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error loading dashboard");
+  }
 });
 
 router.get("/profile", isLoggedIn, async function (req, res) {
@@ -76,9 +130,31 @@ router.post("/profile/update", isLoggedIn, async function (req, res) {
 });
 
 router.get("/appointment-list", isLoggedIn, async function (req, res) {
-  const admin = await AdminModel.findOne({ email: req.user.email });
+  try {
+    const admin = await AdminModel.findOne({ email: req.user.email });
+    const appointments = await AppointmentModel.find()
+      .populate("patientId", "firstname lastname")
+      .populate("therapistId", "username specialties fee profilePicture _id")
+      .sort({ date: -1 });
 
-  res.render("admin/appointment-list", { admin });
+    const formattedAppointments = appointments.map((appointment) => ({
+      ...appointment._doc,
+      formattedDate: moment(appointment.date).format("DD MMM YYYY"),
+      timeRange: `${moment(appointment.time, "HH:mm").format(
+        "h:mm A"
+      )} - ${moment(appointment.time, "HH:mm")
+        .add(30, "minutes")
+        .format("h:mm A")}`,
+    }));
+
+    res.render("admin/appointment-list", {
+      admin,
+      appointments: formattedAppointments,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error fetching appointments");
+  }
 });
 
 router.get("/therapist-list", isLoggedIn, async function (req, res) {
@@ -167,14 +243,71 @@ router.post("/delete-patient/:id", async (req, res) => {
 });
 
 router.get("/transactions-list", isLoggedIn, async function (req, res) {
-  const admin = await AdminModel.findOne({ email: req.user.email });
-  res.render("admin/transactions-list", { admin });
+  try {
+    const admin = await AdminModel.findOne({ email: req.user.email });
+    const transactions = await TransactionModel.find()
+      .populate("patient")
+      .populate("therapist")
+      .populate("appointment");
+
+    res.render("admin/transactions-list", { admin, transactions });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error fetching transactions");
+  }
 });
 
-router.get("/invoice", isLoggedIn, async function (req, res) {
-  const admin = await AdminModel.findOne({ email: req.user.email });
+router.post("/delete-transaction/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await TransactionModel.findByIdAndDelete(id);
+    req.flash("successMessage", "Transaction deleted successfully!");
+    res.redirect("/transactions-list");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error deleting transaction");
+  }
+});
 
-  res.render("admin/invoice", { admin });
+router.get("/invoice/:id", isLoggedIn, async (req, res) => {
+  try {
+    const admin = await AdminModel.findOne({ email: req.user.email });
+
+    const transaction = await TransactionModel.findById(req.params.id)
+      .populate("patient")
+      .populate("therapist")
+      .populate("appointment");
+
+    if (!transaction) {
+      return res.status(404).send("Transaction not found");
+    }
+
+    if (
+      !transaction.patient ||
+      !transaction.therapist ||
+      !transaction.appointment
+    ) {
+      return res.status(400).send("Incomplete transaction data");
+    }
+
+    res.render("admin/invoice", {
+      transaction: {
+        ...transaction._doc,
+        totalAmount: transaction.amount + transaction.tax,
+      },
+      patient: transaction.patient,
+      therapist: transaction.therapist,
+      admin: admin,
+      appointment: {
+        sessionType: transaction.appointment.sessionType,
+        date: moment(transaction.appointment.date).format("MMMM Do, YYYY"),
+        time: moment(transaction.appointment.time, "HH:mm").format("h:mm A"),
+      },
+    });
+  } catch (error) {
+    console.error("Invoice Error:", error);
+    res.status(500).send("Error generating invoice");
+  }
 });
 
 router.get("/therapist-approval", isLoggedIn, async function (req, res) {
