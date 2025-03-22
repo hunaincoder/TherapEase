@@ -235,62 +235,57 @@ router.get("/therapist-booking/:id", isLoggedIn, async function (req, res) {
     });
 
     const formattedAvailability = weekDates.map((dateInfo) => {
-      const dayAvailability = therapist.availability.find(
+      const dayAvailabilities = therapist.availability.filter(
         (slot) => slot.day === dateInfo.day
       );
-
-      if (!dayAvailability) {
+    
+      if (dayAvailabilities.length === 0) {
         return { ...dateInfo, slots: [] };
       }
-
-      const [startHour, startMinute] = dayAvailability.startTime
-        .split(":")
-        .map(Number);
-      const [endHour, endMinute] = dayAvailability.endTime
-        .split(":")
-        .map(Number);
-
-      let currentHour = startHour;
-      let currentMinute = startMinute;
+    
       const slots = [];
-
-      while (
-        currentHour < endHour ||
-        (currentHour === endHour && currentMinute < endMinute)
-      ) {
-        const slotStart = `${currentHour}:${currentMinute
-          .toString()
-          .padStart(2, "0")}`;
-        const slotEndMinute = currentMinute + 30;
-        const slotEndHour = currentHour + Math.floor(slotEndMinute / 60);
-        const formattedEndMinute = slotEndMinute % 60;
-
-        const isBooked = existingAppointments.some((appt) => {
-          const apptDate = moment(appt.date)
-            .tz("Asia/Karachi")
-            .format("YYYY-MM-DD");
-          return apptDate === dateInfo.fullDate && appt.time === slotStart;
-        });
-
-        if (!isBooked) {
-          slots.push({
-            time: `${slotStart}-${slotEndHour}:${formattedEndMinute
-              .toString()
-              .padStart(2, "0")}`,
-            display: `${moment(slotStart, "HH:mm").format("h:mm A")} - ${moment(
-              `${slotEndHour}:${formattedEndMinute}`,
-              "HH:mm"
-            ).format("h:mm A")}`,
+      
+      dayAvailabilities.forEach((dayAvailability) => {
+        const [startHour, startMinute] = dayAvailability.startTime.split(":").map(Number);
+        const [endHour, endMinute] = dayAvailability.endTime.split(":").map(Number);
+    
+        let currentHour = startHour;
+        let currentMinute = startMinute;
+    
+        while (
+          currentHour < endHour ||
+          (currentHour === endHour && currentMinute < endMinute)
+        ) {
+          const slotStart = `${currentHour}:${currentMinute.toString().padStart(2, "0")}`;
+          const slotEndMinute = currentMinute + 30;
+          const slotEndHour = currentHour + Math.floor(slotEndMinute / 60);
+          const formattedEndMinute = slotEndMinute % 60;
+    
+          const isBooked = existingAppointments.some((appt) => {
+            const apptDate = moment(appt.date)
+              .tz("Asia/Karachi")
+              .format("YYYY-MM-DD");
+            return apptDate === dateInfo.fullDate && appt.time === slotStart;
           });
+    
+          if (!isBooked) {
+            slots.push({
+              time: `${slotStart}-${slotEndHour}:${formattedEndMinute.toString().padStart(2, "0")}`,
+              display: `${moment(slotStart, "HH:mm").format("h:mm A")} - ${moment(
+                `${slotEndHour}:${formattedEndMinute}`,
+                "HH:mm"
+              ).format("h:mm A")}`,
+            });
+          }
+    
+          currentMinute += 30;
+          if (currentMinute >= 60) {
+            currentHour += 1;
+            currentMinute = 0;
+          }
         }
-
-        currentMinute += 30;
-        if (currentMinute >= 60) {
-          currentHour += 1;
-          currentMinute = 0;
-        }
-      }
-
+      });
+    
       return { ...dateInfo, slots };
     });
 
