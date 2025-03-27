@@ -31,14 +31,10 @@ app.use(
     secret: "hunain",
     resave: false,
     saveUninitialized: true,
-    store: MongoStore.create({
-      mongoUrl: "mongodb://127.0.0.1:27017/TherapEase",
-    }),
     cookie: {
       secure: false,
       httpOnly: true,
       sameSite: "strict",
-      maxAge: 86400000,
     },
   })
 );

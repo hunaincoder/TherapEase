@@ -302,9 +302,7 @@
 													<td><%= therapist.specialties?.[0] || 'General' %></td>
 													<td>PKR <%= therapist.fee?.toFixed(2) || '0.00' %></td>
 													<td>
-													  <% Array(therapist.badge || 0).fill().forEach(() => { %>
 														<i class="fe fe-star text-warning"></i>
-													  <% }); %>
 													</td>
 												  </tr>
 												<% }); %>
@@ -332,7 +330,6 @@
 													<th>Patient Name</th>
 													<th>Phone</th>
 													<th>Last Visit</th>
-													<th>Paid</th>													
 												</tr>
 											</thead>
 											<tbody>
@@ -341,13 +338,12 @@
 													<td>
 													  <h2 class="table-avatar">
 														<a href="/patient-profile/<%= patient._id %>">
-														  <%= patient.firstname %> <%= patient.lastname %>
+														  <%= patient.username %> 
 														</a>
 													  </h2>
 													</td>
 													<td><%= patient.mobile %></td>
 													<td><%= moment(patient.updatedAt).format("DD MMM YYYY") %></td>
-													<td class="text-right">PK</td>
 												  </tr>
 												<% }); %>
 											  </tbody>

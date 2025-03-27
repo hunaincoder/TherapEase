@@ -65,7 +65,7 @@ router.get("/dashboard", isLoggedIn, async function (req, res) {
     const latestPatients = await PatientModel.find()
       .sort({ createdAt: -1 })
       .limit(5)
-      .select("firstname lastname phone updatedAt");
+      .select("username mobile updatedAt");
 
     const latestAppointments = await AppointmentModel.find()
       .populate("patientId", "firstname lastname")
