@@ -24,7 +24,10 @@
 		<!-- Main CSS -->
         <link rel="stylesheet" href="/css/style.css">
 		
-
+		<script>
+			const chartRevenueData = <%- JSON.stringify(revenueData) %>;
+			const chartAppointmentData = <%- JSON.stringify(appointmentData) %>;
+		</script>
     </head>
     <body>
 	
@@ -96,12 +99,12 @@
 					<!-- User Menu -->
 					<li class="nav-item dropdown has-arrow">
 						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
-							<span class="user-img"><img class="rounded-circle" src="/img/logo-small.png" width="31" alt=""></span>
+							<span class="user-img"><img class="rounded-circle" src="<%= therapist.profilePicture || 'default-doctor.jpg' %>" width="31" alt=""></span>
 						</a>
 						<div class="dropdown-menu">
 							<div class="user-header">
 								<div class="user-text">
-									<h6>Therapist Name</h6>
+									<h6><%= therapist.username %></h6>
 									<p class="text-muted mb-0">Logged in</p>
 								</div>
 							</div>
@@ -128,9 +131,7 @@
 							<li >
 								<a href="/therapist/appointment-confirmation"><i class="fe fe-layout"></i> <span> Appointments</span></a>
 							</li>
-							<li> 
-								<a href="/therapist/availability"><i class="fe fe-layout"></i> <span>Availability</span></a>
-							</li>
+							
 							<li> 
 								<a href="/therapist/invoices"><i class="fe fe-document"></i> <span>Invoice</span></a>
 							</li>
@@ -164,7 +165,7 @@
 					<div class="page-header">
 						<div class="row">
 							<div class="col-sm-12">
-								<h3 class="page-title">Welcome Mr.Therapist!</h3>
+								<h3 class="page-title">Welcome Mr.<%= therapist.username %></h3>
 								<ul class="breadcrumb">
 									<li class="breadcrumb-item active">Dashboard</li>
 								</ul>
@@ -182,7 +183,7 @@
 											<i class="fe fe-users"></i>
 										</span>
 										<div class="dash-count">
-											<h3>5</h3>
+											<h3><%= Appointments %></h3>
 										</div>
 									</div>
 									<div class="dash-widget-info">
@@ -202,7 +203,7 @@
 											<i class="fe fe-credit-card"></i>
 										</span>
 										<div class="dash-count">
-											<h3>487</h3>
+											<h3><%=  totalPatients %></h3>
 										</div>
 									</div>
 									<div class="dash-widget-info">
@@ -223,11 +224,10 @@
 											<i class="fe fe-money"></i>
 										</span>
 										<div class="dash-count">
-											<h3>485</h3>
+											<h3><%= totalAppointments %></h3>
 										</div>
 									</div>
 									<div class="dash-widget-info">
-										
 										<h6 class="text-muted">Appointment</h6>
 										<div class="progress progress-sm">
 											<div class="progress-bar bg-danger w-50"></div>
@@ -244,7 +244,7 @@
 											<i class="fe fe-folder"></i>
 										</span>
 										<div class="dash-count">
-											<h3>$62523</h3>
+											<h3>PKR <%=totalRevenue %></h3>
 										</div>
 									</div>
 									<div class="dash-widget-info">
@@ -293,8 +293,10 @@
 						
 							<!-- Recent Orders -->
 							<div class="card card-table flex-fill">
-								<div class="card-header">
+								<div class="card-header d-flex justify-content-between align-items-center">
 									<h4 class="card-title">Appointment Confirmation</h4>
+									<a href="/therapist/appointment-confirmation">Show all</a>
+
 								</div>
 								<div class="card-body">
 									<div class="table-responsive">
@@ -305,107 +307,28 @@
 													<th>Appointment Date</th>
 													
 													<th class="text-center">Type of Appoinment</th>
-													<th></th>
 												</tr>
 											</thead>
 											<tbody>
-												<tr>
+												<% recentAppointments.forEach(appointment => { %>
+												  <tr>
 													<td>
-														<h2 class="table-avatar">
-															<a href="/therpist/patient-profile">Umar <span>#PT0003</span></a>
-														</h2>
+													  <h2 class="table-avatar">
+														<a href="#">
+														  <%= appointment.patientId.firstname %> <%= appointment.patientId.lastname %>
+														  <span>#PT<%= appointment.patientId._id.toString().slice(-4) %></span>
+														</a>
+													  </h2>
 													</td>
-													<td>30 Dec 2024 <span class="d-block text-info">9.00 AM</span></td>
-													
-													<td class="text-center">Video Call</td>
-													<td class="text-right">
-														<div class="table-action">
-															<a href="javascript:void(0);" class="btn btn-sm bg-info-light">
-																<i class="far fa-eye"></i> View
-															</a>
-															
-															
-														</div>
-													</td>
-												</tr>
-												<tr>
-													
-														<td>
-															<h2 class="table-avatar">
-																<a href="/therpist/patient-profile">Umar <span>#PT0003</span></a>
-															</h2>
-														</td>
-														<td>30 Dec 2024 <span class="d-block text-info">9.00 AM</span></td>
-														
-														<td class="text-center">Video Call</td>
-														<td class="text-right">
-															<div class="table-action">
-																<a href="javascript:void(0);" class="btn btn-sm bg-info-light">
-																	<i class="far fa-eye"></i> View
-																</a>
-																
-																
-															</div>
-														</td>
-												</tr>
-												<tr>
 													<td>
-														<h2 class="table-avatar">
-															<a href="/therpist/patient-profile">Umar <span>#PT0003</span></a>
-														</h2>
+													  <%= appointment.date.toLocaleDateString() %>
+													  <span class="d-block text-info"><%= appointment.time %></span>
 													</td>
-													<td>30 Dec 2024 <span class="d-block text-info">9.00 AM</span></td>
+													<td class="text-center"><%= appointment.sessionType %></td>
 													
-													<td class="text-center">Video Call</td>
-													<td class="text-right">
-														<div class="table-action">
-															<a href="javascript:void(0);" class="btn btn-sm bg-info-light">
-																<i class="far fa-eye"></i> View
-															</a>
-															
-															
-														</div>
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/therpist/patient-profile">Umar <span>#PT0003</span></a>
-														</h2>
-													</td>
-													<td>30 Dec 2024 <span class="d-block text-info">9.00 AM</span></td>
-													
-													<td class="text-center">Video Call</td>
-													<td class="text-right">
-														<div class="table-action">
-															<a href="javascript:void(0);" class="btn btn-sm bg-info-light">
-																<i class="far fa-eye"></i> View
-															</a>
-															
-															
-														</div>
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/therpist/patient-profile">Umar <span>#PT0003</span></a>
-														</h2>
-													</td>
-													<td>30 Dec 2024 <span class="d-block text-info">9.00 AM</span></td>
-													
-													<td class="text-center">Video Call</td>
-													<td class="text-right">
-														<div class="table-action">
-															<a href="javascript:void(0);" class="btn btn-sm bg-info-light">
-																<i class="far fa-eye"></i> View
-															</a>
-															
-															
-														</div>
-													</td>
-												</tr>
-											</tbody>
+												  </tr>
+												<% }); %>
+											  </tbody>
 										</table>
 									</div>
 								</div>
@@ -414,12 +337,13 @@
 							
 						</div>
 						<div class="col-md-6 d-flex">
-						
+							
 							<!-- Feed Activity -->
 							<div class="card  card-table flex-fill">
-								<div class="card-header">
+								<div class="card-header d-flex justify-content-between align-items-center">
 									<h4 class="card-title">Recent Invoices</h4>
-									
+									<a href="/therapist/invoices">Show all</a>
+
 								</div>
 								<div class="card-body">
 									<div class="table-responsive">
@@ -433,103 +357,25 @@
 												</tr>
 											</thead>
 											<tbody>
-												<tr>
+												<% recentTransactions.forEach(transaction => { %>
+												  <tr>
 													<td>
-														<h2 class="table-avatar">
-															<a href="/therpist/patient-profile">Ahmed</a>
-														</h2>
+													  <h2 class="table-avatar">
+														<a href="#"><%= transaction.patient.firstname %></a>
+													  </h2>
 													</td>
-													<td>$100.00</td>
-													<td>1 jan 2025</td>
-													
+													<td>PKR <%= transaction.totalAmount.toFixed(2) %></td>
+													<td><%= transaction.date.toLocaleDateString() %></td>
 													<td class="text-right">
-														<div class="actions">
-															
-															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
-																 View
-															</a>
-															
-														</div>
+													  <div class="actions">
+														<a href="/therapist/invoices/<%= transaction._id %>" class="btn btn-sm bg-success-light mr-2">
+														  View
+														</a>
+													  </div>
 													</td>
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/therpist/patient-profile">Ahmed1</a>
-														</h2>
-													</td>
-													<td>$200.00</td>
-													<td>31 Dec 2024</td>
-													
-													<td class="text-right">
-														<div class="actions">
-															
-															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
-																 View
-															</a>
-															
-														</div>
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/therpist/patient-profile">Ahmed3</a>
-														</h2>
-													</td>
-													<td>$250.00</td>
-													<td>30 Dec 2024</td>
-													
-													<td class="text-right">
-														<div class="actions">
-															
-															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
-																View
-															</a>
-															
-														</div>
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-														<a href="/therpist/patient-profile">Ahmed4</a>
-														</h2>
-													</td>
-													<td>$150.00</td>
-													<td>29 Dec 2024</td>
-													
-													<td class="text-right">
-														<div class="actions">
-															
-															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
-																 View
-															</a>
-															
-														</div>
-													</td>
-												</tr>
-												<tr>
-													<td>
-														<h2 class="table-avatar">
-															<a href="/therpist/patient-profile">Ahmed5</a>
-														</h2>
-													</td>
-													<td>$350.00</td>
-													<td>28 Dec 2024</td>
-													
-													<td class="text-right">
-														<div class="actions">
-															
-															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
-																 View
-															</a>
-															
-														</div>
-													</td>
-												</tr>
-												
-											</tbody>
+												  </tr>
+												<% }); %>
+											  </tbody>
 											
 										</table>
 									</div>
@@ -539,10 +385,9 @@
 							
 						</div>
 					</div>
-					<div class="row">
+					<!-- <div class="row">
 						<div class="col-md-12">
 						
-							<!-- Recent Orders -->
 							<div class="card card-table">
 								<div class="card-header">
 									<h4 class="card-title">Appointment List</h4>
@@ -649,10 +494,9 @@
 									</div>
 								</div>
 							</div>
-							<!-- /Recent Orders -->
 							
 						</div>
-					</div>
+					</div> -->
 					
 				</div>			
 			</div>

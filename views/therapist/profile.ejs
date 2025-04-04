@@ -141,9 +141,7 @@
 						<li >
 							<a href="/therapist/appointment-confirmation"><i class="fe fe-layout"></i> <span> Appointments</span></a>
 						</li>
-						<li> 
-							<a href="/therapist/availability"><i class="fe fe-layout"></i> <span>Availability</span></a>
-						</li>
+						
 						<li> 
 							<a href="/therapist/invoices"><i class="fe fe-document"></i> <span>Invoice</span></a>
 						</li>
@@ -472,7 +470,7 @@
 									<div class="col-12 col-md-4">
 									  <div class="form-group">
 										<label>Day</label>
-										<select class="form-control select day-select" name="availableDays	[]" data-index="<%= index %>">
+										<select class="form-control select day-select" name="availableDays[]" data-index="<%= index %>">
 										  <option value="">Select Day</option>
 										  <% weekdays.forEach(day => { %>
 											<option value="<%= day %>" <%= slot.day === day ? 'selected' : '' %>><%= day %></option>

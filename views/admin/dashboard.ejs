@@ -27,6 +27,11 @@
 			<script src="assets/js/html5shiv.min.js"></script>
 			<script src="assets/js/respond.min.js"></script>
 		<![endif]-->
+
+		<script>
+			const chartRevenueData = <%- JSON.stringify(revenueData) %>;
+			const chartAppointmentData = <%- JSON.stringify(appointmentData) %>;
+		</script>
     </head>
     <body>
 	
@@ -254,7 +259,7 @@
 							<!-- Invoice Chart -->
 							<div class="card card-chart">
 								<div class="card-header">
-									<h4 class="card-title">Status</h4>
+									<h4 class="card-title">Apointments</h4>
 								</div>
 								<div class="card-body">
 									<div id="morrisLine"></div>

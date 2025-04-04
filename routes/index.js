@@ -42,18 +42,17 @@ router.get("/", function (req, res) {
   res.render("index");
 });
 
-
 router.get("/dashboard", isLoggedIn, async function (req, res) {
   try {
     const admin = await AdminModel.findOne({ email: req.user.email });
-    
+
     const therapistCount = await TherapistModel.countDocuments();
     const patientCount = await PatientModel.countDocuments();
     const appointmentCount = await AppointmentModel.countDocuments();
-    
+
     const revenueResult = await TransactionModel.aggregate([
       { $match: { status: "completed" } },
-      { $group: { _id: null, total: { $sum: "$totalAmount" } } }
+      { $group: { _id: null, total: { $sum: "$totalAmount" } } },
     ]);
     const totalRevenue = revenueResult[0]?.total || 0;
 
@@ -72,26 +71,69 @@ router.get("/dashboard", isLoggedIn, async function (req, res) {
       .populate("therapistId", "username specialties profilePicture")
       .sort({ date: -1 })
       .limit(5);
+        
+    const revenueData = await TransactionModel.aggregate([
+      {
+        $match: {
+          date: {
+            $gte: new Date(new Date().setMonth(new Date().getMonth() - 6)),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$date" } },
+          total: { $sum: "$totalAmount" },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const appointmentData = await AppointmentModel.aggregate([
+      {
+        $match: {
+          date: {
+            $gte: new Date(new Date().setMonth(new Date().getMonth() - 6)),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            month: { $dateToString: { format: "%Y-%m", date: "$date" } },
+            status: "$status",
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.month": 1 } },
+    ]);
+
 
     res.render("admin/dashboard", {
       admin,
+      appointmentData,
+      revenueData,
       counts: {
         therapists: therapistCount,
         patients: patientCount,
         appointments: appointmentCount,
-        revenue: totalRevenue
+        revenue: totalRevenue,
       },
       latest: {
         therapists: latestTherapists,
         patients: latestPatients,
-        appointments: latestAppointments.map(a => ({
+        appointments: latestAppointments.map((a) => ({
           ...a._doc,
           formattedDate: moment(a.date).format("DD MMM YYYY"),
-          time: `${moment(a.time, "HH:mm").format("h:mm A")} - ${moment(a.time, "HH:mm")
+          time: `${moment(a.time, "HH:mm").format("h:mm A")} - ${moment(
+            a.time,
+            "HH:mm"
+          )
             .add(30, "minutes")
-            .format("h:mm A")}`
-        }))
-      }
+            .format("h:mm A")}`,
+        })),
+      },
     });
   } catch (error) {
     console.error(error);

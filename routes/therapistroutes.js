@@ -6,6 +6,8 @@ const LocalStrategy = require("passport-local").Strategy;
 const TherapistModel = require("../models/therapist");
 const multer = require("multer");
 const path = require("path");
+const AppointmentModel = require("../models/appointments");
+const TransactionModel = require("../models/transaction");
 
 router.use(authRoutes);
 
@@ -86,16 +88,146 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/dashboard", isLoggedIn, (req, res) => {
-  res.render("therapist/dashboard", { therapist: req.user });
+router.get("/dashboard", isLoggedIn, async (req, res) => {
+  try {
+    const therapistId = req.user._id;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const Appointments = await AppointmentModel.countDocuments({
+      therapistId,
+      date: { $gte: today },
+      status: "Scheduled",
+    });
+
+    const PatientIds = await AppointmentModel.distinct("patientId", {
+      therapistId,
+    });
+    const totalPatients = PatientIds.length;
+
+    const totalAppointments = await AppointmentModel.countDocuments({
+      therapistId,
+    });
+
+    const transactions = await TransactionModel.find({
+      therapist: therapistId,
+    });
+    const totalRevenue = transactions.reduce(
+      (acc, txn) => acc + txn.totalAmount,
+      0
+    );
+
+    const recentAppointments = await AppointmentModel.find({ therapistId })
+      .sort({ date: -1 })
+      .limit(5)
+      .populate("patientId");
+
+    const recentTransactions = await TransactionModel.find({
+      therapist: therapistId,
+    })
+      .sort({ date: -1 })
+      .limit(5)
+      .populate("patient");
+
+    const revenueData = await TransactionModel.aggregate([
+      {
+        $match: {
+          therapist: therapistId,
+          date: {
+            $gte: new Date(new Date().setMonth(new Date().getMonth() - 6)),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$date" } },
+          total: { $sum: "$totalAmount" },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const appointmentData = await AppointmentModel.aggregate([
+      {
+        $match: {
+          therapistId,
+          date: {
+            $gte: new Date(new Date().setMonth(new Date().getMonth() - 6)),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            month: { $dateToString: { format: "%Y-%m", date: "$date" } },
+            status: "$status",
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.month": 1 } },
+    ]);
+
+    res.render("therapist/dashboard", {
+      therapist: req.user,
+      Appointments,
+      totalPatients,
+      totalAppointments,
+      totalRevenue,
+      recentAppointments,
+      recentTransactions,
+      appointmentData,
+      revenueData,
+    });
+  } catch (error) {
+    console.error("Dashboard error:", error);
+    res.status(500).send("Server error");
+  }
 });
 
-router.get("/appointment-confirmation", isLoggedIn, (req, res) => {
-  res.render("therapist/appointment-confirmation", { therapist: req.user });
+router.get("/appointment-confirmation", isLoggedIn, async (req, res) => {
+  try {
+    const appointments = await AppointmentModel.find({
+      therapistId: req.user._id,
+      status: "Scheduled",
+    }).populate("patientId");
+
+    res.render("therapist/appointment-confirmation", {
+      therapist: req.user,
+      appointments,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error fetching appointments");
+  }
 });
 
-router.get("/availability", isLoggedIn, (req, res) => {
-  res.render("therapist/availability", { therapist: req.user });
+router.post("/cancel-appointment/:id", isLoggedIn, async (req, res) => {
+  try {
+    const appointment = await AppointmentModel.findById(req.params.id)
+      .populate("patientId")
+      .populate("therapistId");
+
+    if (!appointment) {
+      return res.status(404).send("appointment not found");
+    }
+
+    appointment.status = "Cancelled";
+    await appointment.save();
+
+    const transaction = await TransactionModel.findOne({
+      appointment: appointment._id,
+    });
+
+    if (transaction) {
+      transaction.status = "refunded";
+      await transaction.save();
+    }
+
+    res.redirect("/therapist/appointment-confirmation");
+  } catch (error) {
+    console.error("Cancellation error:", error);
+    res.status(500).send("Error processing cancellation");
+  }
 });
 
 router.get("/change-pass", isLoggedIn, (req, res) => {
@@ -125,10 +257,8 @@ router.get("/profile", isLoggedIn, async (req, res) => {
     "Sunday",
   ];
 
-  // Create time slots with 30-minute increments
   const timeSlots = [];
   for (let hour = 8; hour <= 20; hour++) {
-    // Add the hour (e.g., 8:00 AM)
     const hourValue = hour < 10 ? `0${hour}:00` : `${hour}:00`;
     const hourDisplay =
       hour < 12
@@ -139,7 +269,6 @@ router.get("/profile", isLoggedIn, async (req, res) => {
 
     timeSlots.push({ value: hourValue, display: hourDisplay });
 
-    // Add the half hour (e.g., 8:30 AM)
     const halfHourValue = hour < 10 ? `0${hour}:30` : `${hour}:30`;
     const halfHourDisplay =
       hour < 12
@@ -151,10 +280,8 @@ router.get("/profile", isLoggedIn, async (req, res) => {
     timeSlots.push({ value: halfHourValue, display: halfHourDisplay });
   }
 
-  // Get the therapist with their availability
   const therapist = await TherapistModel.findById(req.user._id).lean();
 
-  // Create a map of already booked slots
   const bookedSlots = {};
   if (therapist.availability && therapist.availability.length > 0) {
     therapist.availability.forEach((slot) => {
@@ -163,12 +290,10 @@ router.get("/profile", isLoggedIn, async (req, res) => {
           bookedSlots[slot.day] = [];
         }
 
-        // Add all time slots between start and end to the booked slots
         let currentSlot = slot.startTime;
         while (currentSlot !== slot.endTime) {
           bookedSlots[slot.day].push(currentSlot);
 
-          // Move to the next 30-minute slot
           const [hours, minutes] = currentSlot.split(":").map(Number);
           let newHours = hours;
           let newMinutes = minutes + 30;

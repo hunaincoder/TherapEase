@@ -22,7 +22,7 @@ const transactionSchema = new mongoose.Schema({
   paymentMethod: String,
   status: {
     type: String,
-    enum: ["pending", "completed", "failed"],
+    enum: ["pending", "completed", "failed" , "refunded"],
     default: "pending",
   },
   invoiceNumber: String,
