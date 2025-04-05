@@ -177,7 +177,9 @@
                 <ul class="list-unstyled mb-0">
                   <li>
                     <h5 class="mb-0">
-                      <strong><%= patient.firstname %><%= patient.lastname %></strong>
+                      <strong
+                        ><%= patient.firstname %><%= patient.lastname %></strong
+                      >
                     </h5>
                   </li>
                   <li><%= patient.city %></li>
@@ -196,7 +198,7 @@
                       >
                     </h5>
                   </li>
-                  <li>City: <span>Karachi</span></li>
+                  <li>status: <span><%= transaction.status %></span></li>
                 </ul>
               </div>
             </div>
@@ -206,7 +208,7 @@
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th>Therapist Name</th>
+                    <th>Therapist Name </th>
                     <th class="d-none d-sm-table-cell">Appointment Type</th>
                     <th>TOTAL</th>
                   </tr>

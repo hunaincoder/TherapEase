@@ -8,8 +8,15 @@ const multer = require("multer");
 const path = require("path");
 const AppointmentModel = require("../models/appointments");
 const TransactionModel = require("../models/transaction");
+const moment = require("moment");
 
 router.use(authRoutes);
+
+function getOrdinal(n) {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
 
 passport.use(
   "therapist-local",
@@ -234,16 +241,192 @@ router.get("/change-pass", isLoggedIn, (req, res) => {
   res.render("therapist/change-pass", { therapist: req.user });
 });
 
-router.get("/invoices", isLoggedIn, (req, res) => {
-  res.render("therapist/invoices", { therapist: req.user });
+router.get("/invoices", isLoggedIn, async (req, res) => {
+  try {
+    const therapisId = req.user._id;
+    const transactions = await TransactionModel.find({ therapist: therapisId })
+      .populate({
+        path: "appointment",
+        populate: [
+          { path: "therapistId", model: "Therapist" },
+          { path: "patientId", model: "Patient" },
+        ],
+      })
+      .sort({ date: -1 });
+
+    res.render("therapist/invoices", {
+      transactions: transactions.map((t) => ({
+        ...t._doc,
+        formattedDate: moment(t.date).format("MMM D, YYYY"),
+        appointmentDate: moment(t.appointment.date).format("MMM D, YYYY"),
+      })),
+      therapist: req.user,
+    });
+  } catch (error) {
+    console.error("Error fetching invoices:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
-router.get("/invoice", isLoggedIn, (req, res) => {
-  res.render("therapist/invoice", { therapist: req.user });
+router.get("/invoice/:id", isLoggedIn, async (req, res) => {
+  try {
+    const appointmentId = req.params.id;
+
+    const appointment = await AppointmentModel.findById(appointmentId)
+      .populate("therapistId")
+      .populate("patientId");
+    if (!appointment) {
+      return res.status(400).send("appointment not found");
+    }
+
+    if (!appointment.patientId) {
+      return res.status(400).send("Patient details not found");
+    }
+
+    console.log("Appointment:", appointment);
+
+    const transaction = await TransactionModel.findOne({
+      appointment: appointmentId,
+    });
+
+    if (!transaction) {
+      return res.status(400).send("appointment not found");
+    }
+
+    res.render("therapist/invoice", {
+      appointment: {
+        ...appointment._doc,
+        formattedDate: `${getOrdinal(moment(appointment.date).date())} ${moment(
+          appointment.date
+        ).format("dddd")}`,
+        time: `${moment(appointment.time, "HH:mm").format(
+          "h:mm A"
+        )} to ${moment(appointment.time, "HH:mm")
+          .add(30, "minutes")
+          .format("h:mm A")}`,
+      },
+      transaction: {
+        ...transaction._doc,
+        totalAmount: transaction.amount + transaction.tax,
+        status: transaction.status,
+      },
+      patient: appointment.patientId,
+      therapist: appointment.therapistId,
+    });
+  } catch (error) {
+    console.error("Error fetching invoice details:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
-router.get("/payout", isLoggedIn, (req, res) => {
-  res.render("therapist/payout", { therapist: req.user });
+router.get("/payout", isLoggedIn, async (req, res) => {
+  try {
+    const therapistId = req.user._id;
+    const therapist = await TherapistModel.findById(therapistId);
+
+    const completedTransactions = await TransactionModel.find({
+      therapist: therapistId,
+      status: "completed",
+    });
+
+    const totalEarned = completedTransactions.reduce(
+      (acc, txn) => acc + txn.amount,
+      0
+    );
+
+    const balanceTransactions = await TransactionModel.find({
+      therapist: therapistId,
+      status: "completed",
+      therapistPayout: "not paid",
+    });
+    const totalBalance = balanceTransactions.reduce(
+      (acc, txn) => acc + txn.amount,
+      0
+    );
+
+    const requestedTransactions = await TransactionModel.find({
+      therapist: therapistId,
+      therapistPayout: "requested",
+    });
+    const totalRequested = requestedTransactions.reduce(
+      (acc, txn) => acc + txn.amount,
+      0
+    );
+
+    const payoutHistory = await TransactionModel.find({
+      therapist: therapistId,
+      therapistPayout: { $in: ["requested", "paid"] },
+    }).sort({ date: -1 });
+
+    res.render("therapist/payout", {
+      therapist,
+      totalBalance,
+      totalEarned,
+      totalRequested,
+      payoutHistory,
+    });
+  } catch (error) {
+    console.error("Error fetching payout page:", error);
+    res.status(500).send("Server error");
+  }
+});
+
+router.post("/payout", isLoggedIn, async (req, res) => {
+  try {
+    const therapistId = req.user._id;
+
+    const unpaidTransactions = await TransactionModel.find({
+      therapist: therapistId,
+      status: "completed",
+      therapistPayout: "not paid",
+    });
+
+    if (unpaidTransactions.length === 0) {
+      return res
+        .status(400)
+        .send("No unpaid transactions available for payout");
+    }
+
+    await TransactionModel.updateMany(
+      {
+        therapist: therapistId,
+        therapistPayout: "not paid",
+        status: "completed",
+      },
+      { therapistPayout: "requested" }
+    );
+    res.redirect("/therapist/payout");
+  } catch (error) {
+    console.error("Error requesting payout:", error);
+    res.status(500).send("Error processing payout request");
+  }
+});
+
+router.post("/update-bank-details", isLoggedIn, async (req, res) => {
+  try {
+    const therapistId = req.user._id;
+
+    const { bankName, branchName, accountNumber, accountName } = req.body;
+
+    const therapist = await TherapistModel.findById(therapistId);
+
+    if (!therapist) {
+      return res.status(404).send("Therapist not found");
+    }
+
+    therapist.bankDetails = {
+      bankName,
+      branchName,
+      accountNumber,
+      accountName,
+    };
+
+    await therapist.save();
+    res.redirect("/therapist/payout");
+  } catch (error) {
+    console.error("Error saving bank details:", error);
+    res.status(500).send("Error saving bank details");
+  }
 });
 
 router.get("/profile", isLoggedIn, async (req, res) => {

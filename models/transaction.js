@@ -22,9 +22,15 @@ const transactionSchema = new mongoose.Schema({
   paymentMethod: String,
   status: {
     type: String,
-    enum: ["pending", "completed", "failed" , "refunded"],
+    enum: ["pending", "completed", "failed", "refunded"],
     default: "pending",
   },
+  therapistPayout: {
+    type: String,
+    enum: ["paid", "not paid", "requested", "rejected"],
+    default: "not paid",
+  },
+  datePaid: { type: Date },
   invoiceNumber: String,
   date: { type: Date, default: Date.now },
 });

@@ -16,7 +16,7 @@ const TherapistSchema = new mongoose.Schema({
   bio: { type: String },
   clinicName: { type: String },
   clinicAddress: { type: String },
-  specialties: [String], 
+  specialties: [String],
   services: [String],
   fee: { type: Number },
   education: [
@@ -53,6 +53,12 @@ const TherapistSchema = new mongoose.Schema({
     type: String,
     enum: ["Pending", "Approved", "Rejected"],
     default: "Pending",
+  },
+  bankDetails: {
+    bankName: { type: String },
+    branchName: { type: String },
+    accountNumber: { type: String },
+    accountName: { type: String },
   },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

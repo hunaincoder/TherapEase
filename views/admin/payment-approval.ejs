@@ -9,19 +9,20 @@
     <title>TherapEase - Payment Approval</title>
 
     <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png" />
+
+    <!-- Bootstrap CSS -->
     <link
-      rel="shortcut icon"
-      type="image/x-icon"
-      href="/img/logo.png"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+      rel="stylesheet"
     />
 
-	<!-- Bootstrap CSS -->
-	 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-
-
-	 <!-- Bootstrap JS Bundle (includes Popper) -->
-	  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css" />
@@ -33,10 +34,7 @@
     <link rel="stylesheet" href="/css/feathericon.min.css" />
 
     <!-- Datatables CSS -->
-    <link
-      rel="stylesheet"
-      href="/plugins/datatables/datatables.min.css"
-    />
+    <link rel="stylesheet" href="/plugins/datatables/datatables.min.css" />
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="/css/style.css" />
@@ -51,16 +49,16 @@
     <div class="main-wrapper">
       <!-- Header -->
       <div class="header">
-       <!-- Logo -->
-       <div class="header-left">
-        <a href="/dashboard" class="logo">
-<img src="/img/logo.png" alt="Logo" width="140" height="50">
-</a>
-<a href="/dashboard" class="logo logo-small">
-<img src="/img/logo-small.png" alt="Logo" width="100" height="70">
-</a>
-    </div>
-<!-- /Logo -->
+        <!-- Logo -->
+        <div class="header-left">
+          <a href="/dashboard" class="logo">
+            <img src="/img/logo.png" alt="Logo" width="140" height="50" />
+          </a>
+          <a href="/dashboard" class="logo logo-small">
+            <img src="/img/logo-small.png" alt="Logo" width="100" height="70" />
+          </a>
+        </div>
+        <!-- /Logo -->
 
         <a href="javascript:void(0);" id="toggle_btn">
           <i class="fe fe-text-align-left"></i>
@@ -83,7 +81,6 @@
 
         <!-- Header Right Menu -->
         <ul class="nav user-menu">
-       
           <!-- User Menu -->
           <li class="nav-item dropdown has-arrow">
             <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
@@ -120,54 +117,57 @@
       <!-- /Header -->
 
       <!-- Sidebar -->
-			<div class="sidebar" id="sidebar">
-				<div class="sidebar-inner slimscroll">
-				  <div id="sidebar-menu" class="sidebar-menu">
-					<ul>
-					  <li >
-						<a href="/dashboard"
-						  ><i class="fe fe-home"></i> <span>Dashboard</span></a
-						>
-					  </li>
-					  <li>
-						<a href="/profile"
-						  ><i class="fe fe-user"></i> <span>Profile</span></a
-						>
-					  </li>
-		
-					  <li>
-						<a href="/appointment-list"
-						  ><i class="fe fe-layout"></i> <span>Appointments</span></a
-						>
-					  </li>
-					  <li >
-						<a href="/therapist-list"
-						  ><i class="fe fe-user"></i> <span>Therapists</span></a
-						>
-					  </li>
-					  <li>
-						<a href="/patient-list"
-						  ><i class="fe fe-user"></i> <span>Patients</span></a
-						>
-					  </li>
-					  <li>
-						<a href="/transactions-list"
-						  ><i class="fe fe-activity"></i> <span>Transactions</span></a
-						>
-					  </li>
-					  <li>
-						<a href="/Therapist-approval"><i class="fe fe-user-plus"></i> <span>Therapist Approval</span></a>
-		
-					  </li>
-					  <li class="active">
-						<a href="/payment-approval"><i class="fe fe-file"></i> <span>Payment Approval</span></a>
-		
-					  </li>
-					</ul>
-				  </div>
-				</div>
-			  </div>
-			  <!-- /Sidebar -->
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-inner slimscroll">
+          <div id="sidebar-menu" class="sidebar-menu">
+            <ul>
+              <li>
+                <a href="/dashboard"
+                  ><i class="fe fe-home"></i> <span>Dashboard</span></a
+                >
+              </li>
+              <li>
+                <a href="/profile"
+                  ><i class="fe fe-user"></i> <span>Profile</span></a
+                >
+              </li>
+
+              <li>
+                <a href="/appointment-list"
+                  ><i class="fe fe-layout"></i> <span>Appointments</span></a
+                >
+              </li>
+              <li>
+                <a href="/therapist-list"
+                  ><i class="fe fe-user"></i> <span>Therapists</span></a
+                >
+              </li>
+              <li>
+                <a href="/patient-list"
+                  ><i class="fe fe-user"></i> <span>Patients</span></a
+                >
+              </li>
+              <li>
+                <a href="/transactions-list"
+                  ><i class="fe fe-activity"></i> <span>Transactions</span></a
+                >
+              </li>
+              <li>
+                <a href="/Therapist-approval"
+                  ><i class="fe fe-user-plus"></i>
+                  <span>Therapist Approval</span></a
+                >
+              </li>
+              <li class="active">
+                <a href="/payment-approval"
+                  ><i class="fe fe-file"></i> <span>Payment Approval</span></a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- /Sidebar -->
 
       <!-- Page Wrapper -->
       <div class="page-wrapper">
@@ -181,7 +181,7 @@
                   <li class="breadcrumb-item">
                     <a href="/dashboard">Dashboard</a>
                   </li>
-                  
+
                   <li class="breadcrumb-item active">Therapists Requests</li>
                 </ul>
               </div>
@@ -200,201 +200,224 @@
                       <thead>
                         <tr>
                           <th>Therapist Name</th>
-                          <th></th>
-                          <th></th>
-                          <th></th>
-						  <th></th>
+                          <th>Amount</th>
+                          <th>Requested Date</th>
+                          <th>Patient Payment Details</th>
+                          <th>Bank Details</th>
+                          <th>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
+                        <% if (transactions && transactions.length > 0) { %> <%
+                        transactions.forEach(txn => { %>
                         <tr>
                           <td>
                             <h2 class="table-avatar">
                               <a
-                                href="/profile"
+                                href="/therapist-profile/<%= txn.therapist._id %>"
                                 class="avatar avatar-sm mr-2"
-                                ><img
+                              >
+                                <img
                                   class="avatar-img rounded-circle"
-                                  src="/img/doctors/doctor-thumb-01.jpg"
-                                  alt="User Image"
-                              /></a>
-                              <a href="/profile">Name</a>
-                            </h2>
-                          </td>
-                          <td></td>
-
-
-                          <td><a data-bs-toggle="modal" data-bs-target="#view_details" href="#">Veiw Details</a></td>
-						  <td>
-							
-                            <a data-bs-toggle="modal" data-bs-target="#accept_modal" href="#" class="text-success me-4">
-                                <i class="bi bi-check-circle"></i> Accept
+                                  src="<%= txn.therapist.profilePicture || '/img/doctors/doctor-thumb-01.jpg' %>"
+                                  alt="Therapist Image"
+                                />
                               </a>
-                              
-							
-						</td>
-                          <td>
-                            <a data-bs-toggle="modal" data-bs-target="#reject_modal" href="#" class="text-danger" data-bs-dismiss="modal">
-                                <i class="bi bi-x-circle"></i> Reject
-                              </a>
-                          </td>
-                        </tr> <tr>
-                          <td>
-                            <h2 class="table-avatar">
                               <a
-                                href="/profile"
-                                class="avatar avatar-sm mr-2"
-                                ><img
-                                  class="avatar-img rounded-circle"
-                                  src="/img/doctors/doctor-thumb-01.jpg"
-                                  alt="User Image"
-                              /></a>
-                              <a href="/profile">Name</a>
+                                href="/therapist-profile/<%= txn.therapist._id %>"
+                                ><%= txn.therapist.username %></a
+                              >
                             </h2>
                           </td>
-                          <td></td>
-
-
-                          <td><a data-bs-toggle="modal" data-bs-target="#view_details" href="#">Veiw Details</a></td>
-						  <td>
-							
-                            <a data-bs-toggle="modal" data-bs-target="#accept_modal" href="#" class="text-success me-4">
+                          <td>PKR <%= txn.amount || 0 %></td>
+                          <td>
+                            <%= txn.date ? txn.date.toLocaleDateString() : '-'
+                            %>
+                          </td>
+                          <td>
+                            <a
+                              href="#"
+                              data-bs-toggle="modal"
+                              data-bs-target="#patient_details_<%= txn._id %>"
+                              >View Patient Payment</a
+                            >
+                          </td>
+                          <td>
+                            <a
+                              href="#"
+                              data-bs-toggle="modal"
+                              data-bs-target="#bank_details_<%= txn._id %>"
+                              >View Details</a
+                            >
+                          </td>
+                          <td>
+                            <form
+                              action="/approve-payment/<%= txn._id %>"
+                              method="POST"
+                              style="display: inline"
+                            >
+                              <button
+                                type="submit"
+                                class="btn btn-sm btn-success me-2"
+                              >
                                 <i class="bi bi-check-circle"></i> Accept
-                              </a>
-                              
-							
-						</td>
-                          <td>
-                            <a data-bs-toggle="modal" data-bs-target="#reject_modal" href="#" class="text-danger" data-bs-dismiss="modal">
+                              </button>
+                            </form>
+                            <form
+                              action="/reject-payment/<%= txn._id %>"
+                              method="POST"
+                              style="display: inline"
+                            >
+                              <button
+                                type="submit"
+                                class="btn btn-sm btn-danger"
+                              >
                                 <i class="bi bi-x-circle"></i> Reject
-                              </a>
-                          </td>
-                        </tr> <tr>
-                          <td>
-                            <h2 class="table-avatar">
-                              <a
-                                href="/profile"
-                                class="avatar avatar-sm mr-2"
-                                ><img
-                                  class="avatar-img rounded-circle"
-                                  src="/img/doctors/doctor-thumb-01.jpg"
-                                  alt="User Image"
-                              /></a>
-                              <a href="/profile">Name</a>
-                            </h2>
-                          </td>
-                          <td></td>
-
-
-                          <td><a data-bs-toggle="modal" data-bs-target="#view_details" href="#">Veiw Details</a></td>
-						  <td>
-							
-                            <a data-bs-toggle="modal" data-bs-target="#accept_modal" href="#" class="text-success me-4">
-                                <i class="bi bi-check-circle"></i> Accept
-                              </a>
-                              
-							
-						</td>
-                          <td>
-                            <a data-bs-toggle="modal" data-bs-target="#reject_modal" href="#" class="text-danger" data-bs-dismiss="modal">
-                                <i class="bi bi-x-circle"></i> Reject
-                              </a>
-                          </td>
-                        </tr> <tr>
-                          <td>
-                            <h2 class="table-avatar">
-                              <a
-                                href="/profile"
-                                class="avatar avatar-sm mr-2"
-                                ><img
-                                  class="avatar-img rounded-circle"
-                                  src="/img/doctors/doctor-thumb-01.jpg"
-                                  alt="User Image"
-                              /></a>
-                              <a href="/profile">Name</a>
-                            </h2>
-                          </td>
-                          <td></td>
-
-
-                          <td><a data-bs-toggle="modal" data-bs-target="#view_details" href="#">Veiw Details</a></td>
-						  <td>
-							
-                            <a data-bs-toggle="modal" data-bs-target="#accept_modal" href="#" class="text-success me-4">
-                                <i class="bi bi-check-circle"></i> Accept
-                              </a>
-                              
-							
-						</td>
-                          <td>
-                            <a data-bs-toggle="modal" data-bs-target="#reject_modal" href="#" class="text-danger" data-bs-dismiss="modal">
-                                <i class="bi bi-x-circle"></i> Reject
-                              </a>
-                          </td>
-                        </tr> <tr>
-                          <td>
-                            <h2 class="table-avatar">
-                              <a
-                                href="/profile"
-                                class="avatar avatar-sm mr-2"
-                                ><img
-                                  class="avatar-img rounded-circle"
-                                  src="/img/doctors/doctor-thumb-01.jpg"
-                                  alt="User Image"
-                              /></a>
-                              <a href="/profile">Name</a>
-                            </h2>
-                          </td>
-                          <td></td>
-
-
-                          <td><a data-bs-toggle="modal" data-bs-target="#view_details" href="#">Veiw Details</a></td>
-						  <td>
-							
-                            <a data-bs-toggle="modal" data-bs-target="#accept_modal" href="#" class="text-success me-4">
-                                <i class="bi bi-check-circle"></i> Accept
-                              </a>
-                              
-							
-						</td>
-                          <td>
-                            <a data-bs-toggle="modal" data-bs-target="#reject_modal" href="#" class="text-danger" data-bs-dismiss="modal">
-                                <i class="bi bi-x-circle"></i> Reject
-                              </a>
-                          </td>
-                        </tr> <tr>
-                          <td>
-                            <h2 class="table-avatar">
-                              <a
-                                href="/profile"
-                                class="avatar avatar-sm mr-2"
-                                ><img
-                                  class="avatar-img rounded-circle"
-                                  src="/img/doctors/doctor-thumb-01.jpg"
-                                  alt="User Image"
-                              /></a>
-                              <a href="/profile">Name</a>
-                            </h2>
-                          </td>
-                          <td></td>
-
-
-                          <td><a data-bs-toggle="modal" data-bs-target="#view_details" href="#">Veiw Details</a></td>
-						  <td>
-							
-                            <a data-bs-toggle="modal" data-bs-target="#accept_modal" href="#" class="text-success me-4">
-                                <i class="bi bi-check-circle"></i> Accept
-                              </a>
-                              
-							
-						</td>
-                          <td>
-                            <a data-bs-toggle="modal" data-bs-target="#reject_modal" href="#" class="text-danger" data-bs-dismiss="modal">
-                                <i class="bi bi-x-circle"></i> Reject
-                              </a>
+                              </button>
+                            </form>
                           </td>
                         </tr>
-                        
+
+                        <!-- Bank Details Modal -->
+                        <div
+                          class="modal fade"
+                          id="bank_details_<%= txn._id %>"
+                          aria-hidden="true"
+                          role="dialog"
+                        >
+                          <div
+                            class="modal-dialog modal-dialog-centered"
+                            role="document"
+                          >
+                            <div class="modal-content">
+                              <div class="modal-header border-0">
+                                <h5 class="modal-title fw-bold">
+                                  Bank Details
+                                </h5>
+                                <button
+                                  type="button"
+                                  class="btn-close"
+                                  data-bs-dismiss="modal"
+                                  aria-label="Close"
+                                ></button>
+                              </div>
+                              <div class="modal-body">
+                                <div class="mb-3">
+                                  <strong>Bank Name</strong>
+                                  <p class="text-muted">
+                                    <%= txn.therapist.bankDetails?.bankName ||
+                                    'Not Set' %>
+                                  </p>
+                                </div>
+                                <div class="mb-3">
+                                  <strong>Branch Name</strong>
+                                  <p class="text-muted">
+                                    <%= txn.therapist.bankDetails?.branchName ||
+                                    'Not Set' %>
+                                  </p>
+                                </div>
+                                <div class="mb-3">
+                                  <strong>Account Number</strong>
+                                  <p class="text-muted">
+                                    <%= txn.therapist.bankDetails?.accountNumber
+                                    || 'Not Set' %>
+                                  </p>
+                                </div>
+                                <div class="mb-3">
+                                  <strong>Account Name</strong>
+                                  <p class="text-muted">
+                                    <%= txn.therapist.bankDetails?.accountName
+                                    || 'Not Set' %>
+                                  </p>
+                                </div>
+                              </div>
+                              <div
+                                class="modal-footer border-0 justify-content-center"
+                              >
+                                <button
+                                  type="button"
+                                  class="btn btn-danger"
+                                  data-bs-dismiss="modal"
+                                >
+                                  Close
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Patient Payment Details Modal -->
+                        <div
+                          class="modal fade"
+                          id="patient_details_<%= txn._id %>"
+                          aria-hidden="true"
+                          role="dialog"
+                        >
+                          <div
+                            class="modal-dialog modal-dialog-centered"
+                            role="document"
+                          >
+                            <div class="modal-content">
+                              <div class="modal-header border-0">
+                                <h5 class="modal-title fw-bold">
+                                  Patient Payment Details
+                                </h5>
+                                <button
+                                  type="button"
+                                  class="btn-close"
+                                  data-bs-dismiss="modal"
+                                  aria-label="Close"
+                                ></button>
+                              </div>
+                              <div class="modal-body">
+                                <div class="mb-3">
+                                  <strong>Patient Name</strong>
+                                  <p class="text-muted">
+                                    <%= txn.patient ? `${txn.patient.firstname}
+                                    ${txn.patient.lastname}` : 'Not Set' %>
+                                  </p>
+                                </div>
+                                <div class="mb-3">
+                                  <strong>Amount Paid</strong>
+                                  <p class="text-muted">
+                                    PKR <%= txn.totalAmount || 0 %>
+                                  </p>
+                                </div>
+                                <div class="mb-3">
+                                  <strong>Tax</strong>
+                                  <p class="text-muted">
+                                    PKR <%= txn.tax || 0 %>
+                                  </p>
+                                </div>
+                                <div class="mb-3">
+                                  <strong>Payment Date</strong>
+                                  <p class="text-muted">
+                                    <%= txn.date ? txn.date.toLocaleDateString()
+                                    : 'Not Set' %>
+                                  </p>
+                                </div>
+                              </div>
+                              <div
+                                class="modal-footer border-0 justify-content-center"
+                              >
+                                <button
+                                  type="button"
+                                  class="btn btn-danger"
+                                  data-bs-dismiss="modal"
+                                >
+                                  Close
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <% }) %> <% } else { %>
+                        <tr>
+                          <td colspan="6" class="text-center">
+                            No payment requests available
+                          </td>
+                        </tr>
+                        <% } %>
                       </tbody>
                     </table>
                   </div>
@@ -402,86 +425,127 @@
               </div>
             </div>
           </div>
-          			<!-- accept Confirmation Modal -->
-		<div class="modal fade" id="accept_modal" aria-hidden="true" role="dialog">
-			<div class="modal-dialog modal-dialog-centered" role="document" >
-				<div class="modal-content">
-				<!--	<div class="modal-header">
+          <!-- accept Confirmation Modal -->
+          <div
+            class="modal fade"
+            id="accept_modal"
+            aria-hidden="true"
+            role="dialog"
+          >
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content">
+                <!--	<div class="modal-header">
 						<h5 class="modal-title">Delete</h5>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
 					</div>-->
-					<div class="modal-body">
-						<div class="form-content p-2 text-center">
-							<h4 class="modal-title">Accept</h4>
-							<p class="mb-4">Are you sure want to Accept?</p>
-							<button type="button" class="btn btn-primary">Accept </button>
-							<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+                <div class="modal-body">
+                  <div class="form-content p-2 text-center">
+                    <h4 class="modal-title">Accept</h4>
+                    <p class="mb-4">Are you sure want to Accept?</p>
+                    <button type="button" class="btn btn-primary">
+                      Accept
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      data-bs-dismiss="modal"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-		  <!-- Modal -->
-		  <div class="modal fade" id="view_details" aria-hidden="true" role="dialog">
-			<div class="modal-dialog modal-dialog-centered" role="document" >
-				<div class="modal-content">
-			  <div class="modal-header border-0">
-				<h5 class="modal-title fw-bold">Bank Details</h5>
-			  </div>
-			  <div class="modal-body">
-				<div class="mb-3">
-				  <strong>Bank Name</strong>
-				  <p class="text-muted">Bank Name Will Be Shown Over Here</p>
-				</div>
-				<div class="mb-3">
-				  <strong>Branch Name</strong>
-				  <p class="text-muted">Branch Name Will Be Shown Over Here</p>
-				</div>
-				<div class="mb-3">
-				  <strong>Account Number</strong>
-				  <p class="text-muted">Account Number Will Be Shown Over Here</p>
-				</div>
-				<div class="mb-3">
-				  <strong>Account Name</strong>
-				  <p class="text-muted">Account Name Will Be Shown Over Here</p>
-				</div>
-			  </div>
-			  <div class="modal-footer border-0 justify-content-center">
-				<button type="button" class="btn btn-danger" data-bs-dismiss="modal">close</button>
-			  </div>
-			</div>
-		  </div>
-		</div>
-		
+          <!-- Modal -->
+          <div
+            class="modal fade"
+            id="view_details"
+            aria-hidden="true"
+            role="dialog"
+          >
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content">
+                <div class="modal-header border-0">
+                  <h5 class="modal-title fw-bold">Bank Details</h5>
+                </div>
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <strong>Bank Name</strong>
+                    <p class="text-muted">Bank Name Will Be Shown Over Here</p>
+                  </div>
+                  <div class="mb-3">
+                    <strong>Branch Name</strong>
+                    <p class="text-muted">
+                      Branch Name Will Be Shown Over Here
+                    </p>
+                  </div>
+                  <div class="mb-3">
+                    <strong>Account Number</strong>
+                    <p class="text-muted">
+                      Account Number Will Be Shown Over Here
+                    </p>
+                  </div>
+                  <div class="mb-3">
+                    <strong>Account Name</strong>
+                    <p class="text-muted">
+                      Account Name Will Be Shown Over Here
+                    </p>
+                  </div>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                  <button
+                    type="button"
+                    class="btn btn-danger"
+                    data-bs-dismiss="modal"
+                  >
+                    close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
 
-		<!-- /accept Modal -->
+          <!-- /accept Modal -->
 
-              			<!-- reject Confirmation Modal -->
-		<div class="modal fade" id="reject_modal" aria-hidden="true" role="dialog">
-			<div class="modal-dialog modal-dialog-centered" role="document" >
-				<div class="modal-content">
-				<!--	<div class="modal-header">
+          <!-- reject Confirmation Modal -->
+          <div
+            class="modal fade"
+            id="reject_modal"
+            aria-hidden="true"
+            role="dialog"
+          >
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content">
+                <!--	<div class="modal-header">
 						<h5 class="modal-title">Delete</h5>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
 					</div>-->
-					<div class="modal-body">
-						<div class="form-content p-2 text-center">
-							<h4 class="modal-title">Reject</h4>
-							<p class="mb-4">Are you sure want to Reject?</p>
-							<button type="button" class="btn btn-primary">Reject </button>
-							<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<!-- /reject Modal -->
-          
+                <div class="modal-body">
+                  <div class="form-content p-2 text-center">
+                    <h4 class="modal-title">Reject</h4>
+                    <p class="mb-4">Are you sure want to Reject?</p>
+                    <button type="button" class="btn btn-primary">
+                      Reject
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      data-bs-dismiss="modal"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /reject Modal -->
         </div>
       </div>
       <!-- /Page Wrapper -->
@@ -505,5 +569,4 @@
     <!-- Custom JS -->
     <script src="/js/script.js"></script>
   </body>
-
 </html>

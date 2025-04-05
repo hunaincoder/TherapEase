@@ -181,61 +181,41 @@
 											<thead>
 												<tr>
 													<th>Invoice Number</th>
-													<th>Patient Name</th>
 													<th>Total Amount</th>
 													<th>Created Date</th>
 													<th class="text-right">Actions</th>
 												</tr>
 											</thead>
 											<tbody>
-												<tr>
-													<td><a href="/therapist/invoice">#IN0001</td>
-													
-													<td>
-														<h2 class="table-avatar">
-															<a href="/therapist/patient-profile">Ahmed </a>
-														</h2>
-													</td>
-													<td>PKR 4000</td>
-													<td>1 jan 2025</td>
-													
-													<td class="text-right">
+												<% if (transactions.length > 0) { %>
+												  <% transactions.forEach(transaction => { %>
+													<tr>
+													  <td>
+														<a href="/therapist/invoice/<%= transaction.appointment._id %>">
+														  <%= transaction.invoiceNumber %>
+														</a>
+													  </td>
+													  <td>PKR <%= transaction.totalAmount.toFixed(2) %></td>
+													  <td><%= transaction.formattedDate %></td>
+													  <td class="text-right">
 														<div class="actions">
-															
-															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
-																<i class="fe fe-pencil"></i> View
-															</a>
-															<a class="btn btn-sm bg-danger-light" data-toggle="modal" href="#delete_modal">
-																<i class="fe fe-trash"></i>Print
-															</a>
+														  <a href="/therapist/invoice/<%= transaction.appointment._id %>" 
+															 class="btn btn-sm bg-success-light mr-2">
+															<i class="fe fe-eye"></i> View
+														  </a>
+														  <button class="btn btn-sm bg-danger-light" onclick="window.print()">
+															<i class="fe fe-printer"></i> Print
+														  </button>
 														</div>
-													</td>
-												</tr>
-												<tr>
-													<td><a href="/therapist/invoice">#IN0002</td>
-													
-													<td>
-														<h2 class="table-avatar">
-															<a href="/therapist/patient-profile">Ahmed1</a>
-														</h2>
-													</td>
-													<td>PKR 4000</td>
-													<td>31 Dec 2024</td>
-													
-													<td class="text-right">
-														<div class="actions">
-															
-															<a data-toggle="modal" href="#edit_invoice_report" class="btn btn-sm bg-success-light mr-2">
-																<i class="fe fe-pencil"></i> View
-															</a>
-															<a class="btn btn-sm bg-danger-light" data-toggle="modal" href="#delete_modal">
-																<i class="fe fe-trash"></i> Print
-															</a>
-														</div>
-													</td>
-												</tr>
-
-											</tbody>
+													  </td>
+													</tr>
+												  <% }); %>
+												<% } else { %>
+												  <tr>
+													<td colspan="4" class="text-center">No invoices found</td>
+												  </tr>
+												<% } %>
+											  </tbody>
 										</table>
 									</div>
 								</div>

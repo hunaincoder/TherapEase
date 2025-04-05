@@ -71,7 +71,7 @@ router.get("/dashboard", isLoggedIn, async function (req, res) {
       .populate("therapistId", "username specialties profilePicture")
       .sort({ date: -1 })
       .limit(5);
-        
+
     const revenueData = await TransactionModel.aggregate([
       {
         $match: {
@@ -108,7 +108,6 @@ router.get("/dashboard", isLoggedIn, async function (req, res) {
       },
       { $sort: { "_id.month": 1 } },
     ]);
-
 
     res.render("admin/dashboard", {
       admin,
@@ -397,8 +396,57 @@ router.post("/reject-therapist/:id", async (req, res) => {
 });
 
 router.get("/payment-approval", isLoggedIn, async function (req, res) {
-  const admin = await AdminModel.findOne({ email: req.user.email });
-  res.render("admin/payment-approval", { admin });
+  try {
+    const admin = await AdminModel.findOne({ email: req.user.email });
+
+    const transactions = await TransactionModel.find({
+      therapistPayout: "requested",
+    })
+      .populate("therapist", "username profilePicture bankDetails")
+      .populate("patient", "username firstname lastname");
+
+    res.render("admin/payment-approval", { admin, transactions });
+  } catch (error) {}
+});
+
+router.post("/approve-payment/:id", isLoggedIn, async (req, res) => {
+  try {
+    const transactionId = req.params.id;
+    const transaction = await TransactionModel.findById(transactionId);
+
+    if (!transaction) {
+      res.status(404).send("Transaction not found");
+    }
+
+    transaction.therapistPayout = "paid";
+    transaction.datePaid = new Date();
+    await transaction.save();
+
+    res.redirect("/payment-approval");
+  } catch (error) {
+    console.error("Error approving payment:", error);
+    res.status(500).send("Error approving payment");
+  }
+});
+
+router.post("/reject-payment/:id", isLoggedIn, async (req, res) => {
+  try {
+    const transactionId = req.params.id;
+    const transaction = await TransactionModel.findById(transactionId);
+
+    if (!transaction) {
+      res.status(404).send("Transaction not found");
+    }
+
+    transaction.therapistPayout = "rejected";
+    transaction.datePaid = new Date();
+    await transaction.save();
+
+    res.redirect("/payment-approval");
+  } catch (error) {
+    console.error("Error rejecting payment:", error);
+    res.status(500).send("Error approving payment");
+  }
 });
 
 router.post("/change-password", isLoggedIn, async function (req, res) {
