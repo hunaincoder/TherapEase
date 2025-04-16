@@ -406,7 +406,10 @@ router.get("/payment-approval", isLoggedIn, async function (req, res) {
       .populate("patient", "username firstname lastname");
 
     res.render("admin/payment-approval", { admin, transactions });
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error fetching payment approval list");
+  }
 });
 
 router.post("/approve-payment/:id", isLoggedIn, async (req, res) => {
@@ -446,6 +449,63 @@ router.post("/reject-payment/:id", isLoggedIn, async (req, res) => {
   } catch (error) {
     console.error("Error rejecting payment:", error);
     res.status(500).send("Error approving payment");
+  }
+});
+
+router.get("/refunds-approval", isLoggedIn, async function (req, res) {
+  try {
+    const admin = await AdminModel.findOne({ email: req.user.email });
+
+    const transactions = await TransactionModel.find({
+      patientPayout: "requested",
+    })
+      .populate("therapist", "username profilePicture bankDetails")
+      .populate("patient", "username firstname lastname bankDetails");
+
+    res.render("admin/refunds-approval", { admin, transactions });
+  } catch (error) {
+    console.error("Error fetching refunds approval list:", error);
+    res.status(500).send("Error fetching refunds approval list");
+  }
+});
+
+router.post("/approve-refund/:id", isLoggedIn, async (req, res) => {
+  try {
+    const transactionId = req.params.id;
+    const transaction = await TransactionModel.findById(transactionId);
+
+    if (!transaction) {
+      res.status(404).send("Transaction not found");
+    }
+
+    transaction.patientPayout = "refunded";
+    transaction.datePaid = new Date();
+    await transaction.save();
+
+    res.redirect("/refunds-approval");
+  } catch (error) {
+    console.error("Error approving refund:", error);
+    res.status(500).send("Error approving refund");
+  }
+});
+
+router.post("/reject-refund/:id", isLoggedIn, async (req, res) => {
+  try {
+    const transactionId = req.params.id;
+    const transaction = await TransactionModel.findById(transactionId);
+
+    if (!transaction) {
+      res.status(404).send("Transaction not found");
+    }
+
+    transaction.patientPayout = "rejected";
+    transaction.datePaid = new Date();
+    await transaction.save();
+
+    res.redirect("/refunds-approval");
+  } catch (error) {
+    console.error("Error rejecting refund:", error);
+    res.status(500).send("Error rejecting refund");
   }
 });
 

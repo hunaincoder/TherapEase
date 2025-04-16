@@ -24,6 +24,7 @@ const AppointmentSchema = new mongoose.Schema({
     default: "Scheduled",
   },
   notes: { type: String },
+  videoCallUrl: { type: String },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

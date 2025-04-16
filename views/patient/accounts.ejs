@@ -164,9 +164,25 @@
 			<!-- Page Wrapper -->
             <div class="page-wrapper">
                 <div class="content container-fluid">
-					
+					<% if (success && success.length > 0) { %>
+						<div class="alert alert-success alert-dismissible fade show" role="alert">
+							<%= success %>
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<% } %>
+						<% if (error && error.length > 0) { %>
+						<div class="alert alert-danger alert-dismissible fade show" role="alert">
+							<%= error %>
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<% } %>
 					<!-- Page Header -->
 					<div class="page-header">
+						
 						<div class="row">
 							<div class="col">
 								<h3 class="page-title">Accounts</h3>
@@ -190,33 +206,32 @@
 											<div class="payment-amount" style="margin-top: 15px; display:flex; justify-content: space-evenly;">
 												
 												<div><h4 class="user-name mb-0">Total Balance</h4>
-												<span style="font-size: 30px;">PKR 10000</span>
+												<span style="font-size: 30px;">PKR <%= totalBalance %></span>
 											</div>
 											
 
 											<div class="payment-amount">
 												<h4 class="user-name mb-0">Requested</h4>
-												<span style="font-size: 30px;">PKR 9000</span>
+												<span style="font-size: 30px;">PKR <%= totalRequested %></span>
 											</div>
 									</div>
 										
 										
 									</div>
 									<div class="col-auto profile-btn">
-										
-										<a href="#" class="btn btn-primary">
-											Request
-										</a>
+										<button class="btn btn-primary" data-toggle="modal" data-target="#request_refund_modal">
+											Request Refund
+										</button>
 									</div>
 								</div>
 							</div>
 							<div class="profile-menu">
 								<ul class="nav nav-tabs nav-tabs-solid">
 									<li class="nav-item">
-										<a class="nav-link active" data-toggle="tab" href="#per_details_tab">Details</a>
+										<a class="nav-link active" data-toggle="tab" href="#per_details_tab">Bank Details</a>
 									</li>
 									<li class="nav-item">
-										<a class="nav-link" data-toggle="tab" href="#password_tab">Accounts</a>
+										<a class="nav-link" data-toggle="tab" href="#password_tab">Cancelled Appointments</a>
 									</li>
 								</ul>
 							</div>	
@@ -236,19 +251,19 @@
 													</h5>
 													<div class="row">
 														<p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Bank Name</p>
-														<p class="col-sm-10">Meezan</p>
+														<p class="col-sm-10"><%= patient.bankDetails?.bankName || 'Not Set' %></p>
 													</div>
 													<div class="row">
 														<p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Branch Name</p>
-														<p class="col-sm-10">Meezan XXX</p>
+														<p class="col-sm-10"><%= patient.bankDetails?.branchName || 'Not Set' %></p>
 													</div>
 													<div class="row">
 														<p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Account Number</p>
-														<p class="col-sm-10">01234567890</p>
+														<p class="col-sm-10"><%= patient.bankDetails?.accountNumber || 'Not Set' %></p>
 													</div>
 													<div class="row">
 														<p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Account Name</p>
-														<p class="col-sm-10">Ahmed Usmani</p>
+														<p class="col-sm-10"><%= patient.bankDetails?.accountName || 'Not Set' %></p>
 													</div>
 													
 												</div>
@@ -256,44 +271,41 @@
 											
 											<!-- Edit Details Modal -->
 											<div class="modal fade" id="edit_personal_details" aria-hidden="true" role="dialog">
-												<div class="modal-dialog modal-dialog-centered" role="document" >
+												<div class="modal-dialog modal-dialog-centered" role="document">
 													<div class="modal-content">
 														<div class="modal-header">
-															<h5 class="modal-title">Account Details</h5>
+															<h5 class="modal-title">Bank Details</h5>
 															<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 																<span aria-hidden="true">&times;</span>
 															</button>
 														</div>
 														<div class="modal-body">
-															<form>
+															<form action="/client/update-bank-details" method="POST">
 																<div class="row form-row">
 																	<div class="col-12 col-sm-6">
 																		<div class="form-group">
 																			<label>Bank Name</label>
-																			<input type="text" class="form-control" value="Meezan">
+																			<input type="text" name="bankName" class="form-control" value="<%= patient.bankDetails?.bankName || '' %>">
 																		</div>
 																	</div>
 																	<div class="col-12 col-sm-6">
 																		<div class="form-group">
 																			<label>Branch Name</label>
-																			<input type="text"  class="form-control" value="Meezan XXX">
+																			<input type="text" name="branchName" class="form-control" value="<%= patient.bankDetails?.branchName || '' %>">
 																		</div>
 																	</div>
-																	
 																	<div class="col-12 col-sm-6">
 																		<div class="form-group">
 																			<label>Account Number</label>
-																			<input type="number" class="form-control" value="01234567890">
+																			<input type="text" name="accountNumber" class="form-control" value="<%= patient.bankDetails?.accountNumber || '' %>">
 																		</div>
 																	</div>
 																	<div class="col-12 col-sm-6">
 																		<div class="form-group">
 																			<label>Account Name</label>
-																			<input type="text" value="Ahmed Usmani" class="form-control">
+																			<input type="text" name="accountName" class="form-control" value="<%= patient.bankDetails?.accountName || '' %>">
 																		</div>
 																	</div>
-																	
-																	
 																</div>
 																<button type="submit" class="btn btn-primary btn-block">Save Changes</button>
 															</form>
@@ -301,6 +313,7 @@
 													</div>
 												</div>
 											</div>
+											
 											<!-- /Edit Details Modal -->
 											
 										</div>
@@ -314,74 +327,81 @@
 								
 								<!-- Change Password Tab -->
 								<div id="password_tab" class="tab-pane fade">
-								
 									<div class="row">
-						<div class="col-sm-12">
-							<div class="card">
-								<div class="card-body">
-									<div class="table-responsive">
-										<table class="datatable table table-hover table-center mb-0">
-											<thead>
-												<tr>
-													<th>ID</th>
-													<th>Requested Date</th>
-													<th>Account No</th>
-													<th>Credited On</th>
-													<th>Amount</th>
-													<th class="text-center">Status</th>
-													
-												</tr>
-											</thead>
-											<tbody>
-												<tr>
-													<td><a href="">#AC-1234</td>
-													<td>24 Dec 2024</td>
-													<td>1234567890</td>
-													<td>26 Mar 2024</td>
-													<td>PKR 3000</td>
-													<td class="text-center">
-														<span class="badge badge-pill bg-success-light inv-badge">Pending</span>
-													</td>
-													
-												</tr>
-												<tr>
-													<tr>
-														<td><a href="">#AC-1234</td>
-														<td>24 Dec 2024</td>
-														<td>1234567890</td>
-														<td>26 Mar 2024</td>
-														<td>PKR 3000</td>
-														<td class="text-center">
-															<span class="badge badge-pill bg-danger-light inv-badge">Rejected</span>
-														</td>
-														
-													</tr>
-													
-													<tr>
-														<td><a href="">#AC-1234</td>
-														<td>24 Dec 2024</td>
-														<td>1234567890</td>
-														<td>26 Mar 2024</td>
-														<td>PKR 3000x	</td>
-														<td class="text-center">
-															<span class="badge badge-pill bg-success inv-badge">Completed</span>
-														</td>
-														
-													</tr>
-											</tbody>
-										</table>
+										<div class="col-sm-12">
+											<div class="card">
+												<div class="card-body">
+													<div class="table-responsive">
+														<table class="datatable table table-hover table-center mb-0">
+															<thead>
+																<tr>
+																	<th>Transaction ID</th>
+																	<th>Appointment Date</th>
+																	<th>Therapist</th>
+																	<th>Amount</th>
+																	<th>Refund Status</th>
+																	<th>Action</th>
+																</tr>
+															</thead>
+															<tbody>
+																<% if (transactions && transactions.length > 0) { %>
+																	<% transactions.forEach(txn => { %>
+																		<tr>
+																			<td><%= txn.invoiceNumber || txn._id %></td>
+																			<td><%= txn.appointment ? new Date(txn.appointment.date).toLocaleDateString() : '-' %></td>
+																			<td><%= txn.therapist ? txn.therapist.username : '-' %></td>
+																			<td>PKR <%= txn.totalAmount || 0 %></td>
+																			<td>
+																				<span class="badge badge-pill <%= txn.patientPayout === 'refunded' ? 'bg-success' : txn.patientPayout === 'rejected' ? 'bg-danger' : 'bg-warning' %> inv-badge">
+																					<%= txn.patientPayout.charAt(0).toUpperCase() + txn.patientPayout.slice(1) %>
+																				</span>
+																			</td>
+																			<td>
+																				<% if (txn.patientPayout === 'not paid') { %>
+																					<form action="/client/request-refund/<%= txn._id %>" method="POST" style="display: inline;">
+																						<button type="submit" class="btn btn-sm btn-primary">Request Refund</button>
+																					</form>
+																				<% } %>
+																			</td>
+																		</tr>
+																	<% }) %>
+																<% } else { %>
+																	<tr>
+																		<td colspan="6" class="text-center">No cancelled appointments found</td>
+																	</tr>
+																<% } %>
+															</tbody>
+														</table>
+													</div>
+												</div>
+											</div>
+										</div>
 									</div>
 								</div>
-							</div>
-						</div>			
-					</div>
-								</div>
+								
 								<!-- /Change Password Tab -->
 								
 							</div>
 						</div>
 					</div>
-				
+				<!-- Request Refund Confirmation Modal -->
+                <div class="modal fade" id="request_refund_modal" aria-hidden="true" role="dialog">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <div class="form-content p-2 text-center">
+                                    <h4 class="modal-title">Request Refund</h4>
+                                    <p class="mb-4">Are you sure you want to request a refund for all eligible cancelled appointments?</p>
+                                    <form action="/client/request-refund" method="POST">
+                                        <button type="submit" class="btn btn-primary">Confirm</button>
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Request Refund Confirmation Modal -->
 				</div>			
 			</div>
 			<!-- /Page Wrapper -->

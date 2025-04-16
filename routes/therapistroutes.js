@@ -208,7 +208,7 @@ router.get("/appointment-confirmation", isLoggedIn, async (req, res) => {
   }
 });
 
-router.post("/cancel-appointment/:id", isLoggedIn, async (req, res) => {
+router.post("/cancel-appointment/:id", isLoggedIn, async (req, res) => {  
   try {
     const appointment = await AppointmentModel.findById(req.params.id)
       .populate("patientId")
@@ -226,7 +226,7 @@ router.post("/cancel-appointment/:id", isLoggedIn, async (req, res) => {
     });
 
     if (transaction) {
-      transaction.status = "refunded";
+      transaction.status = "cancelled";
       await transaction.save();
     }
 

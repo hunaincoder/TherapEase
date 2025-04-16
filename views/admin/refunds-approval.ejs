@@ -6,10 +6,23 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=0"
     />
-    <title>TherapEase - Appointment List Page</title>
+    <title>TherapEase - Refunds Approval</title>
 
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png" />
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css" />
@@ -41,7 +54,7 @@
           <a href="/dashboard" class="logo">
             <img src="/img/logo.png" alt="Logo" width="140" height="50" />
           </a>
-          <a href="/dashbord" class="logo logo-small">
+          <a href="/dashboard" class="logo logo-small">
             <img src="/img/logo-small.png" alt="Logo" width="100" height="70" />
           </a>
         </div>
@@ -50,6 +63,15 @@
         <a href="javascript:void(0);" id="toggle_btn">
           <i class="fe fe-text-align-left"></i>
         </a>
+
+        <div class="top-nav-search">
+          <form>
+            <input type="text" class="form-control" placeholder="Search here" />
+            <button class="btn" type="submit">
+              <i class="fa fa-search"></i>
+            </button>
+          </form>
+        </div>
 
         <!-- Mobile Menu Toggle -->
         <a class="mobile_btn" id="mobile_btn">
@@ -110,8 +132,8 @@
                 >
               </li>
 
-              <li class="active">
-                <a href="/appointments-list"
+              <li>
+                <a href="/appointment-list"
                   ><i class="fe fe-layout"></i> <span>Appointments</span></a
                 >
               </li>
@@ -136,15 +158,9 @@
                   <span>Therapist Approval</span></a
                 >
               </li>
-
-              <li>
+              <li class="active">
                 <a href="/payment-approval"
                   ><i class="fe fe-file"></i> <span>Payment Approval</span></a
-                >
-              </li>
-              <li>
-                <a href="/refunds-approval"
-                  ><i class="fe fe-file"></i> <span>Refunds Approval</span></a
                 >
               </li>
             </ul>
@@ -160,20 +176,20 @@
           <div class="page-header">
             <div class="row">
               <div class="col-sm-12">
-                <h3 class="page-title">Appointments</h3>
+                <h3 class="page-title">Refund Requests</h3>
                 <ul class="breadcrumb">
                   <li class="breadcrumb-item">
                     <a href="/dashboard">Dashboard</a>
                   </li>
-                  <li class="breadcrumb-item active">Appointments</li>
+                  <li class="breadcrumb-item active">Refund Requests</li>
                 </ul>
               </div>
             </div>
           </div>
           <!-- /Page Header -->
+
           <div class="row">
-            <div class="col-md-12">
-              <!-- Recent Orders -->
+            <div class="col-sm-12">
               <div class="card">
                 <div class="card-body">
                   <div class="table-responsive">
@@ -182,69 +198,155 @@
                     >
                       <thead>
                         <tr>
-                          <th>Doctor Name</th>
-                          <th>Speciality</th>
                           <th>Patient Name</th>
-                          <th>Apointment Time</th>
-                          <th class="text-right">Amount</th>
+                          <th>Amount</th>
+                          <th>Requested Date</th>
+                          <th>Bank Details</th>
+                          <th>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <% appointments.forEach(appointment => { %>
+                        <% if (transactions && transactions.length > 0) { %> <%
+                        transactions.forEach(txn => { %>
                         <tr>
                           <td>
                             <h2 class="table-avatar">
-                              <% if (appointment.therapistId?.profilePicture) {
-                              %>
                               <a
-                                href="/therapist-profile/<%= appointment.therapistId._id %>"
+                                href="/patient-profile/<%= txn.patient._id %>"
                                 class="avatar avatar-sm mr-2"
                               >
                                 <img
                                   class="avatar-img rounded-circle"
-                                  src="<%= appointment.therapistId.profilePicture %>"
-                                  alt="User Image"
+                                  src="<%= txn.patient.profilePicture || '/img/patients/patient-thumb-01.jpg' %>"
+                                  alt="Patient Image"
                                 />
                               </a>
-                              <% } %>
-                              <a
-                                href="/therapist-profile/<%= appointment.therapistId._id %>"
+                              <a href="/patient-profile/<%= txn.patient._id %>"
+                                ><%= txn.patient.firstname %> <%=
+                                txn.patient.lastname %></a
                               >
-                                <%= appointment.therapistId?.username || 'N/A'
-                                %>
-                              </a>
                             </h2>
                           </td>
+                          <td>PKR <%= txn.totalAmount || 0 %></td>
                           <td>
-                            <%= appointment.therapistId?.specialties?.[0] ||
-                            'General' %>
+                            <%= txn.date ? txn.date.toLocaleDateString() : '-'
+                            %>
                           </td>
                           <td>
-                            <h2 class="table-avatar">
-                              <a href="/profile">
-                                <%= appointment.patientId?.firstname %> <%=
-                                appointment.patientId?.lastname %>
-                              </a>
-                            </h2>
-                          </td>
-                          <td>
-                            <%= appointment.formattedDate %>
-                            <span class="text-primary d-block"
-                              ><%= appointment.timeRange %></span
+                            <a
+                              href="#"
+                              data-bs-toggle="modal"
+                              data-bs-target="#bank_details_<%= txn._id %>"
+                              >View Details</a
                             >
                           </td>
-                          <td class="text-right">
-                            PKR <%= appointment.therapistId?.fee?.toFixed(2) ||
-                            '0.00' %>
+                          <td>
+                            <form
+                              action="/approve-refund/<%= txn._id %>"
+                              method="POST"
+                              style="display: inline"
+                            >
+                              <button
+                                type="submit"
+                                class="btn btn-sm btn-success me-2"
+                              >
+                                <i class="bi bi-check-circle"></i> Accept
+                              </button>
+                            </form>
+                            <form
+                              action="/reject-refund/<%= txn._id %>"
+                              method="POST"
+                              style="display: inline"
+                            >
+                              <button
+                                type="submit"
+                                class="btn btn-sm btn-danger"
+                              >
+                                <i class="bi bi-x-circle"></i> Reject
+                              </button>
+                            </form>
                           </td>
                         </tr>
-                        <% }); %>
+
+                        <!-- Bank Details Modal -->
+                        <div
+                          class="modal fade"
+                          id="bank_details_<%= txn._id %>"
+                          aria-hidden="true"
+                          role="dialog"
+                        >
+                          <div
+                            class="modal-dialog modal-dialog-centered"
+                            role="document"
+                          >
+                            <div class="modal-content">
+                              <div class="modal-header border-0">
+                                <h5 class="modal-title fw-bold">
+                                  Patient Bank Details
+                                </h5>
+                                <button
+                                  type="button"
+                                  class="btn-close"
+                                  data-bs-dismiss="modal"
+                                  aria-label="Close"
+                                ></button>
+                              </div>
+                              <div class="modal-body">
+                                <div class="mb-3">
+                                  <strong>Bank Name</strong>
+                                  <p class="text-muted">
+                                    <%= txn.patient.bankDetails?.bankName ||
+                                    'Not Set' %>
+                                  </p>
+                                </div>
+                                <div class="mb-3">
+                                  <strong>Branch Name</strong>
+                                  <p class="text-muted">
+                                    <%= txn.patient.bankDetails?.branchName ||
+                                    'Not Set' %>
+                                  </p>
+                                </div>
+                                <div class="mb-3">
+                                  <strong>Account Number</strong>
+                                  <p class="text-muted">
+                                    <%= txn.patient.bankDetails?.accountNumber
+                                    || 'Not Set' %>
+                                  </p>
+                                </div>
+                                <div class="mb-3">
+                                  <strong>Account Name</strong>
+                                  <p class="text-muted">
+                                    <%= txn.patient.bankDetails?.accountName ||
+                                    'Not Set' %>
+                                  </p>
+                                </div>
+                              </div>
+                              <div
+                                class="modal-footer border-0 justify-content-center"
+                              >
+                                <button
+                                  type="button"
+                                  class="btn btn-danger"
+                                  data-bs-dismiss="modal"
+                                >
+                                  Close
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <% }) %> <% } else { %>
+                        <tr>
+                          <td colspan="5" class="text-center">
+                            No refund requests available
+                          </td>
+                        </tr>
+                        <% } %>
                       </tbody>
                     </table>
                   </div>
                 </div>
               </div>
-              <!-- /Recent Orders -->
             </div>
           </div>
         </div>

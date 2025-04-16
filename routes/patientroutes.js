@@ -9,6 +9,7 @@ const moment = require("moment-timezone");
 const AppointmentModel = require("../models/appointments");
 const TransactionModel = require("../models/transaction");
 const flash = require("connect-flash");
+const mongoose = require("mongoose");
 
 router.use(authRoutes);
 
@@ -120,8 +121,86 @@ router.post("/register", async function (req, res) {
   }
 });
 
-router.get("/dashboard", isLoggedIn, function (req, res) {
-  res.render("patient/dashboard");
+router.get("/dashboard", isLoggedIn, async function (req, res) {
+  try {
+    const patient = await patientModel.findOne({ email: req.user.email });
+    const filter = req.query.filter || "Upcoming";
+    // const selectedDate = req.query.date
+    //   ? moment(req.query.date, "YYYY-MM-DD")
+    //   : null;
+
+    let query = { patientId: patient._id };
+
+    switch (filter) {
+      case "Cancelled":
+        query.status = "Cancelled";
+        break;
+      case "Completed":
+        query.status = "Completed";
+        break;
+      case "Upcoming":
+      default:
+        query.status = "Scheduled";
+        query.date = { $gte: new Date() };
+        break;
+    }
+
+    // if (selectedDate && selectedDate.isValid()) {
+    //   const startOfDay = selectedDate.startOf("day").toDate();
+    //   const endOfDay = selectedDate.endOf("day").toDate();
+    //   query.date = { $gte: startOfDay, $lte: endOfDay };
+    // }
+
+    const appointments = await AppointmentModel.find(query)
+      .populate("therapistId")
+      .sort({ date: 1 });
+
+    const appointmentIds = appointments.map((appt) => appt._id);
+    const transactions = await TransactionModel.find({
+      appointment: { $in: appointmentIds },
+    });
+
+    const formattedAppointments = appointments.map((appt) => {
+      const transaction = transactions.find(
+        (t) => t.appointment.toString() === appt._id.toString()
+      );
+      return {
+        ...appt._doc,
+        formattedDate: moment(appt.date).format("DD MMM YYYY"),
+        bookingDate: moment(appt.createdAt).format("DD MMM YYYY"),
+        therapistName: `${appt.therapistId.firstName} ${appt.therapistId.lastName}`,
+        specialty: appt.therapistId.specialties[0] || "",
+        amount: transaction ? `PKR ${transaction.totalAmount}` : "N/A",
+        time: moment(appt.time, "HH:mm").format("h:mm A"),
+      };
+    });
+
+    const counts = {
+      upcoming: await AppointmentModel.countDocuments({
+        patientId: patient._id,
+        status: "Scheduled",
+        date: { $gte: new Date() },
+      }),
+      cancelled: await AppointmentModel.countDocuments({
+        patientId: patient._id,
+        status: "Cancelled",
+      }),
+      completed: await AppointmentModel.countDocuments({
+        patientId: patient._id,
+        status: "Completed",
+      }),
+    };
+
+    res.render("patient/dashboard", {
+      appointments: formattedAppointments,
+      counts,
+      currentFilter: filter,
+      // selectedDate: selectedDate ? selectedDate.format("YYYY-MM-DD") : "",
+    });
+  } catch (error) {
+    console.error("Error fetching dashboard:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 router.get("/therapist-search", isLoggedIn, async function (req, res) {
@@ -192,10 +271,6 @@ router.get("/therapist-profile/:id", isLoggedIn, async (req, res) => {
   }
 });
 
-router.get("/therapist-profile", isLoggedIn, function (req, res) {
-  res.render("patient/therapist-profile");
-});
-
 router.get("/therapist-booking/:id", isLoggedIn, async function (req, res) {
   try {
     const patient = await patientModel.findOne({ email: req.user.email });
@@ -238,46 +313,56 @@ router.get("/therapist-booking/:id", isLoggedIn, async function (req, res) {
       const dayAvailabilities = therapist.availability.filter(
         (slot) => slot.day === dateInfo.day
       );
-    
+
       if (dayAvailabilities.length === 0) {
         return { ...dateInfo, slots: [] };
       }
-    
+
       const slots = [];
-      
+
       dayAvailabilities.forEach((dayAvailability) => {
-        const [startHour, startMinute] = dayAvailability.startTime.split(":").map(Number);
-        const [endHour, endMinute] = dayAvailability.endTime.split(":").map(Number);
-    
+        const [startHour, startMinute] = dayAvailability.startTime
+          .split(":")
+          .map(Number);
+        const [endHour, endMinute] = dayAvailability.endTime
+          .split(":")
+          .map(Number);
+
         let currentHour = startHour;
         let currentMinute = startMinute;
-    
+
         while (
           currentHour < endHour ||
           (currentHour === endHour && currentMinute < endMinute)
         ) {
-          const slotStart = `${currentHour}:${currentMinute.toString().padStart(2, "0")}`;
+          const slotStart = `${currentHour}:${currentMinute
+            .toString()
+            .padStart(2, "0")}`;
           const slotEndMinute = currentMinute + 30;
           const slotEndHour = currentHour + Math.floor(slotEndMinute / 60);
           const formattedEndMinute = slotEndMinute % 60;
-    
+
           const isBooked = existingAppointments.some((appt) => {
             const apptDate = moment(appt.date)
               .tz("Asia/Karachi")
               .format("YYYY-MM-DD");
             return apptDate === dateInfo.fullDate && appt.time === slotStart;
           });
-    
+
           if (!isBooked) {
             slots.push({
-              time: `${slotStart}-${slotEndHour}:${formattedEndMinute.toString().padStart(2, "0")}`,
-              display: `${moment(slotStart, "HH:mm").format("h:mm A")} - ${moment(
+              time: `${slotStart}-${slotEndHour}:${formattedEndMinute
+                .toString()
+                .padStart(2, "0")}`,
+              display: `${moment(slotStart, "HH:mm").format(
+                "h:mm A"
+              )} - ${moment(
                 `${slotEndHour}:${formattedEndMinute}`,
                 "HH:mm"
               ).format("h:mm A")}`,
             });
           }
-    
+
           currentMinute += 30;
           if (currentMinute >= 60) {
             currentHour += 1;
@@ -285,7 +370,7 @@ router.get("/therapist-booking/:id", isLoggedIn, async function (req, res) {
           }
         }
       });
-    
+
       return { ...dateInfo, slots };
     });
 
@@ -559,7 +644,7 @@ router.get("/invoices", isLoggedIn, async function (req, res) {
   try {
     const patient = await patientModel.findOne({ email: req.user.email });
     const patientId = patient._id;
-    
+
     const transactions = await TransactionModel.find({ patient: patientId })
       .populate({
         path: "appointment",
@@ -634,8 +719,119 @@ router.get("/invoice/:id", isLoggedIn, async function (req, res) {
   }
 });
 
-router.get("/accounts", isLoggedIn, function (req, res) {
-  res.render("patient/accounts");
+router.get("/accounts", isLoggedIn, async function (req, res) {
+  try {
+    const patient = await patientModel.findOne({ email: req.user.email });
+    const patientId = patient._id;
+
+    const transactions = await TransactionModel.find({
+      patient: patientId,
+      status: "cancelled",
+    })
+      .populate("therapist", "username")
+      .populate("appointment", "date");
+
+    const totalBalance = transactions
+      .filter((txn) => txn.patientPayout === "not paid")
+      .reduce((acc, txn) => acc + (txn.amount || 0), 0);
+
+    const totalRequested = transactions
+      .filter((txn) => txn.patientPayout === "requested")
+      .reduce((acc, txn) => acc + (txn.amount || 0), 0);
+
+    res.render("patient/accounts", {
+      patient,
+      transactions,
+      totalBalance,
+      totalRequested,
+    });
+  } catch (error) {}
+});
+
+router.post("/request-refund", isLoggedIn, async function (req, res) {
+  try {
+    const patientId = req.user._id;
+
+    const unpaidTransactions = await TransactionModel.find({
+      patient: patientId,
+      status: "cancelled",
+      patientPayout: "not paid",
+    });
+
+    if (unpaidTransactions.length === 0) {
+      req.flash("error", "No eligible transactions available for refund");
+      return res.redirect("/client/accounts");
+    }
+
+    await TransactionModel.updateMany(
+      {
+        patient: patientId,
+        patientPayout: "not paid",
+        status: "cancelled",
+      },
+      { patientPayout: "requested" }
+    );
+    req.flash("success", "Refund request submitted successfully");
+    res.redirect("/client/accounts");
+  } catch (error) {
+    console.error("Error requesting refund:", error);
+    res.status(500).send("Error processing refund request");
+  }
+});
+
+router.post("/request-refund/:id", isLoggedIn, async function (req, res) {
+  try {
+    const transactionId = req.params.id;
+    const patientId = req.user._id;
+
+    console.log("Transaction ID:", transactionId);
+    console.log("Patient ID:", patientId);
+
+    const transaction = await TransactionModel.findOne({
+      _id: new mongoose.Types.ObjectId(transactionId),
+      patient: new mongoose.Types.ObjectId(patientId),
+      status: "cancelled",
+      patientPayout: "not paid",
+    });
+
+    if (!transaction) {
+      req.flash("error", "Transaction not found or not eligible for refund");
+      console.log("Transaction not found with criteria:", {
+        transactionId,
+        patientId,
+        status: "cancelled",
+        patientPayout: "not paid",
+      });
+      return res.redirect("/client/accounts");
+    }
+
+    transaction.patientPayout = "requested";
+    await transaction.save();
+
+    req.flash("success", "Refund request submitted successfully");
+    res.redirect("/client/accounts");
+  } catch (error) {
+    console.error("Error requesting refund:", error);
+    res.status(500).send("Error processing refund request");
+  }
+});
+
+router.post("/update-bank-details", isLoggedIn, async (req, res) => {
+  try {
+    const patient = await patientModel.findById(req.user._id);
+    patient.bankDetails = {
+      accountNumber: req.body.accountNumber,
+      bankName: req.body.bankName,
+      branchName: req.body.branchName,
+      accountName: req.body.accountName,
+    };
+
+    await patient.save();
+    res.redirect("/client/accounts");
+  } catch (error) {
+    console.error("Error saving bank details:", error);
+    res.status(500).send("Error saving bank details");
+  }
 });
 
 router.get("/logout", function (req, res, next) {
@@ -655,6 +851,7 @@ router.get("/logout", function (req, res, next) {
 
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated()) {
+    console.log("Authenticated user ID:", req.user._id.toString());
     return next();
   }
   res.redirect("/client/login");
