@@ -28,7 +28,7 @@
         padding: 0.25rem 0.5rem;
         border-radius: 9999px;
         font-weight: bold;
-        color: white; 
+        color: white;
       }
       .badge-1 {
         background-color: #ffc107;
@@ -102,6 +102,8 @@
         "I feel lonely a great deal of the time ever since s/he died",
       ];
 
+      const scaleName = "<%= recommendedScale %>";
+
       function createQuestionForm() {
         const container = document.getElementById("questionsContainer");
 
@@ -149,7 +151,7 @@
         });
       }
 
-      function calculateScore() {
+      async function calculateScore() {
         let totalScore = 0;
 
         for (let i = 1; i <= questions.length; i++) {
@@ -188,7 +190,30 @@
         document.getElementById("severity").textContent = severity;
         document.getElementById("badge").textContent = badge;
         document.getElementById("badge").className = `badge ${badgeClass}`;
-        resultsDiv.classList.remove("hidden");
+
+        try {
+          const response = await fetch("/client/save-scale-results", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              scaleName: scaleName,
+              totalScore,
+              severity,
+              badge,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Failed to save scale results");
+          }
+
+          window.location.href = "/client/dashboard";
+        } catch (error) {
+          console.error("Error saving scale results:", error);
+          alert(`Error: ${error.message}`);
+        }
       }
 
       function showError(message) {

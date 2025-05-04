@@ -88,16 +88,7 @@
         </button>
       </form>
 
-      <div id="results" class="result hidden">
-        <h2 class="text-xl font-semibold">Your Social Anxiety Results</h2>
-        <p>
-          <strong>Total Score:</strong> <span id="totalScore"></span> (out of
-          144)
-        </p>
-        <p><strong>Severity:</strong> <span id="severity"></span></p>
-        <p><strong>Badge:</strong> <span id="badge"></span></p>
-      </div>
-    </div>
+      
 
     <script>
       const situations = [
@@ -126,6 +117,8 @@
         "Giving a party",
         "Resisting a high-pressure salesperson",
       ];
+
+      const scaleName = "<%= recommendedScale %>";
 
       function createQuestionForm() {
         const container = document.getElementById("questionsContainer");
@@ -187,7 +180,7 @@
         });
       }
 
-      function calculateScore() {
+      async function calculateScore() {
         let fearScore = 0;
         let avoidanceScore = 0;
 
@@ -232,9 +225,6 @@
           badgeClass = "badge-3";
         }
 
-        const resultsDiv = document.getElementById("results");
-        resultsDiv.className = `result ${severityClass}`;
-
         document.getElementById("totalScore").textContent = totalScore;
         document.getElementById("severity").textContent = severity;
 
@@ -242,7 +232,30 @@
         badgeSpan.textContent = badge;
         badgeSpan.className = `badge ${badgeClass}`;
 
-        resultsDiv.classList.remove("hidden");
+
+          try {
+            const response = await fetch("/client/save-scale-results", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                scaleName: scaleName,
+                totalScore,
+                severity,
+                badge,
+              }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(data.error || "Failed to save scale results");
+            }
+
+            window.location.href = "/client/dashboard";
+          } catch (error) {
+            console.error("Error saving scale results:", error);
+            alert(`Error: ${error.message}`);
+          }
       }
 
       createQuestionForm();

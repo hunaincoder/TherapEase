@@ -4,88 +4,104 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PCL-5 Questionnaire</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        line-height: 1.6;
-        margin: 20px;
+      .result {
+        margin-top: 2rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
       }
-      h1 {
-        color: #2c3e50;
+      .mild {
+        background-color: #e6f7ff;
+        border: 1px solid #4caf50;
+      }
+      .moderate {
+        background-color: #fff7e6;
+        border: 1px solid #ff9800;
+      }
+      .severe {
+        background-color: #ffebee;
+        border: 1px solid #f44336;
+      }
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-weight: bold;
+        color: white;
+      }
+      .badge-1 {
+        background-color: #4caf50;
+      }
+      .badge-2 {
+        background-color: #ff9800;
+      }
+      .badge-3 {
+        background-color: #f44336;
       }
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 20px;
+        margin-bottom: 1rem;
       }
       th,
       td {
         border: 1px solid #ddd;
         padding: 8px;
-        text-align: left;
+        text-align: center;
       }
       th {
         background-color: #f2f2f2;
       }
-      #results {
-        margin-top: 20px;
-        padding: 15px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-      }
-      .mild {
-        background-color: #e6f7ff;
-      }
-      .moderate {
-        background-color: #fff7e6;
-      }
-      .severe {
-        background-color: #ffebee;
-      }
-      .badge {
-        display: inline-block;
-        padding: 3px 8px;
-        border-radius: 10px;
-        font-weight: bold;
-        margin-left: 10px;
-      }
-      .badge-1 {
-        background-color: #4caf50;
-        color: white;
-      }
-      .badge-2 {
-        background-color: #ff9800;
-        color: white;
-      }
-      .badge-3 {
-        background-color: #f44336;
-        color: white;
-      }
     </style>
   </head>
-  <body>
-    <h1>Posttraumatic Stress Disorder Checklist for DSM-5 (PCL-5)</h1>
-    <p>
-      Keeping your worst event in mind, please read each problem carefully and
-      indicate how much you have been bothered by that problem in the past
-      month.
-    </p>
+  <body class="bg-gray-100 p-8">
+    <div class="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-md">
+      <h1 class="text-2xl font-bold mb-4">
+        Posttraumatic Stress Disorder Checklist for DSM-5 (PCL-5)
+      </h1>
+      <p class="mb-4">
+        Keeping your worst event in mind, please read each problem carefully and
+        indicate how much you have been bothered by that problem in the past
+        month.
+      </p>
+      <p class="mb-4 font-semibold">
+        <strong>Scale:</strong> 0 = Not at all | 1 = A little bit | 2 =
+        Moderately | 3 = Quite a bit | 4 = Extremely
+      </p>
 
-    <form id="pclForm">
-      <table id="questionsTable">
-        <tr>
-          <th>Question</th>
-          <th>Not at all (0)</th>
-          <th>A little bit (1)</th>
-          <th>Moderately (2)</th>
-          <th>Quite a bit (3)</th>
-          <th>Extremely (4)</th>
-        </tr>
-      </table>
-      <button type="submit">Submit</button>
-    </form>
+      <form id="pclForm" onsubmit="event.preventDefault(); calculateScore()">
+        <table id="questionsTable">
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th>Not at all (0)</th>
+              <th>A little bit (1)</th>
+              <th>Moderately (2)</th>
+              <th>Quite a bit (3)</th>
+              <th>Extremely (4)</th>
+            </tr>
+          </thead>
+          <tbody id="questionsContainer"></tbody>
+        </table>
+        <button
+          type="submit"
+          class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Submit
+        </button>
+      </form>
 
-    <div id="results" style="display: none"></div>
+      <div id="results" class="result hidden">
+        <h2 class="text-xl font-semibold">Your PCL-5 Results</h2>
+        <p>
+          <strong>Total Score:</strong> <span id="totalScore"></span> (out of
+          80)
+        </p>
+        <p><strong>Severity:</strong> <span id="severity"></span></p>
+        <p><strong>Badge:</strong> <span id="badge"></span></p>
+      </div>
+    </div>
 
     <script>
       const questions = [
@@ -111,66 +127,116 @@
         "Trouble falling or staying asleep?",
       ];
 
-      const table = document.getElementById("questionsTable");
+      // Get the scale name from the server-side variable
+      const scaleName = "<%= recommendedScale %>";
 
-      questions.forEach((question, index) => {
-        const row = document.createElement("tr");
-        const cell = document.createElement("td");
-        cell.textContent = `${index + 1}. ${question}`;
-        row.appendChild(cell);
+      function createQuestionForm() {
+        const container = document.getElementById("questionsContainer");
 
-        for (let i = 0; i < 5; i++) {
-          const radioCell = document.createElement("td");
-          const radio = document.createElement("input");
-          radio.type = "radio";
-          radio.name = `q${index + 1}`;
-          radio.value = i;
-          radioCell.appendChild(radio);
-          row.appendChild(radioCell);
+        questions.forEach((question, index) => {
+          const row = document.createElement("tr");
+
+          const questionCell = document.createElement("td");
+          questionCell.textContent = `${index + 1}. ${question}`;
+          row.appendChild(questionCell);
+
+          for (let i = 0; i < 5; i++) {
+            const radioCell = document.createElement("td");
+            const radioGroup = document.createElement("div");
+            radioGroup.className = "flex justify-center gap-2";
+
+            const label = document.createElement("label");
+            label.className = "inline-flex items-center";
+
+            const radio = document.createElement("input");
+            radio.type = "radio";
+            radio.name = `q${index + 1}`;
+            radio.value = i;
+            radio.className = "mr-1";
+            radio.required = true;
+
+            label.appendChild(radio);
+            label.appendChild(document.createTextNode(i));
+            radioGroup.appendChild(label);
+
+            radioCell.appendChild(radioGroup);
+            row.appendChild(radioCell);
+          }
+
+          container.appendChild(row);
+        });
+      }
+
+      async function calculateScore() {
+        let totalScore = 0;
+
+        for (let i = 1; i <= 20; i++) {
+          const selectedValue = document.querySelector(
+            `input[name="q${i}"]:checked`
+          );
+          if (!selectedValue) {
+            alert(`Please answer question ${i}`);
+            return;
+          }
+          totalScore += parseInt(selectedValue.value);
         }
 
-        table.appendChild(row);
-      });
+        let severity, severityClass, badge, badgeClass;
 
-      document
-        .getElementById("pclForm")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-          let totalScore = 0;
+        if (totalScore >= 0 && totalScore <= 19) {
+          severity = "Mild PTSD symptoms";
+          severityClass = "mild";
+          badge = "1";
+          badgeClass = "badge-1";
+        } else if (totalScore >= 20 && totalScore <= 36) {
+          severity = "Moderate PTSD symptoms";
+          severityClass = "moderate";
+          badge = "2";
+          badgeClass = "badge-2";
+        } else {
+          severity = "Severe PTSD symptoms";
+          severityClass = "severe";
+          badge = "3";
+          badgeClass = "badge-3";
+        }
 
-          for (let i = 1; i <= 20; i++) {
-            const selectedValue = document.querySelector(
-              `input[name="q${i}"]:checked`
-            );
-            if (selectedValue) {
-              totalScore += parseInt(selectedValue.value);
-            }
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.className = `result ${severityClass}`;
+        document.getElementById("totalScore").textContent = totalScore;
+        document.getElementById("severity").textContent = severity;
+
+        const badgeSpan = document.getElementById("badge");
+        badgeSpan.textContent = badge;
+        badgeSpan.className = `badge ${badgeClass}`;
+
+        resultsDiv.classList.remove("hidden");
+
+        try {
+          const response = await fetch("/client/save-scale-results", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              scaleName: scaleName,
+              totalScore,
+              severity,
+              badge,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Failed to save PCL-5 results");
           }
 
-          let severity = "";
-          let badge = 0;
+          window.location.href = "/client/dashboard";
+        } catch (error) {
+          console.error("Error saving PCL-5 results:", error);
+          alert(`Error: ${error.message}`);
+        }
+      }
 
-          if (totalScore >= 0 && totalScore <= 19) {
-            severity = "Mild";
-            badge = 1;
-          } else if (totalScore >= 20 && totalScore <= 36) {
-            severity = "Moderate";
-            badge = 2;
-          } else if (totalScore >= 37) {
-            severity = "Severe";
-            badge = 3;
-          }
-
-          const resultsDiv = document.getElementById("results");
-          resultsDiv.style.display = "block";
-          resultsDiv.className = severity.toLowerCase();
-
-          resultsDiv.innerHTML = `
-                <h2>Results</h2>
-                <p><strong>Total Score:</strong> ${totalScore}</p>
-                <p><strong>Severity:</strong> ${severity} <span class="badge badge-${badge}">Badge ${badge}</span></p>
-            `;
-        });
+      createQuestionForm();
     </script>
   </body>
 </html>

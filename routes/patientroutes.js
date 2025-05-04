@@ -271,6 +271,43 @@ router.get("/scales/:scaleName", async (req, res) => {
   }
 });
 
+router.post("/save-scale-results", isLoggedIn, async (req, res) => {
+  try {
+    const { scaleName, totalScore, severity, badge } = req.body;
+
+    if (!scaleName || typeof totalScore !== "number" || !severity || !badge) {
+      return res.status(400).json({ error: "Invalid scale results data" });
+    }
+
+    if (totalScore < 0) {
+      return res.status(400).json({ error: "Total score cannot be negative" });
+    }
+
+    const updatedPatient = await patientModel.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set: {
+          [`scaleResults.${scaleName}`]: {
+            totalScore,
+            severity,
+            badge,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    console.log("Updated patient with scale results:", updatedPatient);
+
+    return res
+      .status(200)
+      .json({ message: "Scale results saved successfully" });
+  } catch (error) {
+    console.error("Error saving scale results:", error);
+    return res.status(500).json({ error: "Failed to save scale results" });
+  }
+});
+
 router.get("/normal", isLoggedIn, (req, res) => {
   res.render("patient/normal", { messages: req.flash() });
 });

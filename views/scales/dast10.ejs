@@ -87,6 +87,8 @@
         "Have you had medical problems as a result of your drug use (e.g., memory loss, hepatitis, convulsions, bleeding, etc.)?",
       ];
 
+      const scaleName = "<%= recommendedScale %>";
+
       function createQuestionForm() {
         const container = document.getElementById("questionsContainer");
 
@@ -103,7 +105,6 @@
           radioGroup.className = "radio-group flex gap-4";
 
           if (index === 2) {
-            // Special case for question 3
             const labelYes = document.createElement("label");
             labelYes.className = "inline-flex items-center";
             const radioYes = document.createElement("input");
@@ -154,7 +155,7 @@
         });
       }
 
-      function calculateScore() {
+      async function calculateScore() {
         let totalScore = 0;
 
         for (let i = 1; i <= questions.length; i++) {
@@ -167,7 +168,6 @@
           }
 
           if (i === 3) {
-            // Special scoring for question 3
             totalScore += selected.value === "1" ? 0 : 1;
           } else {
             totalScore += parseInt(selected.value);
@@ -206,7 +206,29 @@
         badgeSpan.textContent = badge;
         badgeSpan.className = `badge ${badgeClass}`;
 
-        resultsDiv.classList.remove("hidden");
+        try {
+          const response = await fetch("/client/save-scale-results", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              scaleName: scaleName,
+              totalScore,
+              severity,
+              badge,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Failed to save scale results");
+          }
+
+          window.location.href = "/client/dashboard";
+        } catch (error) {
+          console.error("Error saving scale results:", error);
+          alert(`Error: ${error.message}`);
+        }
       }
 
       createQuestionForm();

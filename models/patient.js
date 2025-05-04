@@ -47,6 +47,16 @@ const PatientSchema = new mongoose.Schema({
   recommendedScale: { type: String },
   rationale: { type: String },
 
+  scaleResults: {
+    type: Map,
+    of: {
+      totalScore: { type: Number },
+      severity: { type: String },
+      badge: { type: String },
+    },
+    default: {},
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
