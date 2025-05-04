@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=0"
     />
-    <title>TherapEase - Therapist search Page</title>
+    <title>TherapEase - Profile Page</title>
 
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png" />
@@ -40,7 +40,7 @@
     <!-- Fancybox CSS -->
     <link
       rel="stylesheet"
-      href="assets/plugins/fancybox/jquery.fancybox.min.css"
+      href="/plugins/fancybox/jquery.fancybox.min.css"
     />
 
     <!-- Datatables CSS -->
@@ -48,12 +48,11 @@
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="/css/patient-style.css" />
-    <!-- Main CSS -->
     <link rel="stylesheet" href="/css/style.css" />
 
     <!--[if lt IE 9]>
-      <script src="assets/js/html5shiv.min.js"></script>
-      <script src="assets/js/respond.min.js"></script>
+      <script src="/js/html5shiv.min.js"></script>
+      <script src="/js/respond.min.js"></script>
     <![endif]-->
   </head>
   <body>
@@ -90,9 +89,15 @@
             </a>
             <div class="dropdown-menu">
               <div class="user-header">
-                <div class="avatar avatar-sm"></div>
+                <div class="avatar avatar-sm">
+                  <img
+                    src="/img/profiles/avatar-01.jpg"
+                    alt="User Image"
+                    class="avatar-img rounded-circle"
+                  />
+                </div>
                 <div class="user-text">
-                  <h6>name</h6>
+                  <h6><%= patient.name || patient.username %></h6>
                   <p class="text-muted mb-0">Client</p>
                 </div>
               </div>
@@ -121,7 +126,6 @@
                   ><i class="fe fe-user"></i> <span>Profile</span></a
                 >
               </li>
-
               <li>
                 <a href="/client/therapist-search"
                   ><i class="fe fe-user"></i> <span>Therapists</span></a
@@ -151,33 +155,28 @@
       <!-- Page Wrapper -->
       <div class="page-wrapper">
         <div class="content container-fluid">
-          <% if (successMessage && successMessage.length > 0) { %>
-          <div
-            class="alert alert-success alert-dismissible fade show"
-            role="alert"
-          >
-            <%= successMessage %>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="alert"
-              aria-label="Close"
-            ></button>
-          </div>
-          <% } %> <% if (errorMessage && errorMessage.length > 0) { %>
-          <div
-            class="alert alert-danger alert-dismissible fade show"
-            role="alert"
-          >
-            <%= errorMessage %>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="alert"
-              aria-label="Close"
-            ></button>
-          </div>
+          <!-- Flash Messages -->
+          <% if (messages.success && messages.success.length > 0) { %>
+            <div class="flash-messages">
+              <% messages.success.forEach(function(message) { %>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                  <%= message %>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              <% }); %>
+            </div>
           <% } %>
+          <% if (messages.error && messages.error.length > 0) { %>
+            <div class="flash-messages">
+              <% messages.error.forEach(function(message) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                  <%= message %>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              <% }); %>
+            </div>
+          <% } %>
+
           <!-- Page Header -->
           <div class="page-header">
             <div class="row">
@@ -187,7 +186,6 @@
                   <li class="breadcrumb-item">
                     <a href="/client/dashboard">Dashboard</a>
                   </li>
-
                   <li class="breadcrumb-item active">Profile</li>
                 </ul>
               </div>
@@ -200,10 +198,29 @@
             <div class="container-fluid">
               <!-- Profile Settings Form -->
               <form action="/client/profile/update" method="post">
+                <!-- Personal Information -->
+                <h4 class="mb-3">Personal Information</h4>
                 <div class="row form-row">
-                  <div class="col-12 col-md-12">
+                  <div class="col-12 col-md-6">
                     <div class="form-group">
-                      <div class="change-avatar"></div>
+                      <label>Username</label>
+                      <input
+                        type="text"
+                        name="username"
+                        class="form-control"
+                        value="<%= patient.username || '' %>"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Full Name</label>
+                      <input
+                        type="text"
+                        name="name"
+                        class="form-control"
+                        value="<%= patient.name || '' %>"
+                      />
                     </div>
                   </div>
                   <div class="col-12 col-md-6">
@@ -211,130 +228,340 @@
                       <label>First Name</label>
                       <input
                         type="text"
-                        name="firstName"
+                        name="firstname"
                         class="form-control"
+                        value="<%= patient.firstname || '' %>"
                       />
                     </div>
                   </div>
                   <div class="col-12 col-md-6">
                     <div class="form-group">
                       <label>Last Name</label>
-                      <input type="text" name="lastname" class="form-control" />
+                      <input
+                        type="text"
+                        name="lastname"
+                        class="form-control"
+                        value="<%= patient.lastname || '' %>"
+                      />
                     </div>
                   </div>
                   <div class="col-12 col-md-6">
                     <div class="form-group">
                       <label>Date of Birth</label>
-                      <div>
-                        <input type="date" name="dob" class="form-control" />
-                      </div>
+                      <input
+                        type="date"
+                        name="dob"
+                        class="form-control"
+                        value="<%= patient.dob ? patient.dob.toISOString().split('T')[0] : '' %>"
+                      />
                     </div>
                   </div>
-                  <div class="col-12 col-md-6"></div>
                   <div class="col-12 col-md-6">
                     <div class="form-group">
-                      <label>Email ID</label>
-                      <input type="email" name="email" class="form-control" />
+                      <label>Age</label>
+                      <input
+                        type="number"
+                        name="age"
+                        class="form-control"
+                        value="<%= patient.age || '' %>"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Gender</label>
+                      <select name="gender" class="form-control">
+                        <option value="" <%= !patient.gender ? 'selected' : '' %>>Select</option>
+                        <option value="Male" <%= patient.gender === 'Male' ? 'selected' : '' %>>Male</option>
+                        <option value="Female" <%= patient.gender === 'Female' ? 'selected' : '' %>>Female</option>
+                        <option value="Other" <%= patient.gender === 'Other' ? 'selected' : '' %>>Other</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Occupation</label>
+                      <input
+                        type="text"
+                        name="occupation"
+                        class="form-control"
+                        value="<%= patient.occupation || '' %>"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Marital Status</label>
+                      <select name="maritalStatus" class="form-control">
+                        <option value="" <%= !patient.maritalStatus ? 'selected' : '' %>>Select</option>
+                        <option value="Single" <%= patient.maritalStatus === 'Single' ? 'selected' : '' %>>Single</option>
+                        <option value="Married" <%= patient.maritalStatus === 'Married' ? 'selected' : '' %>>Married</option>
+                        <option value="Divorced" <%= patient.maritalStatus === 'Divorced' ? 'selected' : '' %>>Divorced</option>
+                        <option value="Widowed" <%= patient.maritalStatus === 'Widowed' ? 'selected' : '' %>>Widowed</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Contact Details -->
+                <h4 class="mb-3 mt-4">Contact Details</h4>
+                <div class="row form-row">
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        class="form-control"
+                        value="<%= patient.email || '' %>"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Phone</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        class="form-control"
+                        value="<%= patient.phone || '' %>"
+                      />
                     </div>
                   </div>
                   <div class="col-12 col-md-6">
                     <div class="form-group">
                       <label>Mobile</label>
-                      <input type="text" name="mobile" class="form-control" />
+                      <input
+                        type="tel"
+                        name="mobile"
+                        class="form-control"
+                        value="<%= patient.mobile || '' %>"
+                      />
                     </div>
                   </div>
-                  <div class="col-12"></div>
                   <div class="col-12 col-md-6">
                     <div class="form-group">
                       <label>City</label>
-                      <input type="text" name="city" class="form-control" />
+                      <input
+                        type="text"
+                        name="city"
+                        class="form-control"
+                        value="<%= patient.city || '' %>"
+                      />
                     </div>
                   </div>
-
                   <div class="col-12 col-md-6">
                     <div class="form-group">
                       <label>Country</label>
-                      <input type="text" name="country" class="form-control" />
+                      <input
+                        type="text"
+                        name="country"
+                        class="form-control"
+                        value="<%= patient.country || '' %>"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Address</label>
+                      <textarea
+                        name="address"
+                        class="form-control"
+                        rows="4"
+                      ><%= patient.address || '' %></textarea>
                     </div>
                   </div>
                 </div>
-                <div class="submit-section">
+
+                <!-- Family Details -->
+                <h4 class="mb-3 mt-4">Family Details</h4>
+                <div class="row form-row">
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Family Structure</label>
+                      <select name="familyStructure" class="form-control">
+                        <option value="" <%= !patient.familyStructure ? 'selected' : '' %>>Select</option>
+                        <option value="Nuclear" <%= patient.familyStructure === 'Nuclear' ? 'selected' : '' %>>Nuclear</option>
+                        <option value="Joint" <%= patient.familyStructure === 'Joint' ? 'selected' : '' %>>Joint</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Head of Family</label>
+                      <input
+                        type="text"
+                        name="headOfFamily"
+                        class="form-control"
+                        value="<%= patient.headOfFamily || '' %>"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Head of Family Contact</label>
+                      <input
+                        type="tel"
+                        name="headOfFamilyContact"
+                        class="form-control"
+                        value="<%= patient.headOfFamilyContact || '' %>"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Therapy Profile -->
+                <h4 class="mb-3 mt-4">Therapy Profile</h4>
+                <div class="row form-row">
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Primary Concern</label>
+                      <textarea
+                        name="therapyProfile.primary_concern"
+                        class="form-control"
+                        rows="4"
+                      ><%= patient.therapyProfile?.primary_concern || '' %></textarea>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Impact</label>
+                      <textarea
+                        name="therapyProfile.impact"
+                        class="form-control"
+                        rows="4"
+                      ><%= patient.therapyProfile?.impact || '' %></textarea>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Past Experiences</label>
+                      <textarea
+                        name="therapyProfile.past_experiences"
+                        class="form-control"
+                        rows="4"
+                      ><%= patient.therapyProfile?.past_experiences || '' %></textarea>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Emotional State</label>
+                      <textarea
+                        name="therapyProfile.emotional_state"
+                        class="form-control"
+                        rows="4"
+                      ><%= patient.therapyProfile?.emotional_state || '' %></textarea>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Behavior Patterns</label>
+                      <textarea
+                        name="therapyProfile.behavior_patterns"
+                        class="form-control"
+                        rows="4"
+                      ><%= patient.therapyProfile?.behavior_patterns || '' %></textarea>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Therapy History</label>
+                      <textarea
+                        name="therapyProfile.therapy_history"
+                        class="form-control"
+                        rows="4"
+                      ><%= patient.therapyProfile?.therapy_history || '' %></textarea>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Support System</label>
+                      <textarea
+                        name="therapyProfile.support_system"
+                        class="form-control"
+                        rows="4"
+                      ><%= patient.therapyProfile?.support_system || '' %></textarea>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Therapy Goals</label>
+                      <textarea
+                        name="therapyProfile.therapy_goals"
+                        class="form-control"
+                        rows="4"
+                      ><%= patient.therapyProfile?.therapy_goals || '' %></textarea>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Therapist Preferences</label>
+                      <textarea
+                        name="therapyProfile.therapist_preferences"
+                        class="form-control"
+                        rows="4"
+                      ><%= patient.therapyProfile?.therapist_preferences || '' %></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bank Details -->
+                <h4 class="mb-3 mt-4">Bank Details</h4>
+                <div class="row form-row">
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Bank Name</label>
+                      <input
+                        type="text"
+                        name="bankDetails.bankName"
+                        class="form-control"
+                        value="<%= patient.bankDetails?.bankName || '' %>"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Branch Name</label>
+                      <input
+                        type="text"
+                        name="bankDetails.branchName"
+                        class="form-control"
+                        value="<%= patient.bankDetails?.branchName || '' %>"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Account Number</label>
+                      <input
+                        type="text"
+                        name="bankDetails.accountNumber"
+                        class="form-control"
+                        value="<%= patient.bankDetails?.accountNumber || '' %>"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label>Account Name</label>
+                      <input
+                        type="text"
+                        name="bankDetails.accountName"
+                        class="form-control"
+                        value="<%= patient.bankDetails?.accountName || '' %>"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="submit-section mt-4">
                   <button type="submit" class="btn btn-primary submit-btn">
                     Save Changes
                   </button>
                 </div>
               </form>
               <!-- /Profile Settings Form -->
-              <!-- Personal Details Tab -->
-              <div class="tab-pane fade show active" id="per_details_tab">
-                <!-- Personal Details -->
-                <div class="row">
-                  <div class="col-lg-12">
-                    <div class="card">
-                      <div class="card-body">
-                        <h5 class="card-title d-flex justify-content-between">
-                          <span>Details</span>
-                        </h5>
-                        <div class="row">
-                          <p
-                            class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3"
-                          >
-                            Name
-                          </p>
-                          <p class="col-sm-10">
-                            <%= patient.firstname %> <%= patient.lastname %>
-                          </p>
-                        </div>
-                        <div class="row">
-                          <p
-                            class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3"
-                          >
-                            Date of Birth
-                          </p>
-                          <p class="col-sm-10">
-                            <%= patient.dob ?
-                            patient.dob.toISOString().split('T')[0] : '' %>
-                          </p>
-                        </div>
-                        <div class="row">
-                          <p
-                            class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3"
-                          >
-                            Email ID
-                          </p>
-                          <p class="col-sm-10"><%= patient.email %></p>
-                        </div>
-                        <div class="row">
-                          <p
-                            class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3"
-                          >
-                            Mobile
-                          </p>
-                          <p class="col-sm-10"><%= patient.mobile %></p>
-                        </div>
-                        <div class="row">
-                          <p
-                            class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3"
-                          >
-                            City
-                          </p>
-                          <p class="col-sm-10"><%= patient.city %></p>
-                        </div>
-                        <div class="row">
-                          <p
-                            class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3"
-                          >
-                            Country
-                          </p>
-                          <p class="col-sm-10"><%= patient.country %></p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- /Personal Details -->
-              </div>
-              <!-- /Personal Details Tab -->
             </div>
           </div>
           <!-- /Page Content -->

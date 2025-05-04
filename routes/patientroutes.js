@@ -15,6 +15,7 @@ const fs = require("fs").promises;
 const path = require("path");
 const multer = require("multer");
 const upload = multer();
+const axios = require("axios");
 
 router.use(flash());
 router.use(authRoutes);
@@ -52,6 +53,42 @@ function getOrdinal(n) {
   const s = ["th", "st", "nd", "rd"];
   const v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+const problemToSpecialtyMap = {
+  anxiety: "Anxiety",
+  depression: "Depression",
+  ptsd: "PTSD",
+  ocd: "OCD",
+  stress: "Anxiety",
+  grief: "Grief",
+  insomnia: "Sleep Disorder",
+  "social anxiety": "Anxiety",
+  "self-esteem": "Self-Esteem",
+  "body image": "Body Image",
+  addiction: "Addiction",
+};
+
+function extractProblem(primaryConcern, recommendedScale) {
+  if (!primaryConcern && !recommendedScale) return null;
+
+  const lowerConcern = (primaryConcern || "").toLowerCase();
+  for (const problem in problemToSpecialtyMap) {
+    if (lowerConcern.includes(problem)) {
+      return problemToSpecialtyMap[problem];
+    }
+  }
+
+  if (recommendedScale) {
+    const scaleName = recommendedScale.toLowerCase();
+    for (const problem in problemToSpecialtyMap) {
+      if (scaleName.includes(problem)) {
+        return problemToSpecialtyMap[problem];
+      }
+    }
+  }
+
+  return null;
 }
 
 router.get("/login", function (req, res) {
@@ -129,15 +166,38 @@ router.post("/register", async function (req, res) {
 
       req.login(newPatient, (loginErr) => {
         if (loginErr) {
+          console.error("Login error:", loginErr);
           req.flash("error", "Registration successful, but login failed");
           return res.redirect("/client/register");
         }
         req.flash("success", "Successfully registered and logged in");
-        res.redirect("/client/dashboard");
+        if (!newPatient.hasCompletedScreening) {
+          req.flash(
+            "success",
+            "Successfully registered. Please complete the screening."
+          );
+          req.session.save((err) => {
+            if (err) {
+              console.error("Error saving session:", err);
+              req.flash("error", "Failed to save session");
+              return res.redirect("/client/register");
+            }
+            res.redirect("/client/screening");
+          });
+          return;
+        }
+        req.session.save((err) => {
+          if (err) {
+            console.error("Error saving session:", err);
+            req.flash("error", "Failed to save session");
+            return res.redirect("/client/register");
+          }
+          res.redirect("/client/dashboard");
+        });
       });
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     req.flash("error", "Error occurred during signup");
     res.redirect("/client/register");
   }
@@ -161,16 +221,14 @@ router.post("/followup", isLoggedIn, upload.none(), async (req, res) => {
       rationale,
     });
 
-    // Ensure finalScale and rationale are provided
     if (!finalScale || !rationale) {
       throw new Error("finalScale and rationale are required");
     }
 
-    // Update the database with the recommended scale and rationale
     const updatedPatient = await patientModel.findByIdAndUpdate(
       req.user._id,
       {
-        hasCompletedScreening: true,
+        hasCompletedScreening: false,
         recommendedScale: finalScale,
         rationale: rationale,
       },
@@ -200,7 +258,7 @@ router.post("/submit-followup", isLoggedIn, async (req, res) => {
     const patient = await patientModel.findById(req.user._id);
     patient.recommendedScale = scale;
     patient.rationale = reason;
-    patient.hasCompletedScreening = true;
+    patient.hasCompletedScreening = false;
 
     await patient.save();
     res.status(200).json({ message: "Follow-up submitted successfully." });
@@ -299,9 +357,7 @@ router.post("/save-scale-results", isLoggedIn, async (req, res) => {
 
     console.log("Updated patient with scale results:", updatedPatient);
 
-    return res
-      .status(200)
-      .json({ message: "Scale results saved successfully" });
+    return res.status(200).json({ redirect: "/client/patient-profile" });
   } catch (error) {
     console.error("Error saving scale results:", error);
     return res.status(500).json({ error: "Failed to save scale results" });
@@ -310,6 +366,167 @@ router.post("/save-scale-results", isLoggedIn, async (req, res) => {
 
 router.get("/normal", isLoggedIn, (req, res) => {
   res.render("patient/normal", { messages: req.flash() });
+});
+
+router.get("/patient-profile", isLoggedIn, (req, res) => {
+  res.render("patient/patientProfile", {
+    messages: req.flash(),
+    patient: req.user,
+  });
+});
+
+router.post("/patient-profile", isLoggedIn, async (req, res) => {
+  try {
+    const {
+      name,
+      age,
+      sex,
+      occupation,
+      maritalStatus,
+      familyStructure,
+      headOfFamily,
+      headOfFamilyContact,
+    } = req.body;
+
+    if (
+      !name ||
+      !age ||
+      !sex ||
+      !maritalStatus ||
+      !familyStructure ||
+      !headOfFamily ||
+      !headOfFamilyContact
+    ) {
+      req.flash("error", "All required fields must be filled");
+      return res.redirect("/client/patient-profile");
+    }
+
+    const updatedPatient = await patientModel.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set: {
+          name,
+          age: parseInt(age),
+          gender: sex,
+          occupation,
+          maritalStatus,
+          familyStructure,
+          headOfFamily,
+          headOfFamilyContact,
+        },
+      },
+      { new: true }
+    );
+
+    console.log("Updated patient with profile data:", updatedPatient);
+
+    res.redirect("/client/therapy-profile");
+  } catch (error) {
+    console.error("Error saving patient profile:", error);
+    req.flash("error", "Failed to save patient profile");
+    res.redirect("/client/patient-profile");
+  }
+});
+
+router.get("/therapy-profile", isLoggedIn, (req, res) => {
+  res.render("patient/therapyProfile", {
+    messages: req.flash(),
+    patient: req.user,
+  });
+});
+
+router.post("/therapy-profile", isLoggedIn, async (req, res) => {
+  try {
+    const { q1, q2, q3, q4, q5 } = req.body;
+
+    if (![q1, q2, q3, q4, q5].every(Boolean)) {
+      return res.status(400).json({ error: "All questions must be answered" });
+    }
+
+    const therapyProfileData = { q1, q2, q3, q4, q5 };
+
+    const response = await axios.post(
+      "http://localhost:8000/generate-summary",
+      therapyProfileData,
+      { headers: { "Content-Type": "application/json" } }
+    );
+
+    if (response.data.status !== "success" || !response.data.summary) {
+      throw new Error(
+        "Failed to generate therapy profile summary: " +
+          (response.data.message || response.data.error || "Unknown error")
+      );
+    }
+
+    const summary = response.data.summary;
+
+    const requiredFields = [
+      "primary_concern",
+      "impact",
+      "past_experiences",
+      "emotional_state",
+      "behavior_patterns",
+      "therapy_history",
+      "support_system",
+      "therapy_goals",
+      "therapist_preferences",
+    ];
+    if (!requiredFields.every((field) => field in summary)) {
+      throw new Error("Incomplete therapy profile summary received");
+    }
+
+    const updatedPatient = await patientModel.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set: {
+          therapyProfile: summary,
+          hasCompletedScreening: true,
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedPatient) {
+      return res.status(404).json({ error: "Patient not found" });
+    }
+
+    console.log("Updated patient with therapy profile:", updatedPatient);
+
+    // Get the latest scale result badge
+    let patientBadge = null;
+    let patientProblem = null;
+    if (updatedPatient.scaleResults && updatedPatient.recommendedScale) {
+      const scaleResult = updatedPatient.scaleResults.get(
+        updatedPatient.recommendedScale
+      );
+      if (scaleResult && scaleResult.badge) {
+        patientBadge = scaleResult.badge;
+      }
+    }
+
+    // Extract problem from therapy profile or recommended scale
+    patientProblem = extractProblem(
+      updatedPatient.therapyProfile.primary_concern,
+      updatedPatient.recommendedScale
+    );
+
+    // Redirect to therapist-search with filters
+    const queryParams = new URLSearchParams();
+    if (patientBadge) queryParams.append("badge", patientBadge);
+    if (patientProblem) queryParams.append("specialties", patientProblem);
+
+    return res.status(200).json({
+      message: "Screening process completed successfully",
+      redirect: `/client/therapist-search?${queryParams.toString()}`,
+      summary,
+    });
+  } catch (error) {
+    console.error("Error processing therapy profile:", error.message);
+    return res.status(500).json({
+      error: "Failed to process therapy profile",
+      details: error.message,
+    });
+  }
 });
 
 router.get("/dashboard", isLoggedIn, async function (req, res) {
@@ -498,14 +715,26 @@ router.get("/therapist-search", isLoggedIn, async function (req, res) {
   try {
     const patient = await patientModel.findOne({ email: req.user.email });
 
-    const specialtyOptions = ["PTSD", "OCD", "Depression", "Anxiety"];
+    const specialtyOptions = [
+      "PTSD",
+      "OCD",
+      "Depression",
+      "Anxiety",
+      "Grief",
+      "Addiction",
+      "Sleep Disorder",
+      "Self-Esteem",
+      "Body Image",
+    ];
 
     let query = { status: "Approved" };
 
-    if (req.query.gender) {
-      query.gender = req.query.gender;
+    // Apply badge filter
+    if (req.query.badge) {
+      query.badge = req.query.badge;
     }
 
+    // Apply specialty filter
     if (req.query.specialties) {
       const specialtiesParam = Array.isArray(req.query.specialties)
         ? req.query.specialties
@@ -518,6 +747,11 @@ router.get("/therapist-search", isLoggedIn, async function (req, res) {
       if (validSpecialties.length > 0) {
         query.specialties = { $in: validSpecialties };
       }
+    }
+
+    // Apply gender filter if provided
+    if (req.query.gender) {
+      query.gender = req.query.gender;
     }
 
     const therapists = await TherapistModel.find(query).lean();
@@ -533,6 +767,7 @@ router.get("/therapist-search", isLoggedIn, async function (req, res) {
       therapists,
       selectedGender: req.query.gender || "",
       selectedSpecialties,
+      selectedBadge: req.query.badge || "",
       specialtyOptions,
       messages: req.flash(),
     });
@@ -751,7 +986,7 @@ function formatTherapistAvailability(availability) {
         currentMinute += 30;
         if (currentMinute >= 60) {
           currentHour += 1;
-          currentMinute -= 60;
+          currentMinute = 60;
         }
       }
     });
@@ -1194,12 +1429,12 @@ router.get("/logout", function (req, res, next) {
       return next(err);
     }
     res.clearCookie("patient.sid");
+    req.flash("success", "Successfully logged out");
     req.session.destroy((err) => {
       if (err) {
-        req.flash("error", "Error destroying session");
+        console.error("Error destroying session:", err);
         return next(err);
       }
-      req.flash("success", "Successfully logged out");
       res.redirect("/client/login");
     });
   });

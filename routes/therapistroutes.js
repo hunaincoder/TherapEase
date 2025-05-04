@@ -1080,12 +1080,12 @@ router.get("/logout", function (req, res, next) {
       return next(err);
     }
     res.clearCookie("therapist.sid");
+    req.flash("success", "Successfully logged out");
     req.session.destroy((err) => {
       if (err) {
-        req.flash("error", "Error destroying session");
+        console.error("Error destroying session:", err);
         return next(err);
       }
-      req.flash("success", "Successfully logged out");
       res.redirect("/therapist/login");
     });
   });

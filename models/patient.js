@@ -17,6 +17,28 @@ const PatientSchema = new mongoose.Schema({
   age: { type: Number },
   address: { type: String },
 
+  name: { type: String },
+  occupation: { type: String },
+  maritalStatus: {
+    type: String,
+    enum: ["Single", "Married", "Divorced", "Widowed"],
+  },
+  familyStructure: { type: String, enum: ["Nuclear", "Joint"] },
+  headOfFamily: { type: String },
+  headOfFamilyContact: { type: String },
+
+  therapyProfile: {
+    primary_concern: { type: String },
+    impact: { type: String },
+    past_experiences: { type: String },
+    emotional_state: { type: String },
+    behavior_patterns: { type: String },
+    therapy_history: { type: String },
+    support_system: { type: String },
+    therapy_goals: { type: String },
+    therapist_preferences: { type: String },
+  },
+
   appointments: [
     {
       therapistId: { type: mongoose.Schema.Types.ObjectId, ref: "Therapist" },

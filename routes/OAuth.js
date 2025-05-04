@@ -44,9 +44,18 @@ router.get(
   "/auth/google/callback",
   passport.authenticate("admin-google", {
     failureRedirect: "/login",
+    failureFlash: true,
   }),
-  (req, res) => {
-    res.redirect("/dashboard");
+  (req, res, next) => {
+    req.flash("success", "Successfully logged in");
+    req.session.save((err) => {
+      if (err) {
+        console.error("Error saving session:", err);
+        req.flash("error", "Failed to save session");
+        return res.redirect("/login");
+      }
+      res.redirect("/dashboard");
+    });
   }
 );
 

@@ -27,7 +27,7 @@ passport.use(
 
         return done(null, patient);
       } catch (error) {
-        console.error("Error during client Google authentication:", error);
+        console.error("Error during patient Google authentication:", error);
         return done(error, false);
       }
     }
@@ -45,22 +45,19 @@ router.get(
     failureRedirect: "/client/login",
     failureFlash: true,
   }),
-  (req, res) => {
-    req.session.patient = {
-      id: req.user._id,
-      email: req.user.email,
-    };
-
-    if (!req.user.hasCompletedScreening) {
-      req.flash(
-        "success",
-        "Successfully logged in. Please complete the screening."
-      );
-      return res.redirect("/client/screening");
-    }
-
+  (req, res, next) => {
     req.flash("success", "Successfully logged in");
-    res.redirect("/client/dashboard");
+    req.session.save((err) => {
+      if (err) {
+        console.error("Error saving session:", err);
+        req.flash("error", "Failed to save session");
+        return res.redirect("/client/login");
+      }
+      if (!req.user.hasCompletedScreening) {
+        return res.redirect("/client/screening");
+      }
+      res.redirect("/client/dashboard");
+    });
   }
 );
 

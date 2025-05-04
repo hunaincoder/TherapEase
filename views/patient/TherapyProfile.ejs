@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Therapy Profile Form with Speech to Text</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    form {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .form-group {
+      margin-bottom: 25px;
+      position: relative;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #34495e;
+    }
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-family: inherit;
+      font-size: 16px;
+    }
+    .mic-button {
+      position: absolute;
+      right: 10px;
+      bottom: 30px;
+      background: #3498db;
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mic-button.listening {
+      background: #e74c3c;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    .word-count {
+      font-size: 13px;
+      color: #555;
+      margin-top: 5px;
+    }
+    button[type="submit"], #save-btn {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    #loading {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+    }
+    #summary-container {
+      display: none;
+      margin-top: 30px;
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .summary-item {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    .summary-item:last-child {
+      border-bottom: none;
+    }
+    .summary-title {
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+    .error {
+      color: #e74c3c;
+      margin-top: 20px;
+    }
+    .recording-indicator {
+      display: none;
+      color: #e74c3c;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    .profile-display {
+      margin-top: 30px;
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .profile-section {
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+    .profile-section h3 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    .profile-field {
+      margin-bottom: 8px;
+    }
+    .profile-field label {
+      font-weight: bold;
+      display: inline-block;
+      min-width: 180px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Therapy Profile Questionnaire</h1>
+    <form id="therapy-form">
+      <!-- QUESTIONS -->
+      <div class="form-group">
+        <label for="q1">1. What brings you to therapy at this time, and how has it been affecting your life?</label>
+        <textarea id="q1" name="q1" maxlength="700" required></textarea>
+        <div class="word-count" id="count-q1">0/700 characters</div>
+        <button type="button" class="mic-button" data-target="q1" title="Start recording">
+          <span class="mic-icon">🎤</span>
+        </button>
+        <div class="recording-indicator" id="recording-q1">Recording...</div>
+      </div>
+
+      <div class="form-group">
+        <label for="q2">2. Can you describe any past experiences or events that you feel may be contributing to how you're feeling today?</label>
+        <textarea id="q2" name="q2" maxlength="700" required></textarea>
+        <div class="word-count" id="count-q2">0/700 characters</div>
+        <button type="button" class="mic-button" data-target="q2" title="Start recording">
+          <span class="mic-icon">🎤</span>
+        </button>
+        <div class="recording-indicator" id="recording-q2">Recording...</div>
+      </div>
+
+      <div class="form-group">
+        <label for="q3">3. How are you currently feeling emotionally, and have you noticed any specific patterns or changes in your mood or behavior recently?</label>
+        <textarea id="q3" name="q3" maxlength="700" required></textarea>
+        <div class="word-count" id="count-q3">0/700 characters</div>
+        <button type="button" class="mic-button" data-target="q3" title="Start recording">
+          <span class="mic-icon">🎤</span>
+        </button>
+        <div class="recording-indicator" id="recording-q3">Recording...</div>
+      </div>
+
+      <div class="form-group">
+        <label for="q4">4. Have you ever been to therapy before? If yes, what was your experience like, and what kind of support system do you currently have?</label>
+        <textarea id="q4" name="q4" maxlength="700" required></textarea>
+        <div class="word-count" id="count-q4">0/700 characters</div>
+        <button type="button" class="mic-button" data-target="q4" title="Start recording">
+          <span class="mic-icon">🎤</span>
+        </button>
+        <div class="recording-indicator" id="recording-q4">Recording...</div>
+      </div>
+
+      <div class="form-group">
+        <label for="q5">5. What do you hope to gain from therapy, and do you have any preferences for your therapist or the type of support you receive?</label>
+        <textarea id="q5" name="q5" maxlength="700" required></textarea>
+        <div class="word-count" id="count-q5">0/700 characters</div>
+        <button type="button" class="mic-button" data-target="q5" title="Start recording">
+          <span class="mic-icon">🎤</span>
+        </button>
+        <div class="recording-indicator" id="recording-q5">Recording...</div>
+      </div>
+
+      <button type="submit">Generate Profile Summary</button>
+    </form>
+
+    <div id="loading">
+      <p>Analyzing your responses with Gemini AI. This may take a moment...</p>
+    </div>
+
+    <div id="summary-container">
+      <h2>Complete Patient Profile</h2>
+      
+      <div class="profile-display" id="patient-profile-display">
+        <h3>Basic Information</h3>
+        <div id="patient-profile-content"></div>
+      </div>
+      
+      <div class="profile-display">
+        <h3>Therapy Profile Summary</h3>
+        <div id="summary-content"></div>
+      </div>
+    </div>
+
+    <div id="error-message" class="error"></div>
+  </div>
+
+  <script>
+    document.querySelectorAll("textarea").forEach(textarea => {
+      textarea.addEventListener("input", () => {
+        const count = textarea.value.length;
+        const id = textarea.id;
+        document.getElementById(`count-${id}`).textContent = `${count}/700 characters`;
+      });
+    });
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+    let isListening = false;
+    let currentTarget = null;
+
+    function initializeSpeechRecognition() {
+      if (!SpeechRecognition) {
+        console.warn("Speech Recognition not supported in this browser");
+        document.querySelectorAll('.mic-button').forEach(btn => {
+          btn.disabled = true;
+          btn.title = "Speech recognition not supported";
+        });
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        if (currentTarget) {
+          document.getElementById(`recording-${currentTarget}`).style.display = "block";
+          document.querySelector(`button[data-target="${currentTarget}"]`).classList.add("listening");
+        }
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        if (currentTarget) {
+          document.getElementById(`recording-${currentTarget}`).style.display = "none";
+          document.querySelector(`button[data-target="${currentTarget}"]`).classList.remove("listening");
+        }
+      };
+
+      recognition.onresult = event => {
+        const transcript = event.results[0][0].transcript.trim();
+        if (currentTarget) {
+          const textarea = document.getElementById(currentTarget);
+          if (!textarea.value.endsWith(transcript)) {
+            textarea.value += (textarea.value ? " " : "") + transcript;
+            textarea.dispatchEvent(new Event("input")); 
+          }
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        document.getElementById('error-message').textContent = `Speech recognition error: ${event.error}`;
+        stopListening();
+      };
+    }
+
+    function startListening(target) {
+      if (!recognition) {
+        initializeSpeechRecognition();
+      }
+
+      if (isListening) {
+        if (currentTarget === target) {
+          stopListening();
+          return;
+        }
+        stopListening();
+      }
+
+      currentTarget = target;
+      isListening = true;
+      
+      const button = document.querySelector(`.mic-button[data-target="${target}"]`);
+      const indicator = document.getElementById(`recording-${target}`);
+      
+      if (button) button.classList.add("listening");
+      if (indicator) indicator.style.display = "block";
+      
+      try {
+        recognition.start();
+      } catch (e) {
+        console.error("Recognition start error:", e);
+      }
+    }
+
+    function stopListening() {
+      if (!isListening) return;
+      
+      isListening = false;
+      
+      if (currentTarget) {
+        const button = document.querySelector(`.mic-button[data-target="${currentTarget}"]`);
+        const indicator = document.getElementById(`recording-${currentTarget}`);
+        
+        if (button) button.classList.remove("listening");
+        if (indicator) indicator.style.display = "none";
+      }
+      
+      if (recognition) {
+        try {
+          recognition.stop();
+        } catch (e) {
+          console.error("Recognition stop error:", e);
+        }
+      }
+      
+      currentTarget = null;
+    }
+
+    document.querySelectorAll('.mic-button').forEach(button => {
+      button.addEventListener('click', () => {
+        const target = button.getAttribute('data-target');
+        if (isListening && currentTarget === target) {
+          stopListening();
+        } else {
+          startListening(target);
+        }
+      });
+    });
+
+    document.getElementById("therapy-form").addEventListener("submit", async function(event) {
+      event.preventDefault();
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("error-message").textContent = "";
+
+      stopListening();
+
+      const patientProfile = JSON.parse(localStorage.getItem('patientProfile'));
+      
+      if (patientProfile) {
+        const patientContent = document.getElementById("patient-profile-content");
+        patientContent.innerHTML = `
+          <div class="profile-field">
+            <label>Name:</label> <span>${patientProfile.name}</span>
+          </div>
+          <div class="profile-field">
+            <label>Age:</label> <span>${patientProfile.age}</span>
+          </div>
+          <div class="profile-field">
+            <label>Sex:</label> <span>${patientProfile.sex}</span>
+          </div>
+          <div class="profile-field">
+            <label>Occupation:</label> <span>${patientProfile.occupation || 'Not specified'}</span>
+          </div>
+          <div class="profile-field">
+            <label>Marital Status:</label> <span>${patientProfile.maritalStatus}</span>
+          </div>
+          <div class="profile-field">
+            <label>Family Structure:</label> <span>${patientProfile.familyStructure}</span>
+          </div>
+          <div class="profile-field">
+            <label>Head of Family:</label> <span>${patientProfile.headOfFamily}</span>
+          </div>
+          <div class="profile-field">
+            <label>Head Contact:</label> <span>${patientProfile.headOfFamilyContact}</span>
+          </div>
+        `;
+      }
+
+      const formData = {
+        q1: document.getElementById("q1").value,
+        q2: document.getElementById("q2").value,
+        q3: document.getElementById("q3").value,
+        q4: document.getElementById("q4").value,
+        q5: document.getElementById("q5").value
+      };
+
+      try {
+        const response = await fetch("/client/therapy-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Server error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (result.redirect) {
+          window.location.href = result.redirect;
+          return;
+        }
+
+        const summaryContent = document.getElementById("summary-content");
+        summaryContent.innerHTML = '';
+        
+        for (let key in result) {
+          const section = document.createElement("div");
+          section.className = "summary-item";
+          const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          section.innerHTML = `<div class="summary-title">${formattedKey}</div><div>${result[key]}</div>`;
+          summaryContent.appendChild(section);
+        }
+
+        document.getElementById("patient-profile-display").style.display = "block";
+        document.getElementById("summary-container").style.display = "block";
+      } catch (err) {
+        document.getElementById("error-message").textContent = `An error occurred: ${err.message}. Please try again.`;
+        console.error(err);
+      } finally {
+        document.getElementById("loading").style.display = "none";
+      }
+    });
+
+    initializeSpeechRecognition();
+  </script>
+</body>
+</html>

@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=0"
     />
-    <title>TherapEase - Therapist search Page</title>
+    <title>TherapEase - Therapist Search Page</title>
 
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png" />
@@ -40,7 +40,7 @@
     <!-- Fancybox CSS -->
     <link
       rel="stylesheet"
-      href="assets/plugins/fancybox/jquery.fancybox.min.css"
+      href="/plugins/fancybox/jquery.fancybox.min.css"
     />
 
     <!-- Datatables CSS -->
@@ -48,12 +48,11 @@
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="/css/patient-style.css" />
-    <!-- Main CSS -->
     <link rel="stylesheet" href="/css/style.css" />
 
     <!--[if lt IE 9]>
-      <script src="assets/js/html5shiv.min.js"></script>
-      <script src="assets/js/respond.min.js"></script>
+      <script src="/js/html5shiv.min.js"></script>
+      <script src="/js/respond.min.js"></script>
     <![endif]-->
   </head>
   <body>
@@ -75,15 +74,6 @@
         <a href="javascript:void(0);" id="toggle_btn">
           <i class="fe fe-text-align-left"></i>
         </a>
-
-        <!-- <div class="top-nav-search">
-          <form>
-            <input type="text" class="form-control" placeholder="Search here" />
-            <button class="btn" type="submit">
-              <i class="fa fa-search"></i>
-            </button>
-          </form>
-        </div> -->
 
         <!-- Mobile Menu Toggle -->
         <a class="mobile_btn" id="mobile_btn">
@@ -107,7 +97,7 @@
                   />
                 </div>
                 <div class="user-text">
-                  <h6>name</h6>
+                  <h6><%= patient.name || patient.username %></h6>
                   <p class="text-muted mb-0">Client</p>
                 </div>
               </div>
@@ -151,7 +141,6 @@
                   ><i class="fe fe-user"></i> <span>Invoices</span></a
                 >
               </li>
-
               <li>
                 <a href="/client/pass-change"
                   ><i class="fe fe-user"></i> <span>Change password</span></a
@@ -170,76 +159,43 @@
           <div class="page-header">
             <div class="row">
               <div class="col-sm-12">
-                <h3 class="page-title">List of Therapists</h3>
+                <h3 class="page-title">Find a Therapist</h3>
                 <ul class="breadcrumb">
                   <li class="breadcrumb-item">
                     <a href="/client/dashboard">Dashboard</a>
                   </li>
-
                   <li class="breadcrumb-item active">Therapists</li>
                 </ul>
               </div>
             </div>
           </div>
           <!-- /Page Header -->
-          <!-- 
-          Breadcrumb
-			<div class="breadcrumb-bar">
-				<div class="container-fluid">
-					<div class="row align-items-center">
-						<div class="col-md-8 col-12">
-							<nav aria-label="breadcrumb" class="page-breadcrumb">
-							
-							</nav>
-						</div>
-						<div class="col-md-4 col-12 d-md-block d-none">
-							<div class="sort-by">
-								<span class="sort-title">Sort by</span>
-								<span class="sortby-fliter">
-									<select class="select">
-										<option>Select</option>
-										<option class="sorting">Recommended</option>
-										<option class="sorting">Price</option>
-										<option class="sorting">Experience</option>
-									</select>
-								</span>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			/Breadcrumb -->
 
           <!-- Page Content -->
           <div class="content">
             <div class="container-fluid">
-              <% if (successMessage && successMessage.length > 0) { %>
-              <div
-                class="alert alert-success alert-dismissible fade show"
-                role="alert"
-              >
-                <%= successMessage %>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="alert"
-                  aria-label="Close"
-                ></button>
-              </div>
-              <% } %> <% if (errorMessage && errorMessage.length > 0) { %>
-              <div
-                class="alert alert-danger alert-dismissible fade show"
-                role="alert"
-              >
-                <%= errorMessage %>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="alert"
-                  aria-label="Close"
-                ></button>
-              </div>
+              <!-- Flash Messages -->
+              <% if (messages.success && messages.success.length > 0) { %>
+                <div class="flash-messages">
+                  <% messages.success.forEach(function(message) { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                      <%= message %>
+                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                  <% }); %>
+                </div>
               <% } %>
+              <% if (messages.error && messages.error.length > 0) { %>
+                <div class="flash-messages">
+                  <% messages.error.forEach(function(message) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                      <%= message %>
+                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                  <% }); %>
+                </div>
+              <% } %>
+
               <div class="row">
                 <div class="col-md-12 col-lg-4 col-xl-3 theiaStickySidebar">
                   <!-- Search Filter -->
@@ -254,45 +210,44 @@
                           <h4>Gender</h4>
                           <div>
                             <label class="custom_check">
-                              <input type="radio" name="gender" value="Male" <%
-                              if (selectedGender === 'Male') { %>checked<% } %>
-                              />
+                              <input type="radio" name="gender" value="Male" <% if (selectedGender === 'Male') { %>checked<% } %> />
                               <span class="checkmark"></span> Male Therapist
                             </label>
                           </div>
                           <div>
                             <label class="custom_check">
-                              <input type="radio" name="gender" value="Female"
-                              <% if (selectedGender === 'Female') { %>checked<%
-                              } %> />
+                              <input type="radio" name="gender" value="Female" <% if (selectedGender === 'Female') { %>checked<% } %> />
                               <span class="checkmark"></span> Female Therapist
                             </label>
                           </div>
+                          <div>
+                            <label class="custom_check">
+                              <input type="radio" name="gender" value="" <% if (!selectedGender) { %>checked<% } %> />
+                              <span class="checkmark"></span> Any
+                            </label>
+                          </div>
                         </div>
-<!-- Specialty Filter -->
-<div class="filter-widget">
-  <h4>Select Specialist</h4>
-  <% let specialtiesList = ["PTSD", "OCD", "Depression", "Anxiety"]; %>
-  <% specialtiesList.forEach(function(specialty) { %>
-    <div>
-      <label class="custom_check">
-        <input
-          type="checkbox"
-          name="specialties"
-          value="<%= specialty %>"
-          <% if (selectedSpecialties && selectedSpecialties.includes(specialty)) { %>
-            checked
-          <% } %>
-        />
-        <span class="checkmark"></span> <%= specialty %>
-      </label>
-    </div>
-  <% }); %>
-</div>
-
+                        
+                        <!-- Specialty Filter -->
+                        <div class="filter-widget">
+                          <h4>Select Specialty</h4>
+                          <% specialtyOptions.forEach(function(specialty) { %>
+                            <div>
+                              <label class="custom_check">
+                                <input
+                                  type="checkbox"
+                                  name="specialties"
+                                  value="<%= specialty %>"
+                                  <% if (selectedSpecialties && selectedSpecialties.includes(specialty)) { %>checked<% } %>
+                                />
+                                <span class="checkmark"></span> <%= specialty %>
+                              </label>
+                            </div>
+                          <% }); %>
+                        </div>
                         <!-- Search Button -->
                         <div class="btn-search">
-                          <button type="submit" class="btn btn-block">
+                          <button type="submit" class="btn btn-block btn-primary">
                             Search
                           </button>
                         </div>
@@ -308,82 +263,74 @@
                       <div class="card">
                         <div class="card-body">
                           <div class="table-responsive">
-                            <table
-                              class="datatable table table-hover table-center mb-0"
-                            >
+                            <table class="datatable table table-hover table-center mb-0">
                               <thead>
                                 <tr>
-                                  <th>Doctor Name</th>
-                                  <th>Speciality</th>
+                                  <th>Therapist Name</th>
+                                  <th>Specialty</th>
+                                  <th>Badge</th>
                                   <th>Fee</th>
-                                  <th></th>
                                   <th>Action</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 <% if (therapists && therapists.length > 0) { %>
-                                <% therapists.forEach(function(therapist) { %>
-                                <tr>
-                                  <td>
-                                    <h2 class="table-avatar">
-                                      <a
-                                        href="/client/therapist-profile/<%= therapist._id %>"
-                                        class="avatar avatar-sm mr-2"
-                                      >
-                                        <img
-                                          class="avatar-img rounded-circle"
-                                          src="<%= therapist.profilePicture %>"
-                                          alt="Therapist Image"
-                                        />
-                                      </a>
-                                      <a
-                                        href="/client/therapist-profile/<%= therapist._id %>"
-                                      >
-                                        <%= therapist.username %>
-                                      </a>
-                                    </h2>
-                                  </td>
-                                  <td>
-                                    <% if (therapist.specialties &&
-                                    therapist.specialties.length > 0) { %> <%=
-                                    therapist.specialties.join(', ') %> <% }
-                                    else { %> N/A <% } %>
-                                  </td>
-                                  <td>Rs.<%= therapist.fee %></td>
-                                  <td>
-                                    <a
-                                      href="/client/therapist-profile/<%= therapist._id %>"
-                                    >
-                                      View Profile
-                                    </a>
-                                  </td>
-                                  <td>
-                                    <a
-                                      href="/client/therapist-booking/<%= therapist._id %>"
-                                      class="btn btn-danger"
-                                    >
-                                      Book session
-                                    </a>
-                                  </td>
-                                </tr>
-                                <% }); %> <% } else { %>
-                                <tr>
-                                  <td colspan="5" class="text-center">
-                                    No therapists found matching your criteria.
-                                  </td>
-                                </tr>
+                                  <% therapists.forEach(function(therapist) { %>
+                                    <tr>
+                                      <td>
+                                        <h2 class="table-avatar">
+                                          <a href="/client/therapist-profile/<%= therapist._id %>" class="avatar avatar-sm mr-2">
+                                            <img
+                                              class="avatar-img rounded-circle"
+                                              src="<%= therapist.profilePicture || '/img/profiles/default.jpg' %>"
+                                              alt="Therapist Image"
+                                            />
+                                          </a>
+                                          <a href="/client/therapist-profile/<%= therapist._id %>">
+                                            <%= therapist.firstName %> <%= therapist.lastName %>
+                                          </a>
+                                        </h2>
+                                      </td>
+                                      <td>
+                                        <% if (therapist.specialties && therapist.specialties.length > 0) { %>
+                                          <%= therapist.specialties.join(', ') %>
+                                        <% } else { %>
+                                          N/A
+                                        <% } %>
+                                      </td>
+                                      <td>
+                                        <% if (therapist.badge) { %>
+                                          <%= therapist.badge === 1 ? 'Mild' : therapist.badge === 2 ? 'Moderate' : 'Severe' %>
+                                        <% } else { %>
+                                          Not specified
+                                        <% } %>
+                                      </td>
+                                      <td>Rs.<%= therapist.fee %></td>
+                                      <td>
+                                        <a href="/client/therapist-booking/<%= therapist._id %>" class="btn btn-primary btn-sm">
+                                          Book Session
+                                        </a>
+                                        <a href="/client/therapist-profile/<%= therapist._id %>" class="btn btn-outline-info btn-sm">
+                                          View Profile
+                                        </a>
+                                      </td>
+                                    </tr>
+                                  <% }); %>
+                                <% } else { %>
+                                  <tr>
+                                    <td colspan="5" class="text-center">
+                                      No therapists found matching your criteria. Try adjusting the filters.
+                                    </td>
+                                  </tr>
                                 <% } %>
                               </tbody>
                             </table>
                           </div>
-
-                          <div class="load-more text-center mt-4">
-                            <a
-                              class="btn btn-primary btn-sm"
-                              href="javascript:void(0);"
-                              >Load More</a
-                            >
-                          </div>
+                          <% if (therapists && therapists.length > 0) { %>
+                            <div class="load-more text-center mt-4">
+                              <a class="btn btn-primary btn-sm" href="javascript:void(0);">Load More</a>
+                            </div>
+                          <% } %>
                         </div>
                       </div>
                     </div>
@@ -425,5 +372,34 @@
 
     <!-- Custom JS -->
     <script src="/js/script.js"></script>
+    <script>
+      $(document).ready(function() {
+        // Destroy existing DataTable if it exists
+        if ($.fn.DataTable.isDataTable('.datatable')) {
+          $('.datatable').DataTable().destroy();
+        }
+
+        // Initialize DataTable
+        $('.datatable').DataTable({
+          "pageLength": 10,
+          "order": [[0, "asc"]],
+          "destroy": true // Ensure DataTable can be reinitialized
+        });
+
+        // Display success message from localStorage
+        const successMessage = localStorage.getItem('successMessage');
+        if (successMessage) {
+          const flashMessages = $('<div class="flash-messages"></div>');
+          flashMessages.append(`
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              ${successMessage}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          `);
+          $('.container-fluid').prepend(flashMessages);
+          localStorage.removeItem('successMessage');
+        }
+      });
+    </script>
   </body>
 </html>

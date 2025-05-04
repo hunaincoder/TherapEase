@@ -88,150 +88,158 @@
         </button>
       </form>
 
-      
+      <!-- Result Display Section -->
+      <div id="result" class="result hidden">
+        <p>Total Score: <span id="totalScore"></span></p>
+        <p>Severity: <span id="severity"></span></p>
+        <p>Badge: <span id="badge" class="badge"></span></p>
+      </div>
 
-    <script>
-      const situations = [
-        "Using a telephone in public",
-        "Participating in a small group activity",
-        "Eating in public",
-        "Drinking with others",
-        "Talking to someone in authority",
-        "Acting, performing, or speaking in front of an audience",
-        "Going to a party",
-        "Working while being observed",
-        "Writing while being observed",
-        "Calling someone you don't know very well",
-        "Talking face-to-face with someone you don't know very well",
-        "Meeting strangers",
-        "Urinating in a public bathroom",
-        "Entering a room when others are already seated",
-        "Being the center of attention",
-        "Speaking up at a meeting",
-        "Taking a test of your ability, skill, or knowledge",
-        "Expressing disagreement or disapproval to someone you don't know very well",
-        "Looking someone who you don't know very well straight in the eyes",
-        "Giving a prepared oral talk to a group",
-        "Trying to make someone's acquaintance for the purpose of a romantic/sexual relationship",
-        "Returning goods to a store for a refund",
-        "Giving a party",
-        "Resisting a high-pressure salesperson",
-      ];
+      <script>
+        const situations = [
+          "Using a telephone in public",
+          "Participating in a small group activity",
+          "Eating in public",
+          "Drinking with others",
+          "Talking to someone in authority",
+          "Acting, performing, or speaking in front of an audience",
+          "Going to a party",
+          "Working while being observed",
+          "Writing while being observed",
+          "Calling someone you don't know very well",
+          "Talking face-to-face with someone you don't know very well",
+          "Meeting strangers",
+          "Urinating in a public bathroom",
+          "Entering a room when others are already seated",
+          "Being the center of attention",
+          "Speaking up at a meeting",
+          "Taking a test of your ability, skill, or knowledge",
+          "Expressing disagreement or disapproval to someone you don't know very well",
+          "Looking someone who you don't know very well straight in the eyes",
+          "Giving a prepared oral talk to a group",
+          "Trying to make someone's acquaintance for the purpose of a romantic/sexual relationship",
+          "Returning goods to a store for a refund",
+          "Giving a party",
+          "Resisting a high-pressure salesperson",
+        ];
 
-      const scaleName = "<%= recommendedScale %>";
+        const scaleName = "<%= recommendedScale %>";
 
-      function createQuestionForm() {
-        const container = document.getElementById("questionsContainer");
+        function createQuestionForm() {
+          const container = document.getElementById("questionsContainer");
 
-        situations.forEach((situation, index) => {
-          const row = document.createElement("tr");
+          situations.forEach((situation, index) => {
+            const row = document.createElement("tr");
 
-          const situationCell = document.createElement("td");
-          situationCell.textContent = `${index + 1}. ${situation}`;
-          row.appendChild(situationCell);
+            const situationCell = document.createElement("td");
+            situationCell.textContent = `${index + 1}. ${situation}`;
+            row.appendChild(situationCell);
 
-          const fearCell = document.createElement("td");
-          const fearGroup = document.createElement("div");
-          fearGroup.className = "flex justify-center gap-2";
+            const fearCell = document.createElement("td");
+            const fearGroup = document.createElement("div");
+            fearGroup.className = "flex justify-center gap-2";
 
-          for (let i = 0; i < 4; i++) {
-            const label = document.createElement("label");
-            label.className = "inline-flex items-center";
+            for (let i = 0; i < 4; i++) {
+              const label = document.createElement("label");
+              label.className = "inline-flex items-center";
 
-            const radio = document.createElement("input");
-            radio.type = "radio";
-            radio.name = `fear${index + 1}`;
-            radio.value = i;
-            radio.className = "mr-1";
-            radio.required = true;
+              const radio = document.createElement("input");
+              radio.type = "radio";
+              radio.name = `fear${index + 1}`;
+              radio.value = i;
+              radio.className = "mr-1";
+              radio.required = true;
 
-            label.appendChild(radio);
-            label.appendChild(document.createTextNode(i));
-            fearGroup.appendChild(label);
-          }
+              label.appendChild(radio);
+              label.appendChild(document.createTextNode(i));
+              fearGroup.appendChild(label);
+            }
 
-          fearCell.appendChild(fearGroup);
-          row.appendChild(fearCell);
+            fearCell.appendChild(fearGroup);
+            row.appendChild(fearCell);
 
-          const avoidCell = document.createElement("td");
-          const avoidGroup = document.createElement("div");
-          avoidGroup.className = "flex justify-center gap-2";
+            const avoidCell = document.createElement("td");
+            const avoidGroup = document.createElement("div");
+            avoidGroup.className = "flex justify-center gap-2";
 
-          for (let i = 0; i < 4; i++) {
-            const label = document.createElement("label");
-            label.className = "inline-flex items-center";
+            for (let i = 0; i < 4; i++) {
+              const label = document.createElement("label");
+              label.className = "inline-flex items-center";
 
-            const radio = document.createElement("input");
-            radio.type = "radio";
-            radio.name = `avoid${index + 1}`;
-            radio.value = i;
-            radio.className = "mr-1";
-            radio.required = true;
+              const radio = document.createElement("input");
+              radio.type = "radio";
+              radio.name = `avoid${index + 1}`;
+              radio.value = i;
+              radio.className = "mr-1";
+              radio.required = true;
 
-            label.appendChild(radio);
-            label.appendChild(document.createTextNode(i));
-            avoidGroup.appendChild(label);
-          }
+              label.appendChild(radio);
+              label.appendChild(document.createTextNode(i));
+              avoidGroup.appendChild(label);
+            }
 
-          avoidCell.appendChild(avoidGroup);
-          row.appendChild(avoidCell);
+            avoidCell.appendChild(avoidGroup);
+            row.appendChild(avoidCell);
 
-          container.appendChild(row);
-        });
-      }
-
-      async function calculateScore() {
-        let fearScore = 0;
-        let avoidanceScore = 0;
-
-        for (let i = 1; i <= situations.length; i++) {
-          const fearSelected = document.querySelector(
-            `input[name="fear${i}"]:checked`
-          );
-          const avoidSelected = document.querySelector(
-            `input[name="avoid${i}"]:checked`
-          );
-
-          if (!fearSelected || !avoidSelected) {
-            alert(`Please answer all questions for situation ${i}`);
-            return;
-          }
-
-          fearScore += parseInt(fearSelected.value);
-          avoidanceScore += parseInt(avoidSelected.value);
+            container.appendChild(row);
+          });
         }
 
-        const totalScore = fearScore + avoidanceScore;
+        async function calculateScore() {
+          let fearScore = 0;
+          let avoidanceScore = 0;
 
-        let severity;
-        let severityClass;
-        let badge;
-        let badgeClass;
+          for (let i = 1; i <= situations.length; i++) {
+            const fearSelected = document.querySelector(
+              `input[name="fear${i}"]:checked`
+            );
+            const avoidSelected = document.querySelector(
+              `input[name="avoid${i}"]:checked`
+            );
 
-        if (totalScore <= 49) {
-          severity = "Mild social anxiety";
-          severityClass = "mild";
-          badge = "1";
-          badgeClass = "badge-1";
-        } else if (totalScore >= 50 && totalScore <= 79) {
-          severity = "Moderate social anxiety";
-          severityClass = "moderate";
-          badge = "2";
-          badgeClass = "badge-2";
-        } else {
-          severity = "Severe social anxiety";
-          severityClass = "severe";
-          badge = "3";
-          badgeClass = "badge-3";
-        }
+            if (!fearSelected || !avoidSelected) {
+              alert(`Please answer all questions for situation ${i}`);
+              return;
+            }
 
-        document.getElementById("totalScore").textContent = totalScore;
-        document.getElementById("severity").textContent = severity;
+            fearScore += parseInt(fearSelected.value);
+            avoidanceScore += parseInt(avoidSelected.value);
+          }
 
-        const badgeSpan = document.getElementById("badge");
-        badgeSpan.textContent = badge;
-        badgeSpan.className = `badge ${badgeClass}`;
+          const totalScore = fearScore + avoidanceScore;
 
+          let severity;
+          let severityClass;
+          let badge;
+          let badgeClass;
+
+          if (totalScore <= 49) {
+            severity = "Mild social anxiety";
+            severityClass = "mild";
+            badge = "1";
+            badgeClass = "badge-1";
+          } else if (totalScore >= 50 && totalScore <= 79) {
+            severity = "Moderate social anxiety";
+            severityClass = "moderate";
+            badge = "2";
+            badgeClass = "badge-2";
+          } else {
+            severity = "Severe social anxiety";
+            severityClass = "severe";
+            badge = "3";
+            badgeClass = "badge-3";
+          }
+
+          const resultDiv = document.getElementById("result");
+          document.getElementById("totalScore").textContent = totalScore;
+          document.getElementById("severity").textContent = severity;
+          const badgeSpan = document.getElementById("badge");
+          badgeSpan.textContent = badge;
+          badgeSpan.className = `badge ${badgeClass}`;
+          resultDiv.className = `result ${severityClass} hidden`;
+          setTimeout(() => {
+            resultDiv.classList.remove("hidden");
+          }, 10);
 
           try {
             const response = await fetch("/client/save-scale-results", {
@@ -251,14 +259,16 @@
               throw new Error(data.error || "Failed to save scale results");
             }
 
-            window.location.href = "/client/dashboard";
+            window.location.href = data.redirect || "/client/patient-profile";
           } catch (error) {
             console.error("Error saving scale results:", error);
             alert(`Error: ${error.message}`);
+            resultDiv.classList.add("hidden"); 
           }
-      }
+        }
 
-      createQuestionForm();
-    </script>
+        createQuestionForm();
+      </script>
+    </div>
   </body>
 </html>

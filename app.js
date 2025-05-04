@@ -10,7 +10,9 @@ const flash = require("connect-flash");
 const ConnectMongo = require("./config/DB");
 const mongoose = require("mongoose");
 require("dotenv").config();
-const { scheduleAppointmentStatusUpdate } = require("./jobs/updateAppointmentStatus");
+const {
+  scheduleAppointmentStatusUpdate,
+} = require("./jobs/updateAppointmentStatus");
 
 var indexRouter = require("./routes/index");
 var TherapistRoutes = require("./routes/therapistroutes");
@@ -29,61 +31,51 @@ app.use(cookieParser());
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-
 ConnectMongo().then(() => {
   console.log("MongoDB connected, starting appointment status cron job");
   scheduleAppointmentStatusUpdate();
 });
 
-const adminSession = session({
-  name: "admin.sid",
+const sessionOptions = {
   secret: process.env.SESSION_SECRET || "hunain",
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+  }),
+  cookie: {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+    maxAge: 24 * 60 * 60 * 1000,
+  },
+};
+
+const adminSession = session({
+  ...sessionOptions,
+  name: "admin.sid",
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
     collectionName: "admin_sessions",
   }),
-  cookie: {
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-    sameSite: "strict",
-    maxAge: 24 * 60 * 60 * 1000,
-  },
 });
 
 const therapistSession = session({
+  ...sessionOptions,
   name: "therapist.sid",
-  secret: process.env.SESSION_SECRET || "hunain",
-  resave: false,
-  saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
     collectionName: "therapist_sessions",
   }),
-  cookie: {
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-    sameSite: "strict",
-    maxAge: 24 * 60 * 60 * 1000,
-  },
 });
 
 const patientSession = session({
+  ...sessionOptions,
   name: "patient.sid",
-  secret: process.env.SESSION_SECRET || "hunain",
-  resave: false,
-  saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
     collectionName: "patient_sessions",
   }),
-  cookie: {
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-    sameSite: "strict",
-    maxAge: 24 * 60 * 60 * 1000,
-  },
 });
 
 app.use((req, res, next) => {

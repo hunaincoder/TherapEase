@@ -44,14 +44,22 @@ router.get(
   "/auth/google/callback",
   passport.authenticate("therapist-google", {
     failureRedirect: "/therapist/login",
+    failureFlash: true,
   }),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
-      console.log("Google OAuth callback triggered");
       const therapist = await TherapistModel.findById(req.user._id);
       if (!therapist) {
-        console.error("Therapist not found in database");
-        return res.status(404).send("Therapist not found");
+        req.flash("error", "Therapist not found");
+        return res.redirect("/therapist/login");
+      }
+
+      if (therapist.status === "Rejected") {
+        req.logout((err) => {
+          if (err) console.error("Error logging out:", err);
+        });
+        req.flash("error", "Your account has been rejected");
+        return res.redirect("/therapist/login");
       }
 
       const isProfileComplete =
@@ -60,36 +68,40 @@ router.get(
         therapist.specialties &&
         therapist.specialties.length > 0;
 
-      if (therapist.status === "Rejected") {
-        console.log("Therapist account rejected");
-        req.logout(() => {});
-        return res.status(403).send("Your account has been rejected");
-      }
-
       if (!isProfileComplete && therapist.status === "Pending") {
-        console.log("Redirecting to profile setup");
-        return res.redirect("/therapist/profile-setup");
+        req.flash("info", "Please complete your profile setup");
+        req.session.save((err) => {
+          if (err) {
+            console.error("Error saving session:", err);
+            req.flash("error", "Failed to save session");
+            return res.redirect("/therapist/login");
+          }
+          res.redirect("/therapist/profile-setup");
+        });
+        return;
       }
 
       if (therapist.status !== "Approved") {
-        console.log(
-          "Therapist not approved, showing registration complete page"
-        );
-        req.logout(() => {});
+        req.logout((err) => {
+          if (err) console.error("Error logging out:", err);
+        });
+        req.flash("info", "Your account is pending approval");
         return res.render("therapist/registration-complete");
       }
 
-      console.log("Therapist logged in successfully");
-      req.session.therapist = {
-        id: therapist._id,
-        email: therapist.email,
-        status: therapist.status,
-      };
-
-      res.redirect("/therapist/dashboard");
+      req.flash("success", "Successfully logged in");
+      req.session.save((err) => {
+        if (err) {
+          console.error("Error saving session:", err);
+          req.flash("error", "Failed to save session");
+          return res.redirect("/therapist/login");
+        }
+        res.redirect("/therapist/dashboard");
+      });
     } catch (error) {
       console.error("Error in Google OAuth callback:", error);
-      res.status(500).send("Internal Server Error");
+      req.flash("error", "Internal Server Error");
+      res.redirect("/therapist/login");
     }
   }
 );
