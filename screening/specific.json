@@ -1,0 +1,58 @@
+{
+  "Depression (PHQ 9)": [
+    "Can you describe your mood over the past few weeks or months? Have you experienced feelings of sadness, hopelessness, or emptiness?",
+    "How often do you struggle with finding motivation or interest in activities you used to enjoy?"
+  ],
+  "Anxiety (GAD-7)": [
+    "Can you describe situations that make you feel anxious or worried? How does this anxiety affect your ability to concentrate or relax?",
+    "Do you experience physical symptoms such as restlessness, a racing heart, or difficulty breathing when you feel anxious?"
+  ],
+  "Body Image (BSQ)": [
+    "How do you currently feel about your body and physical appearance? Are there specific aspects that you think about frequently?",
+    "Have you ever avoided certain activities, people, or situations because of concerns about your body image?"
+  ],
+  "PTSD (PCL-5)": [
+    "Have you experienced a traumatic event that continues to affect you emotionally or physically? Can you share how this impacts your daily life?",
+    "Do you experience nightmares, flashbacks, or intrusive thoughts related to the event?"
+  ],
+  "Alcohol Use (AUDIT)": [
+    "Can you describe your current relationship with alcohol? How often do you consume it, and what situations usually lead you to drink?",
+    "Have you noticed any impact of alcohol on your health, relationships, or responsibilities? Can you provide examples?"
+  ],
+  "Drug Use (DAST-10)": [
+    "Can you explain your experience with using drugs, including the type and frequency? What led you to start, and how has your usage changed over time?",
+    "How does drug use affect your daily life, including your health, relationships, or work?"
+  ],
+  "Grief and Loss (ICG)": [
+    "Can you describe your experience with loss? How has it impacted your emotions and daily life?",
+    "How often do memories of the loss interfere with your ability to focus or enjoy life?"
+  ],
+  "Identity Crisis (SCS)": [
+    "Can you describe any feelings of confusion or uncertainty about who you are or what you want in life?",
+    "Do you feel pressured or influenced by others when it comes to defining your identity?"
+  ],
+  "OCD (OCI-R)": [
+    "Do you experience repetitive thoughts or worries that you find hard to control? Can you provide examples?",
+    "Have you noticed any behaviors or rituals you feel compelled to repeat to ease your anxiety?"
+  ],
+  "Self-Esteem (Rosenberg Self-Esteem Scale)": [
+    "How do you generally feel about yourself and your abilities? Are there specific situations that make you doubt yourself?",
+    "Have you ever avoided opportunities or challenges because of low confidence?"
+  ],
+  "Sleep disorder (ESS)": [
+    "Do you often feel excessively tired during the day, even after a full night's sleep? How does this affect your daily routine?",
+    "Have others commented on your tendency to fall asleep in inappropriate situations?"
+  ], 
+  "Sleep Disorder Insomnia (ISI)": [
+    "Can you describe your sleeping habits, including how long it takes you to fall asleep and how often you wake up during the night?",
+    "How do your sleep patterns affect your mood, energy levels, or concentration during the day?"
+  ],
+  "Social Anxiety (LSAS)": [
+    "Can you describe how you feel in social situations, particularly around unfamiliar people?",
+    "Have you ever avoided events or gatherings because of fear of being judged or embarrassed?"
+  ], 
+  "Stress (PSS)": [
+    "What situations or responsibilities are currently causing you stress? Can you describe how they make you feel?",
+    "How do you typically cope with stress, and have your coping methods been effective recently?"
+  ]
+}

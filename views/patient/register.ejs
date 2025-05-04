@@ -1,96 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
-    
-<head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-        <title>TherapEase - Register</title>
-		
-		<!-- Favicon -->
-        <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png">
-		
-		<!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="/css/bootstrap.min.css">
-		
-		<!-- Fontawesome CSS -->
-        <link rel="stylesheet" href="/css/font-awesome.min.css">
-		
-		<!-- Main CSS -->
-        <link rel="stylesheet" href="/css/style.css">
-		
-		
-		<!--[if lt IE 9]>
-			<script src="assets/js/html5shiv.min.js"></script>
-			<script src="assets/js/respond.min.js"></script>
-		<![endif]-->
-    </head>
-    <body>
-		<script src="/js/validations.js"></script>
-		<!-- Main Wrapper -->
-        <div class="main-wrapper login-body">
-            <div class="login-wrapper">
-            	<div class="container">
-                	<div class="loginbox">
-                    	<div class="login-left">
-							<img class="img-fluid" src="/img/logo.png" alt="Logo">
-                        </div>
-                        <div class="login-right">
-							<div class="login-right-wrap">
-								<h1>Register</h1>
-								<p class="account-subtitle">Access to our dashboard</p>
-								
-								<!-- Form -->
-								<form action="/client/register" method="post" onsubmit="return RegisterVal()">
-									<div class="form-group">
-										<input class="form-control" type="text" placeholder="Name" name="username" id="regName">
-									</div>
-									<div class="form-group">
-										<input class="form-control" type="email" placeholder="Email" name="email" id="regEmail">
-									</div>
-									<div class="form-group">
-										<input class="form-control" type="password" placeholder="Password" name="password" id="regPass">
-									</div>
-									<div class="form-group mb-0">
-										<button class="btn btn-primary btn-block" type="submit">Register</button>
-									</div>
-								</form>
-								<!-- /Form -->
-								
-								<div class="login-or">
-									<span class="or-line"></span>
-									<span class="span-or">or</span>
-								</div>
-								
-								<!-- Social Login -->
-								<div class="social-login">
-									<span>Register with</span>
-									<a href="/client/auth/google" class="google"><i class="fa fa-google"></i></a>
-								</div>
-								<!-- /Social Login -->
-								
-								<div class="text-center dont-have">Already have an account? <a href="/client/login">Login</a></div>
-							</div>
-                        </div>
-                    </div>
-                </div>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=0"
+    />
+    <title>TherapEase - Register</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png" />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" href="/css/font-awesome.min.css" />
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <!--[if lt IE 9]>
+      <script src="assets/js/html5shiv.min.js"></script>
+      <script src="assets/js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <script src="/js/validations.js"></script>
+    <!-- Main Wrapper -->
+    <div class="main-wrapper login-body">
+      <div class="login-wrapper">
+        <div class="container">
+          <% if (successMessage && successMessage.length > 0) { %>
+          <div
+            class="alert alert-success alert-dismissible fade show"
+            role="alert"
+          >
+            <%= successMessage %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          <% } %> <% if (errorMessage && errorMessage.length > 0) { %>
+          <div
+            class="alert alert-danger alert-dismissible fade show"
+            role="alert"
+          >
+            <%= errorMessage %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          <% } %>
+          <div class="loginbox">
+            <div class="login-left">
+              <img class="img-fluid" src="/img/logo.png" alt="Logo" />
             </div>
+            <div class="login-right">
+              <div class="login-right-wrap">
+                <h1>Register</h1>
+                <p class="account-subtitle">Access to our dashboard</p>
+
+                <!-- Form -->
+                <form
+                  action="/client/register"
+                  method="post"
+                  onsubmit="return RegisterVal()"
+                >
+                  <div class="form-group">
+                    <input
+                      class="form-control"
+                      type="text"
+                      placeholder="Name"
+                      name="username"
+                      id="regName"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <input
+                      class="form-control"
+                      type="email"
+                      placeholder="Email"
+                      name="email"
+                      id="regEmail"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <input
+                      class="form-control"
+                      type="password"
+                      placeholder="Password"
+                      name="password"
+                      id="regPass"
+                    />
+                  </div>
+                  <div class="form-group mb-0">
+                    <button class="btn btn-primary btn-block" type="submit">
+                      Register
+                    </button>
+                  </div>
+                </form>
+                <!-- /Form -->
+
+                <div class="login-or">
+                  <span class="or-line"></span>
+                  <span class="span-or">or</span>
+                </div>
+
+                <!-- Social Login -->
+                <div class="social-login">
+                  <span>Register with</span>
+                  <a href="/client/auth/google" class="google"
+                    ><i class="fa fa-google"></i
+                  ></a>
+                </div>
+                <!-- /Social Login -->
+
+                <div class="text-center dont-have">
+                  Already have an account? <a href="/client/login">Login</a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-		<!-- /Main Wrapper -->
-		
-		<!-- Validations -->
-		<script src="/js/validations.js"></script>
+      </div>
+    </div>
+    <!-- /Main Wrapper -->
 
-		<!-- jQuery -->
-        <script src="/js/jquery-3.2.1.min.js"></script>
-		
-		<!-- Bootstrap Core JS -->
-        <script src="/js/popper.min.js"></script>
-        <script src="/js/bootstrap.min.js"></script>
-		
-		<!-- Custom JS -->
-		<script  src="/js/script.js"></script>
-		
-		
-    </body>
+    <!-- Validations -->
+    <script src="/js/validations.js"></script>
 
+    <!-- jQuery -->
+    <script src="/js/jquery-3.2.1.min.js"></script>
+
+    <!-- Bootstrap Core JS -->
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="/js/script.js"></script>
+  </body>
 </html>

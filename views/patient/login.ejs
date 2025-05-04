@@ -29,6 +29,33 @@
         <div class="main-wrapper login-body">
             <div class="login-wrapper">
             	<div class="container">
+					<% if (successMessage && successMessage.length > 0) { %>
+						<div
+						  class="alert alert-success alert-dismissible fade show"
+						  role="alert"
+						>
+						  <%= successMessage %>
+						  <button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="alert"
+							aria-label="Close"
+						  ></button>
+						</div>
+						<% } %> <% if (errorMessage && errorMessage.length > 0) { %>
+						<div
+						  class="alert alert-danger alert-dismissible fade show"
+						  role="alert"
+						>
+						  <%= errorMessage %>
+						  <button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="alert"
+							aria-label="Close"
+						  ></button>
+						</div>
+						<% } %>
                 	<div class="loginbox">
                     	<div class="login-left">
 							<img class="img-fluid" src="/img/logo.png" alt="Logo">

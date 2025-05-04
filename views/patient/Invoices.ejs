@@ -167,7 +167,33 @@
 			<!-- Page Wrapper -->
             <div class="page-wrapper">
                 <div class="content container-fluid">
-				
+					<% if (successMessage && successMessage.length > 0) { %>
+						<div
+						  class="alert alert-success alert-dismissible fade show"
+						  role="alert"
+						>
+						  <%= successMessage %>
+						  <button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="alert"
+							aria-label="Close"
+						  ></button>
+						</div>
+						<% } %> <% if (errorMessage && errorMessage.length > 0) { %>
+						<div
+						  class="alert alert-danger alert-dismissible fade show"
+						  role="alert"
+						>
+						  <%= errorMessage %>
+						  <button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="alert"
+							aria-label="Close"
+						  ></button>
+						</div>
+						<% } %>
 					<!-- Page Header -->
 					<div class="page-header">
 						<div class="row">

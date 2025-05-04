@@ -10,7 +10,13 @@ const AppointmentModel = require("../models/appointments");
 const TransactionModel = require("../models/transaction");
 const flash = require("connect-flash");
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+const fs = require("fs").promises;
+const path = require("path");
+const multer = require("multer");
+const upload = multer();
 
+router.use(flash());
 router.use(authRoutes);
 
 passport.use(
@@ -49,31 +55,42 @@ function getOrdinal(n) {
 }
 
 router.get("/login", function (req, res) {
-  res.render("patient/login");
+  res.render("patient/login", { messages: req.flash() });
 });
 
 router.post("/login", (req, res, next) => {
   passport.authenticate("patient-local", (err, user, info) => {
     if (err) {
       console.error("Authentication error:", err);
-      return res.status(500).send("Authentication error");
+      req.flash("error", "Authentication error");
+      return res.redirect("/client/login");
     }
     if (!user) {
       console.log("Login failed:", info.message);
-      return res.status(400).send(info.message);
+      req.flash("error", info.message);
+      return res.redirect("/client/login");
     }
-    req.login(user, (loginErr) => {
+    req.login(user, async (loginErr) => {
       if (loginErr) {
         console.error("Login error:", loginErr);
-        return res.status(500).send("Login failed");
+        req.flash("error", "Login failed");
+        return res.redirect("/client/login");
       }
+      if (!user.hasCompletedScreening) {
+        req.flash(
+          "success",
+          "Successfully logged in. Please complete the screening."
+        );
+        return res.redirect("/client/screening");
+      }
+      req.flash("success", "Successfully logged in");
       res.redirect("/client/dashboard");
     });
   })(req, res, next);
 });
 
 router.get("/register", function (req, res) {
-  res.render("patient/register");
+  res.render("patient/register", { messages: req.flash() });
 });
 
 router.post("/register", async function (req, res) {
@@ -81,17 +98,20 @@ router.post("/register", async function (req, res) {
 
   try {
     if (!username || !email || !password) {
-      return res.status(400).send("All fields are required");
+      req.flash("error", "All fields are required");
+      return res.redirect("/client/register");
     }
 
     const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!emailPattern.test(email)) {
-      return res.status(400).send("Invalid email format");
+      req.flash("error", "Invalid email format");
+      return res.redirect("/client/register");
     }
 
     const existingPatient = await patientModel.findOne({ email: email });
     if (existingPatient) {
-      return res.status(400).send("Email already in use");
+      req.flash("error", "Email already in use");
+      return res.redirect("/client/register");
     }
 
     const patient = new patientModel({
@@ -103,31 +123,162 @@ router.post("/register", async function (req, res) {
     patientModel.register(patient, password, async function (err, newPatient) {
       if (err) {
         console.error(err);
-        return res.status(500).send("Error registering patient");
+        req.flash("error", "Error registering patient");
+        return res.redirect("/client/register");
       }
 
       req.login(newPatient, (loginErr) => {
         if (loginErr) {
-          return res
-            .status(500)
-            .send("Registration successful, but login failed");
+          req.flash("error", "Registration successful, but login failed");
+          return res.redirect("/client/register");
         }
+        req.flash("success", "Successfully registered and logged in");
         res.redirect("/client/dashboard");
       });
     });
   } catch (err) {
     console.log(err);
-    res.status(400).send("Error occurred during signup");
+    req.flash("error", "Error occurred during signup");
+    res.redirect("/client/register");
   }
+});
+
+router.get("/screening", isLoggedIn, (req, res) => {
+  res.render("patient/screening", { messages: req.flash() });
+});
+
+router.get("/followup", isLoggedIn, (req, res) => {
+  res.render("patient/followup", { messages: req.flash() });
+});
+
+router.post("/followup", isLoggedIn, upload.none(), async (req, res) => {
+  try {
+    const { answers, finalScale, rationale } = req.body;
+
+    console.log("Received followup data:", {
+      answers,
+      finalScale,
+      rationale,
+    });
+
+    // Ensure finalScale and rationale are provided
+    if (!finalScale || !rationale) {
+      throw new Error("finalScale and rationale are required");
+    }
+
+    // Update the database with the recommended scale and rationale
+    const updatedPatient = await patientModel.findByIdAndUpdate(
+      req.user._id,
+      {
+        hasCompletedScreening: true,
+        recommendedScale: finalScale,
+        rationale: rationale,
+      },
+      { new: true }
+    );
+
+    console.log("Updated patient in database:", updatedPatient);
+
+    return res.json({
+      redirect: `/client/scale/${finalScale.replace(/ /g, "_")}`,
+    });
+  } catch (error) {
+    console.error("Follow-up error:", error);
+    req.flash("error", `Error processing follow-up: ${error.message}`);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/submit-followup", isLoggedIn, async (req, res) => {
+  const { scale, reason } = req.body;
+
+  if (!scale || !reason) {
+    return res.status(400).json({ error: "Scale and reason are required." });
+  }
+
+  try {
+    const patient = await patientModel.findById(req.user._id);
+    patient.recommendedScale = scale;
+    patient.rationale = reason;
+    patient.hasCompletedScreening = true;
+
+    await patient.save();
+    res.status(200).json({ message: "Follow-up submitted successfully." });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to submit follow-up." });
+  }
+});
+
+router.get("/scale/:scaleName", isLoggedIn, async (req, res) => {
+  const scaleName = req.params.scaleName.replace(/_/g, " ");
+  const patient = await patientModel.findById(req.user._id);
+
+  const scaleFileMap = {
+    "Anxiety (GAD-7)": "gad7",
+    "Body Image (BSQ)": "bsq",
+    "Depression (PHQ 9)": "phq9",
+    "PTSD (PCL-5)": "pcl5",
+    "Alcohol Use (AUDIT)": "audit",
+    "Drug Use (DAST-10)": "dast10",
+    "Grief and Loss (ICG)": "icg",
+    "Identity Crisis (SCS)": "scs",
+    "OCD (OCI-R)": "ocir",
+    "Self-Esteem (Rosenberg Self-Esteem Scale)": "rosenberg",
+    "Sleep disorder (ESS)": "ess",
+    "Sleep Disorder Insomnia (ISI)": "isi",
+    "Social Anxiety (LSAS)": "lsas",
+    "Stress (PSS)": "pss",
+  };
+
+  const scaleFile =
+    scaleFileMap[scaleName] || scaleName.replace(/ \(.+\)/, "").toLowerCase();
+
+  console.log(`Rendering scale: ${scaleName}, file: scales/${scaleFile}`);
+
+  try {
+    res.render(`scales/${scaleFile}`, {
+      patient,
+      recommendedScale: scaleName,
+      rationale: patient.rationale,
+      messages: req.flash(),
+    });
+  } catch (error) {
+    console.error(`Error rendering scale ${scaleFile}:`, error);
+    req.flash("error", "Scale not found or rendering failed");
+    res.redirect("/client/dashboard");
+  }
+});
+
+router.get("/scales/:scaleName", async (req, res) => {
+  const scaleName = req.params.scaleName;
+  const scalePath = path.join(__dirname, "scales", scaleName, "index.json");
+
+  try {
+    const data = await fs.readFile(scalePath, "utf8");
+    const json = JSON.parse(data);
+
+    if (!json || !json.scale) {
+      return res
+        .status(400)
+        .json({ error: "Invalid scale format: missing 'scale' field." });
+    }
+
+    res.json(json);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: err.message || "Failed to load scale file." });
+  }
+});
+
+router.get("/normal", isLoggedIn, (req, res) => {
+  res.render("patient/normal", { messages: req.flash() });
 });
 
 router.get("/dashboard", isLoggedIn, async function (req, res) {
   try {
     const patient = await patientModel.findOne({ email: req.user.email });
     const filter = req.query.filter || "Upcoming";
-    // const selectedDate = req.query.date
-    //   ? moment(req.query.date, "YYYY-MM-DD")
-    //   : null;
 
     let query = { patientId: patient._id };
 
@@ -141,15 +292,8 @@ router.get("/dashboard", isLoggedIn, async function (req, res) {
       case "Upcoming":
       default:
         query.status = "Scheduled";
-        query.date = { $gte: new Date() };
         break;
     }
-
-    // if (selectedDate && selectedDate.isValid()) {
-    //   const startOfDay = selectedDate.startOf("day").toDate();
-    //   const endOfDay = selectedDate.endOf("day").toDate();
-    //   query.date = { $gte: startOfDay, $lte: endOfDay };
-    // }
 
     const appointments = await AppointmentModel.find(query)
       .populate("therapistId")
@@ -161,17 +305,31 @@ router.get("/dashboard", isLoggedIn, async function (req, res) {
     });
 
     const formattedAppointments = appointments.map((appt) => {
-      const transaction = transactions.find(
-        (t) => t.appointment.toString() === appt._id.toString()
+      const appointmentDateTime = moment.tz(
+        `${moment(appt.date).format("YYYY-MM-DD")} ${appt.time}`,
+        "YYYY-MM-DD HH:mm",
+        "Asia/Karachi"
       );
+
+      const windowStart = moment(appointmentDateTime).subtract(5, "minutes");
+      const windowEnd = moment(appointmentDateTime).add(30, "minutes");
+      const now = moment().tz("Asia/Karachi");
+
       return {
         ...appt._doc,
         formattedDate: moment(appt.date).format("DD MMM YYYY"),
-        bookingDate: moment(appt.createdAt).format("DD MMM YYYY"),
-        therapistName: `${appt.therapistId.firstName} ${appt.therapistId.lastName}`,
-        specialty: appt.therapistId.specialties[0] || "",
-        amount: transaction ? `PKR ${transaction.totalAmount}` : "N/A",
-        time: moment(appt.time, "HH:mm").format("h:mm A"),
+        timeRange: `${moment(appt.time, "HH:mm").format("h:mm A")} - ${moment(
+          appt.time,
+          "HH:mm"
+        )
+          .add(30, "minutes")
+          .format("h:mm A")}`,
+        canJoinCall:
+          now.isBetween(windowStart, windowEnd, null, "[]") &&
+          appt.status === "Scheduled" &&
+          appt.sessionType === "video",
+        windowStart,
+        windowEnd,
       };
     });
 
@@ -195,11 +353,107 @@ router.get("/dashboard", isLoggedIn, async function (req, res) {
       appointments: formattedAppointments,
       counts,
       currentFilter: filter,
-      // selectedDate: selectedDate ? selectedDate.format("YYYY-MM-DD") : "",
+      moment: moment,
+      patient: req.user,
+      messages: req.flash(),
     });
   } catch (error) {
     console.error("Error fetching dashboard:", error);
-    res.status(500).send("Internal Server Error");
+    req.flash("error", "Internal Server Error");
+    res.redirect("/client/login");
+  }
+});
+
+router.get("/video-call/:id", isLoggedIn, async (req, res) => {
+  try {
+    const appointmentId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(appointmentId)) {
+      console.error(`Invalid appointment ID format: ${appointmentId}`);
+      req.flash("error", "Invalid appointment ID format");
+      return res.redirect("/client/dashboard");
+    }
+
+    const appointment = await AppointmentModel.findById(appointmentId)
+      .populate("patientId")
+      .populate("therapistId");
+
+    if (!appointment) {
+      console.error(`Appointment not found for ID: ${appointmentId}`);
+      req.flash("error", "Appointment not found");
+      return res.redirect("/client/dashboard");
+    }
+
+    if (
+      appointment.patientId._id.toString() !== req.user._id.toString() &&
+      appointment.therapistId._id.toString() !== req.user._id.toString()
+    ) {
+      console.error(`Unauthorized access attempt by user: ${req.user._id}`);
+      req.flash("error", "Unauthorized access");
+      return res.redirect("/client/dashboard");
+    }
+
+    if (appointment.status !== "Scheduled") {
+      req.flash("error", "This appointment is not active");
+      return res.redirect("/client/dashboard");
+    }
+
+    if (appointment.sessionType !== "video") {
+      req.flash("error", "This appointment is not a video call");
+      return res.redirect("/client/dashboard");
+    }
+
+    if (!moment().isSame(moment(appointment.date), "day")) {
+      req.flash("error", "This appointment is not scheduled for today");
+      return res.redirect("/client/dashboard");
+    }
+
+    const appointmentDateTime = moment.tz(
+      `${moment(appointment.date).format("YYYY-MM-DD")} ${appointment.time}`,
+      "YYYY-MM-DD HH:mm",
+      "Asia/Karachi"
+    );
+
+    const windowStart = moment(appointmentDateTime).subtract(5, "minutes");
+    const windowEnd = moment(appointmentDateTime).add(30, "minutes");
+    const now = moment().tz("Asia/Karachi");
+
+    if (now.isBefore(windowStart)) {
+      req.flash("error", "Call is not available yet");
+      return res.redirect("/client/dashboard");
+    }
+
+    if (now.isAfter(windowEnd)) {
+      req.flash("error", "Call has ended");
+      return res.redirect("/client/dashboard");
+    }
+
+    res.render("shared/video-call", {
+      user: req.user,
+      appointment,
+      sessionPartnerName: req.user._id.equals(appointment.therapistId._id)
+        ? `${appointment.patientId.firstname} ${appointment.patientId.lastname}`
+        : `${appointment.therapistId.firstName} ${appointment.therapistId.lastName}`,
+      displayName: req.user.firstname
+        ? `${req.user.firstname} ${req.user.lastname || ""}`
+        : req.user.username,
+      isTherapist: false,
+      appointmentDateFormatted: moment(appointment.date).format("MMM Do YYYY"),
+      appointmentEndTimeFormatted: moment(appointment.time, "HH:mm")
+        .add(30, "minutes")
+        .format("h:mm A"),
+      stunServers: process.env.STUN_SERVERS,
+      messages: req.flash(),
+    });
+  } catch (error) {
+    console.error("Error accessing video call:", {
+      appointmentId: req.params.id,
+      userId: req.user._id,
+      error: error.message,
+      stack: error.stack,
+    });
+    req.flash("error", "Internal Server Error");
+    res.redirect("/client/dashboard");
   }
 });
 
@@ -243,10 +497,12 @@ router.get("/therapist-search", isLoggedIn, async function (req, res) {
       selectedGender: req.query.gender || "",
       selectedSpecialties,
       specialtyOptions,
+      messages: req.flash(),
     });
   } catch (error) {
     console.error("Error in therapist search:", error);
-    res.status(500).send("Internal Server Error");
+    req.flash("error", "Internal Server Error");
+    res.redirect("/client/dashboard");
   }
 });
 
@@ -256,7 +512,8 @@ router.get("/therapist-profile/:id", isLoggedIn, async (req, res) => {
     const therapist = await TherapistModel.findById(req.params.id);
 
     if (!therapist) {
-      return res.status(404).send("Therapist not found");
+      req.flash("error", "Therapist not found");
+      return res.redirect("/client/therapist-search");
     }
     console.log("Fetched therapist availability:", therapist.availability);
 
@@ -264,10 +521,12 @@ router.get("/therapist-profile/:id", isLoggedIn, async (req, res) => {
       patient,
       therapist: therapist,
       availability: therapist.availability || [],
+      messages: req.flash(),
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error fetching therapist profile");
+    req.flash("error", "Error fetching therapist profile");
+    res.redirect("/client/therapist-search");
   }
 });
 
@@ -277,7 +536,8 @@ router.get("/therapist-booking/:id", isLoggedIn, async function (req, res) {
     const therapist = await TherapistModel.findById(req.params.id);
 
     if (!therapist) {
-      return res.status(404).send("Therapist not found");
+      req.flash("error", "Therapist not found");
+      return res.redirect("/client/therapist-search");
     }
 
     const today = moment().tz("Asia/Karachi");
@@ -379,10 +639,12 @@ router.get("/therapist-booking/:id", isLoggedIn, async function (req, res) {
       therapist,
       weekDates,
       formattedAvailability,
+      messages: req.flash(),
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal Server Error");
+    req.flash("error", "Internal Server Error");
+    res.redirect("/client/therapist-search");
   }
 });
 
@@ -467,18 +729,21 @@ router.get("/checkout/:id", isLoggedIn, async function (req, res) {
     const therapist = await TherapistModel.findById(req.params.id);
 
     if (!therapist) {
-      return res.status(404).send("Therapist not found");
+      req.flash("error", "Therapist not found");
+      return res.redirect("/client/therapist-search");
     }
 
     const { day, date, time } = req.query;
 
     if (!day || !date || !time) {
-      return res.status(400).send("Missing booking parameters");
+      req.flash("error", "Missing booking parameters");
+      return res.redirect(`/client/therapist-booking/${req.params.id}`);
     }
 
     const dateMoment = moment.tz(req.query.date, "YYYY-MM-DD", "Asia/Karachi");
     if (!dateMoment.isValid()) {
-      return res.status(400).send("Invalid date format");
+      req.flash("error", "Invalid date format");
+      return res.redirect(`/client/therapist-booking/${req.params.id}`);
     }
 
     res.render("patient/checkout", {
@@ -487,10 +752,12 @@ router.get("/checkout/:id", isLoggedIn, async function (req, res) {
       selectedDay: day,
       selectedTime: time,
       selectedDate: dateMoment.format("YYYY-MM-DD"),
+      messages: req.flash(),
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal Server Error");
+    req.flash("error", "Internal Server Error");
+    res.redirect("/client/therapist-search");
   }
 });
 
@@ -501,21 +768,37 @@ router.post("/confirm-booking", isLoggedIn, async function (req, res) {
     const patientId = patient._id;
 
     if (!therapistId || !selectedDate || !selectedTime || !sessionType) {
-      return res.status(400).send("Missing required feilds");
+      req.flash("error", "Missing required fields");
+      return res.redirect("/client/therapist-search");
     }
 
     const appointmentMoment = moment.tz(
-      selectedDate,
-      "YYYY-MM-DD",
+      `${selectedDate} ${selectedTime.split("-")[0].trim()}`,
+      "YYYY-MM-DD HH:mm",
       "Asia/Karachi"
     );
 
     if (!appointmentMoment.isValid()) {
-      return res.status(400).send("Invalid date format");
+      req.flash("error", "Invalid date/time format");
+      return res.redirect("/client/therapist-search");
     }
 
-    const appointmentDate = appointmentMoment.utc().toDate();
+    const today = moment().tz("Asia/Karachi").startOf("day");
+    if (appointmentMoment.isBefore(today)) {
+      req.flash("error", "Cannot book appointments in the past");
+      return res.redirect("/client/therapist-search");
+    }
+
+    const appointmentDate = new Date(appointmentMoment.format());
     const [startTime] = selectedTime.split("-");
+
+    console.log("Booking Input:", {
+      selectedDate,
+      selectedTime,
+      sessionType,
+      appointmentDate: appointmentDate.toISOString(),
+      time: startTime.trim(),
+    });
 
     const existing = await AppointmentModel.findOne({
       therapistId,
@@ -523,20 +806,29 @@ router.post("/confirm-booking", isLoggedIn, async function (req, res) {
       date: appointmentDate,
       time: startTime.trim(),
     });
+
     if (existing) {
       req.flash("error", "This time slot is already booked");
       return res.redirect("back");
     }
+
     const appointment = new AppointmentModel({
       therapistId,
       patientId,
       date: appointmentDate,
       time: startTime.trim(),
-      sessionType: sessionType || "video",
+      sessionType: sessionType.toLowerCase() || "video",
       status: "Scheduled",
     });
 
     await appointment.save();
+
+    console.log("Saved Appointment:", {
+      _id: appointment._id,
+      date: appointment.date.toISOString(),
+      time: appointment.time,
+      sessionType: appointment.sessionType,
+    });
 
     req.session.appointmentId = appointment._id;
 
@@ -557,16 +849,19 @@ router.post("/confirm-booking", isLoggedIn, async function (req, res) {
     });
     await transaction.save();
 
+    req.flash("success", "Booking confirmed successfully");
     res.redirect("/client/booking-success");
   } catch (error) {
     console.error("Booking error:", error);
-    res.status(500).send("Error processing booking");
+    req.flash("error", "Error processing booking");
+    res.redirect("/client/therapist-search");
   }
 });
 
 router.get("/booking-success", isLoggedIn, async function (req, res) {
   try {
     if (!req.session.appointmentId) {
+      req.flash("error", "No booking found");
       return res.redirect("/client/dashboard");
     }
 
@@ -577,7 +872,8 @@ router.get("/booking-success", isLoggedIn, async function (req, res) {
       .populate("patientId");
 
     if (!appointment) {
-      return res.status(404).send("Appointment not found");
+      req.flash("error", "Appointment not found");
+      return res.redirect("/client/dashboard");
     }
 
     const dateObj = moment(appointment.date).tz("Asia/Karachi");
@@ -599,22 +895,24 @@ router.get("/booking-success", isLoggedIn, async function (req, res) {
         formattedDate,
         time: `${startTime} to ${endTime}`,
       },
+      messages: req.flash(),
     });
 
     delete req.session.appointmentId;
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error retrieving booking details");
+    req.flash("error", "Error retrieving booking details");
+    res.redirect("/client/dashboard");
   }
 });
 
 router.get("/pass-change", isLoggedIn, function (req, res) {
-  res.render("patient/pass-change");
+  res.render("patient/pass-change", { messages: req.flash() });
 });
 
 router.get("/profile", isLoggedIn, async function (req, res) {
   const patient = await patientModel.findOne({ email: req.user.email });
-  res.render("patient/profile", { patient });
+  res.render("patient/profile", { patient, messages: req.flash() });
 });
 
 router.post("/profile/update", isLoggedIn, async function (req, res) {
@@ -622,7 +920,7 @@ router.post("/profile/update", isLoggedIn, async function (req, res) {
     const clientId = req.user._id;
     const updatedData = {
       firstname: req.body.firstName,
-      lastname: req.body.lastname,
+      lastname: req.body.lastName,
       dob: req.body.dob,
       email: req.body.email,
       mobile: req.body.mobile,
@@ -633,10 +931,12 @@ router.post("/profile/update", isLoggedIn, async function (req, res) {
 
     await patientModel.findByIdAndUpdate(clientId, updatedData, { new: true });
 
+    req.flash("success", "Profile updated successfully");
     res.redirect("/client/profile");
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error updating profile");
+    req.flash("error", "Error updating profile");
+    res.redirect("/client/profile");
   }
 });
 
@@ -661,10 +961,12 @@ router.get("/invoices", isLoggedIn, async function (req, res) {
         formattedDate: moment(t.date).format("MMM D, YYYY"),
         appointmentDate: moment(t.appointment.date).format("MMM D, YYYY"),
       })),
+      messages: req.flash(),
     });
   } catch (error) {
     console.error("Error fetching invoices:", error);
-    res.status(500).send("Internal Server Error");
+    req.flash("error", "Internal Server Error");
+    res.redirect("/client/dashboard");
   }
 });
 
@@ -677,11 +979,13 @@ router.get("/invoice/:id", isLoggedIn, async function (req, res) {
       .populate("patientId");
 
     if (!appointment) {
-      return res.status(400).send("appointment not found");
+      req.flash("error", "Appointment not found");
+      return res.redirect("/client/invoices");
     }
 
     if (!appointment.patientId) {
-      return res.status(400).send("Patient details not found");
+      req.flash("error", "Patient details not found");
+      return res.redirect("/client/invoices");
     }
 
     console.log("Appointment:", appointment);
@@ -691,7 +995,8 @@ router.get("/invoice/:id", isLoggedIn, async function (req, res) {
     });
 
     if (!transaction) {
-      return res.status(400).send("appointment not found");
+      req.flash("error", "Transaction not found");
+      return res.redirect("/client/invoices");
     }
 
     res.render("patient/invoice", {
@@ -712,10 +1017,12 @@ router.get("/invoice/:id", isLoggedIn, async function (req, res) {
       },
       patient: appointment.patientId,
       therapist: appointment.therapistId,
+      messages: req.flash(),
     });
   } catch (error) {
     console.error("Error fetching invoice details:", error);
-    res.status(500).send("Internal Server Error");
+    req.flash("error", "Internal Server Error");
+    res.redirect("/client/invoices");
   }
 });
 
@@ -744,8 +1051,13 @@ router.get("/accounts", isLoggedIn, async function (req, res) {
       transactions,
       totalBalance,
       totalRequested,
+      messages: req.flash(),
     });
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error fetching accounts:", error);
+    req.flash("error", "Internal Server Error");
+    res.redirect("/client/dashboard");
+  }
 });
 
 router.post("/request-refund", isLoggedIn, async function (req, res) {
@@ -775,7 +1087,8 @@ router.post("/request-refund", isLoggedIn, async function (req, res) {
     res.redirect("/client/accounts");
   } catch (error) {
     console.error("Error requesting refund:", error);
-    res.status(500).send("Error processing refund request");
+    req.flash("error", "Error processing refund request");
+    res.redirect("/client/accounts");
   }
 });
 
@@ -812,7 +1125,8 @@ router.post("/request-refund/:id", isLoggedIn, async function (req, res) {
     res.redirect("/client/accounts");
   } catch (error) {
     console.error("Error requesting refund:", error);
-    res.status(500).send("Error processing refund request");
+    req.flash("error", "Error processing refund request");
+    res.redirect("/client/accounts");
   }
 });
 
@@ -827,23 +1141,28 @@ router.post("/update-bank-details", isLoggedIn, async (req, res) => {
     };
 
     await patient.save();
+    req.flash("success", "Bank details updated successfully");
     res.redirect("/client/accounts");
   } catch (error) {
     console.error("Error saving bank details:", error);
-    res.status(500).send("Error saving bank details");
+    req.flash("error", "Error saving bank details");
+    res.redirect("/client/accounts");
   }
 });
 
 router.get("/logout", function (req, res, next) {
   req.logout(function (err) {
     if (err) {
+      req.flash("error", "Error logging out");
       return next(err);
     }
-
-    res.clearCookie("connect.sid");
-
+    res.clearCookie("patient.sid");
     req.session.destroy((err) => {
-      if (err) return next(err);
+      if (err) {
+        req.flash("error", "Error destroying session");
+        return next(err);
+      }
+      req.flash("success", "Successfully logged out");
       res.redirect("/client/login");
     });
   });
@@ -854,6 +1173,7 @@ function isLoggedIn(req, res, next) {
     console.log("Authenticated user ID:", req.user._id.toString());
     return next();
   }
+  req.flash("error", "Please log in to access this page");
   res.redirect("/client/login");
 }
 

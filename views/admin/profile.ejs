@@ -1,328 +1,455 @@
 <!DOCTYPE html>
 <html lang="en">
-    
-<head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-        <title>TherapEase - Profile</title>
-		
-		<!-- Favicon -->
-        <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png">
-		
-		<!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="/css/bootstrap.min.css">
-		
-		<!-- Fontawesome CSS -->
-        <link rel="stylesheet" href="/css/font-awesome.min.css">
-		
-		<!-- Feathericon CSS -->
-        <link rel="stylesheet" href="/css/feathericon.min.css">
-		
-		
-		<!-- Main CSS -->
-        <link rel="stylesheet" href="/css/style.css">
-		
-		<!--[if lt IE 9]>
-			<script src="assets/js/html5shiv.min.js"></script>
-			<script src="assets/js/respond.min.js"></script>
-		<![endif]-->
-    </head>
-    <body>
-	
-		<!-- Main Wrapper -->
-        <div class="main-wrapper">
-		
-			<!-- Header -->
-            <div class="header">
-			
-				<!-- Logo -->
-                <div class="header-left">
-                    <a href="/dashboard" class="logo">
-						<img src="/img/logo.png" alt="Logo" width="140" height="50">
-					</a>
-					<a href="/dashboard" class="logo logo-small">
-						<img src="/img/logo-small.png" alt="Logo" width="100" height="70">
-					</a>
-                </div>
-				<!-- /Logo -->
-				<a href="javascript:void(0);" id="toggle_btn">
-					<i class="fe fe-text-align-left"></i>
-				</a>
-				
-				
-				
-				<!-- Mobile Menu Toggle -->
-				<a class="mobile_btn" id="mobile_btn">
-					<i class="fa fa-bars"></i>
-				</a>
-				<!-- /Mobile Menu Toggle -->
-				
-				<!-- Header Right Menu -->
-				<ul class="nav user-menu">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=0"
+    />
+    <title>TherapEase - Profile</title>
 
-					
-					<!-- User Menu -->
-					<li class="nav-item dropdown has-arrow">
-						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
-							<span class="user-img"><img class="rounded-circle" src="/img/profiles/avatar-01.jpg" width="31" alt="Hunain Asif"></span>
-						</a>
-						<div class="dropdown-menu">
-							<div class="user-header">
-								<div class="avatar avatar-sm">
-									<img src="/img/profiles/avatar-01.jpg" alt="User Image" class="avatar-img rounded-circle">
-								</div>
-								<div class="user-text">
-									<h6><%= admin.username %></h6>
-									<p class="text-muted mb-0">Administrator</p>
-								</div>
-							</div>
-							<a class="dropdown-item" href="/profile">My Profile</a>
-							<a class="dropdown-item" href="/login">Logout</a>
-						</div>
-					</li>
-					<!-- /User Menu -->
-					
-				</ul>
-				<!-- /Header Right Menu -->
-				
-            </div>
-			<!-- /Header -->
-			<!-- Sidebar -->
-            <div class="sidebar" id="sidebar">
-                <div class="sidebar-inner slimscroll">
-					<div id="sidebar-menu" class="sidebar-menu">
-						<ul>
-							<li > 
-								<a href="/dashboard"><i class="fe fe-home"></i> <span>Dashboard</span></a>
-							</li>
-							<li class="active"> 
-								<a href="/profile"><i class="fe fe-user"></i> <span>Profile</span></a>
-							</li>
-							
-							<li> 
-								<a href="/appointment-list"><i class="fe fe-layout"></i> <span>Appointments</span></a>
-							</li>
-							<li> 
-								<a href="/therapist-list"><i class="fe fe-user"></i> <span>Therapists</span></a>
-							</li>
-							<li> 
-								<a href="/patient-list"><i class="fe fe-user"></i> <span>Patients</span></a>
-							</li>
-							<li> 
-								<a href="transactions-list"><i class="fe fe-activity"></i> <span>Transactions</span></a>
-							</li>
-							<li> 
-								<a href="/therapist-approval"><i class="fe fe-user-plus"></i> <span>Therapist Approval</span></a>
-							</li>
-							
-							
-							
-							<li> 
-								<a href="/payment-approval"><i class="fe fe-file"></i> <span>Payment Approval</span></a>
-							</li>
-							
-							
-						</ul>
-					</div>
-                </div>
-            </div>
-			<!-- /Sidebar -->
-			
-			<!-- Page Wrapper -->
-            <div class="page-wrapper">
-                <div class="content container-fluid">
-					
-					<!-- Page Header -->
-					<div class="page-header">
-						<div class="row">
-							<div class="col">
-								<h3 class="page-title">Profile</h3>
-								<ul class="breadcrumb">
-									<li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
-									<li class="breadcrumb-item active">Profile</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-					<!-- /Page Header -->
-					
-					<div class="row">
-						<div class="col-md-12">
-							<div class="profile-header">
-								<div class="row align-items-center">
-									<div class="col-auto profile-image">
-										<a href="#">
-											<img class="rounded-circle" alt="User Image" src="/img/profiles/avatar-01.jpg">
-										</a>
-									</div>
-									<div class="col ml-md-n2 profile-user-info">
-										<h4 class="user-name mb-0"><%= admin.username %></h4>
-										<h6 class="text-muted"><%= admin.email %></h6>
-										<div class="about-text"><%= admin.description %></div>
-									</div>
-									
-								</div>
-							</div>
-							<div class="profile-menu">
-								<ul class="nav nav-tabs nav-tabs-solid">
-									<li class="nav-item">
-										<a class="nav-link active" data-toggle="tab" href="#per_details_tab">About</a>
-									</li>
-									<li class="nav-item">
-										<a class="nav-link" data-toggle="tab" href="#password_tab">Password</a>
-									</li>
-								</ul>
-							</div>	
-							<div class="tab-content profile-tab-cont">
-								
-								<!-- Personal Details Tab -->
-								<div class="tab-pane fade show active" id="per_details_tab">
-								
-									<!-- Personal Details -->
-									<div class="row">
-										<div class="col-lg-12">
-											<div class="card">
-												<div class="card-body">
-													<h5 class="card-title d-flex justify-content-between">
-														<span>Personal Details</span> 
-														<a class="edit-link" data-toggle="modal" href="#edit_personal_details"><i class="fa fa-edit mr-1"></i>Edit</a>
-													</h5>
-													<div class="row">
-														<p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Name</p>
-														<p class="col-sm-10"><%= admin.username %></p>
-													</div>
-													<div class="row">
-														<p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Date of Birth</p>
-														<p class="col-sm-10"><%= admin.dob  || 'N/A' %></p>
-													</div>
-													<div class="row">
-														<p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Email ID</p>
-														<p class="col-sm-10"><%= admin.email %></p>
-													</div>
-													<div class="row">
-														<p class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3">Mobile</p>
-														<p class="col-sm-10"><%= admin.mobile || 'N/A' %></p>
-													</div>
-													
-												</div>
-											</div>
-											
-											<!-- Edit Details Modal -->
-											<div class="modal fade" id="edit_personal_details" aria-hidden="true" role="dialog">
-												<div class="modal-dialog modal-dialog-centered" role="document" >
-													<div class="modal-content">
-														<div class="modal-header">
-															<h5 class="modal-title">Personal Details</h5>
-															<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-																<span aria-hidden="true">&times;</span>
-															</button>
-														</div>
-														<div class="modal-body">
-															<form action="/profile/update" method="POST">
-																<div class="row form-row">
-																	<div class="col-12 col-sm-6">
-																		<div class="form-group">
-																			<label>First Name</label>
-																			<input type="text" class="form-control" name="firstName" value="<%= admin.firstName %>">
-																		</div>
-																	</div>
-																	<div class="col-12 col-sm-6">
-																		<div class="form-group">
-																			<label>Last Name</label>
-																			<input type="text"  class="form-control" name="lastname" value="<%= admin.lastname %>">
-																		</div>
-																	</div>
-																	<div class="col-12">
-																		<div class="form-group">
-																			<label>Date of Birth</label>
-																			<div class="cal-icon">
-																				<input type="date" class="form-control" name="dob" value="<%= admin.dob ? admin.dob.toISOString().split('T')[0] : '' %>">
-																			</div>
-																		</div>
-																	</div>
-																	<div class="col-12 col-sm-6">
-																		<div class="form-group">
-																			<label>Email ID</label>
-																			<input type="email" class="form-control" name="email" value="<%= admin.email %>">
-																		</div>
-																	</div>
-																	<div class="col-12 col-sm-6">
-																		<div class="form-group">
-																			<label>Mobile</label>
-																			<input type="text" value="<%= admin.mobile %>" name = "mobile" class="form-control">
-																		</div>
-																	</div>
-																</div>
-																<button type="submit" class="btn btn-primary btn-block">Save Changes</button>
-															</form>
-														</div>
-													</div>
-												</div>
-											</div>
-											<!-- /Edit Details Modal -->
-											
-										</div>
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png" />
 
-									
-									</div>
-									<!-- /Personal Details -->
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
 
-								</div>
-								<!-- /Personal Details Tab -->
-								
-								<!-- Change Password Tab -->
-								<div id="password_tab" class="tab-pane fade">
-									<div class="card">
-										<div class="card-body">
-											<h5 class="card-title">Change Password</h5>
-											<div class="row">
-												<div class="col-md-10 col-lg-6">
-													<form action="/change-password" method="post">
-														<div class="form-group">
-															<label>Old Password</label>
-															<input type="password"name="oldpass" class="form-control">
-														</div>
-														<div class="form-group">
-															<label>New Password</label>
-															<input type="password" name="newpass" class="form-control">
-														</div>
-														<div class="form-group">
-															<label>Confirm Password</label>
-															<input type="password" name="confirmpass" class="form-control">
-														</div>
-														<button class="btn btn-primary" type="submit">Save Changes</button>
-													</form>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-								<!-- /Change Password Tab -->
-								
-							</div>
-						</div>
-					</div>
-				
-				</div>			
-			</div>
-			<!-- /Page Wrapper -->
-		
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" href="/css/font-awesome.min.css" />
+
+    <!-- Feathericon CSS -->
+    <link rel="stylesheet" href="/css/feathericon.min.css" />
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <!--[if lt IE 9]>
+      <script src="assets/js/html5shiv.min.js"></script>
+      <script src="assets/js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+      <!-- Header -->
+      <div class="header">
+        <!-- Logo -->
+        <div class="header-left">
+          <a href="/dashboard" class="logo">
+            <img src="/img/logo.png" alt="Logo" width="140" height="50" />
+          </a>
+          <a href="/dashboard" class="logo logo-small">
+            <img src="/img/logo-small.png" alt="Logo" width="100" height="70" />
+          </a>
         </div>
-		<!-- /Main Wrapper -->
-		
-		<!-- jQuery -->
-        <script src="/js/jquery-3.2.1.min.js"></script>
-		
-		<!-- Bootstrap Core JS -->
-        <script src="/js/popper.min.js"></script>
-        <script src="/js/bootstrap.min.js"></script>
-		
-		<!-- Slimscroll JS -->
-        <script src="/plugins/slimscroll/jquery.slimscroll.min.js"></script>
-		
-		<!-- Custom JS -->
-		<script  src="/js/script.js"></script>
-		
-    </body>
+        <!-- /Logo -->
+        <a href="javascript:void(0);" id="toggle_btn">
+          <i class="fe fe-text-align-left"></i>
+        </a>
 
+        <!-- Mobile Menu Toggle -->
+        <a class="mobile_btn" id="mobile_btn">
+          <i class="fa fa-bars"></i>
+        </a>
+        <!-- /Mobile Menu Toggle -->
+
+        <!-- Header Right Menu -->
+        <ul class="nav user-menu">
+          <!-- User Menu -->
+          <li class="nav-item dropdown has-arrow">
+            <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+              <span class="user-img"
+                ><img
+                  class="rounded-circle"
+                  src="/img/profiles/avatar-01.jpg"
+                  width="31"
+                  alt="Hunain Asif"
+              /></span>
+            </a>
+            <div class="dropdown-menu">
+              <div class="user-header">
+                <div class="avatar avatar-sm">
+                  <img
+                    src="/img/profiles/avatar-01.jpg"
+                    alt="User Image"
+                    class="avatar-img rounded-circle"
+                  />
+                </div>
+                <div class="user-text">
+                  <h6><%= admin.username %></h6>
+                  <p class="text-muted mb-0">Administrator</p>
+                </div>
+              </div>
+              <a class="dropdown-item" href="/profile">My Profile</a>
+              <a class="dropdown-item" href="/login">Logout</a>
+            </div>
+          </li>
+          <!-- /User Menu -->
+        </ul>
+        <!-- /Header Right Menu -->
+      </div>
+      <!-- /Header -->
+      <!-- Sidebar -->
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-inner slimscroll">
+          <div id="sidebar-menu" class="sidebar-menu">
+            <ul>
+              <li>
+                <a href="/dashboard"
+                  ><i class="fe fe-home"></i> <span>Dashboard</span></a
+                >
+              </li>
+              <li class="active">
+                <a href="/profile"
+                  ><i class="fe fe-user"></i> <span>Profile</span></a
+                >
+              </li>
+
+              <li>
+                <a href="/appointment-list"
+                  ><i class="fe fe-layout"></i> <span>Appointments</span></a
+                >
+              </li>
+              <li>
+                <a href="/therapist-list"
+                  ><i class="fe fe-user"></i> <span>Therapists</span></a
+                >
+              </li>
+              <li>
+                <a href="/patient-list"
+                  ><i class="fe fe-user"></i> <span>Patients</span></a
+                >
+              </li>
+              <li>
+                <a href="transactions-list"
+                  ><i class="fe fe-activity"></i> <span>Transactions</span></a
+                >
+              </li>
+              <li>
+                <a href="/therapist-approval"
+                  ><i class="fe fe-user-plus"></i>
+                  <span>Therapist Approval</span></a
+                >
+              </li>
+
+              <li>
+                <a href="/payment-approval"
+                  ><i class="fe fe-file"></i> <span>Payment Approval</span></a
+                >
+              </li>
+              <li>
+                <a href="/refunds-approval"
+                  ><i class="fe fe-file"></i> <span>refund Approval</span></a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- /Sidebar -->
+
+      <!-- Page Wrapper -->
+      <div class="page-wrapper">
+        <div class="content container-fluid">
+          <!-- Page Header -->
+          <div class="page-header">
+            <div class="row">
+              <div class="col">
+                <h3 class="page-title">Profile</h3>
+                <ul class="breadcrumb">
+                  <li class="breadcrumb-item">
+                    <a href="/dashboard">Dashboard</a>
+                  </li>
+                  <li class="breadcrumb-item active">Profile</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <!-- /Page Header -->
+          <div class="container mt-3">
+            <% if (successMessage && successMessage.length > 0) { %>
+            <div
+              class="alert alert-success alert-dismissible fade show"
+              role="alert"
+            >
+              <%= successMessage %>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+            <% } %> <% if (errorMessage && errorMessage.length > 0) { %>
+            <div
+              class="alert alert-danger alert-dismissible fade show"
+              role="alert"
+            >
+              <%= errorMessage %>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+            <% } %>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="profile-header">
+                <div class="row align-items-center">
+                  <div class="col-auto profile-image">
+                    <a href="#">
+                      <img
+                        class="rounded-circle"
+                        alt="User Image"
+                        src="/img/profiles/avatar-01.jpg"
+                      />
+                    </a>
+                  </div>
+                  <div class="col ml-md-n2 profile-user-info">
+                    <h4 class="user-name mb-0"><%= admin.username %></h4>
+                    <h6 class="text-muted"><%= admin.email %></h6>
+                    <div class="about-text"><%= admin.description %></div>
+                  </div>
+                </div>
+              </div>
+              <div class="profile-menu">
+                <ul class="nav nav-tabs nav-tabs-solid">
+                  <li class="nav-item">
+                    <a
+                      class="nav-link active"
+                      data-toggle="tab"
+                      href="#per_details_tab"
+                      >About</a
+                    >
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#password_tab"
+                      >Password</a
+                    >
+                  </li>
+                </ul>
+              </div>
+              <div class="tab-content profile-tab-cont">
+                <!-- Personal Details Tab -->
+                <div class="tab-pane fade show active" id="per_details_tab">
+                  <!-- Personal Details -->
+                  <div class="row">
+                    <div class="col-lg-12">
+                      <div class="card">
+                        <div class="card-body">
+                          <h5 class="card-title d-flex justify-content-between">
+                            <span>Personal Details</span>
+                            <a
+                              class="edit-link"
+                              data-toggle="modal"
+                              href="#edit_personal_details"
+                              ><i class="fa fa-edit mr-1"></i>Edit</a
+                            >
+                          </h5>
+                          <div class="row">
+                            <p
+                              class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3"
+                            >
+                              Name
+                            </p>
+                            <p class="col-sm-10"><%= admin.username %></p>
+                          </div>
+                          <div class="row">
+                            <p
+                              class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3"
+                            >
+                              Date of Birth
+                            </p>
+                            <p class="col-sm-10"><%= admin.dob || 'N/A' %></p>
+                          </div>
+                          <div class="row">
+                            <p
+                              class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3"
+                            >
+                              Email ID
+                            </p>
+                            <p class="col-sm-10"><%= admin.email %></p>
+                          </div>
+                          <div class="row">
+                            <p
+                              class="col-sm-2 text-muted text-sm-right mb-0 mb-sm-3"
+                            >
+                              Mobile
+                            </p>
+                            <p class="col-sm-10">
+                              <%= admin.mobile || 'N/A' %>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Edit Details Modal -->
+                      <div
+                        class="modal fade"
+                        id="edit_personal_details"
+                        aria-hidden="true"
+                        role="dialog"
+                      >
+                        <div
+                          class="modal-dialog modal-dialog-centered"
+                          role="document"
+                        >
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title">Personal Details</h5>
+                              <button
+                                type="button"
+                                class="close"
+                                data-dismiss="modal"
+                                aria-label="Close"
+                              >
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              <form action="/profile/update" method="POST">
+                                <div class="row form-row">
+                                  <div class="col-12 col-sm-6">
+                                    <div class="form-group">
+                                      <label>First Name</label>
+                                      <input
+                                        type="text"
+                                        class="form-control"
+                                        name="firstName"
+                                        value="<%= admin.firstName %>"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div class="col-12 col-sm-6">
+                                    <div class="form-group">
+                                      <label>Last Name</label>
+                                      <input
+                                        type="text"
+                                        class="form-control"
+                                        name="lastname"
+                                        value="<%= admin.lastname %>"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div class="col-12">
+                                    <div class="form-group">
+                                      <label>Date of Birth</label>
+                                      <div class="cal-icon">
+                                        <input
+                                          type="date"
+                                          class="form-control"
+                                          name="dob"
+                                          value="<%= admin.dob ? admin.dob.toISOString().split('T')[0] : '' %>"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="col-12 col-sm-6">
+                                    <div class="form-group">
+                                      <label>Email ID</label>
+                                      <input
+                                        type="email"
+                                        class="form-control"
+                                        name="email"
+                                        value="<%= admin.email %>"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div class="col-12 col-sm-6">
+                                    <div class="form-group">
+                                      <label>Mobile</label>
+                                      <input
+                                        type="text"
+                                        value="<%= admin.mobile %>"
+                                        name="mobile"
+                                        class="form-control"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                                <button
+                                  type="submit"
+                                  class="btn btn-primary btn-block"
+                                >
+                                  Save Changes
+                                </button>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- /Edit Details Modal -->
+                    </div>
+                  </div>
+                  <!-- /Personal Details -->
+                </div>
+                <!-- /Personal Details Tab -->
+
+                <!-- Change Password Tab -->
+                <div id="password_tab" class="tab-pane fade">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Change Password</h5>
+                      <div class="row">
+                        <div class="col-md-10 col-lg-6">
+                          <form action="/change-password" method="post">
+                            <div class="form-group">
+                              <label>Old Password</label>
+                              <input
+                                type="password"
+                                name="oldpass"
+                                class="form-control"
+                              />
+                            </div>
+                            <div class="form-group">
+                              <label>New Password</label>
+                              <input
+                                type="password"
+                                name="newpass"
+                                class="form-control"
+                              />
+                            </div>
+                            <div class="form-group">
+                              <label>Confirm Password</label>
+                              <input
+                                type="password"
+                                name="confirmpass"
+                                class="form-control"
+                              />
+                            </div>
+                            <button class="btn btn-primary" type="submit">
+                              Save Changes
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- /Change Password Tab -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /Page Wrapper -->
+    </div>
+    <!-- /Main Wrapper -->
+
+    <!-- jQuery -->
+    <script src="/js/jquery-3.2.1.min.js"></script>
+
+    <!-- Bootstrap Core JS -->
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Slimscroll JS -->
+    <script src="/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="/js/script.js"></script>
+  </body>
 </html>

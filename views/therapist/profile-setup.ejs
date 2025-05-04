@@ -3,390 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TherapEase</title>
-		
-		<!-- Favicon -->
-        <link rel="shortcut icon" type="image/x-icon" href="/img/logo-small.png">
-		
-		<!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="/css/bootstrap.min.css">
-		
-		<!-- Fontawesome CSS -->
-        <link rel="stylesheet" href="/css/font-awesome.min.css">
-
-		<!-- Feathericon CSS -->
-        <link rel="stylesheet" href="/css/feathericon.min.css">
-		
-		<!-- Main CSS -->
-        <link rel="stylesheet" href="/css/style.css">
-
-		<!-- Select2 CSS -->
-		<link rel="stylesheet" href="/plugins/select2/css/select2.min.css">
-
-		<!-- Bootstrap CSS -->
-		<link rel="stylesheet" href="/plugins/bootstrap-tagsinput/css/bootstrap-tagsinput.css">
-
-		<link rel="stylesheet" href="/plugins/dropzone/dropzone.min.css">
-		
-
-		<!-- Main CSS -->
-		<link rel="stylesheet" href="/css/patient-style.css">
+    <title>CV Upload & Parser</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        input, textarea, button {
+            margin: 10px 0;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+        #fields {
+            display: none;
+            margin-top: 20px;
+        }
+        .education-entry, .work-experience-entry {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .education-entry input, .work-experience-entry input {
+            display: inline-block;
+            width: 30%;
+            margin-right: 10px;
+        }
+        .education-entry button, .work-experience-entry button {
+            display: inline-block;
+            width: auto;
+            padding: 5px 10px;
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .add-btn {
+            background-color: #4CAF50 !important;
+            margin-bottom: 20px;
+        }
+        .wide-input {
+            width: 100% !important;
+            display: block !important;
+        }
+        #resultContainer {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        .loading {
+            display: none;
+            margin: 10px 0;
+            color: #666;
+        }
+        .error {
+            color: red;
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
-    <div class="col-md-7 col-lg-8 col-xl-9">
-        <form method="POST" action="/therapist/profile-setup" enctype="multipart/form-data">
-            <!-- Basic Information -->
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Basic Information</h4>
-                <div class="row form-row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <div class="change-avatar">
-                                <div class="profile-img">
-                                    <img src="<%= therapist.profilePicture %>" alt="User Image">
-                                </div>
-                                <div class="upload-img">
-                                    <div class="change-photo-btn">
-                                        <span><i class="fa fa-upload"></i> Upload Photo</span>
-                                        <input type="file" name="profilePicture" class="upload">
-                                    </div>
-                                    <small class="form-text text-muted">Allowed JPG, GIF or PNG. Max size of 2MB</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Username <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="username" value="<%= therapist.username %>" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Email <span class="text-danger">*</span></label>
-                            <input type="email" class="form-control" name="email" value="<%= therapist.email %>" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>First Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="firstName" value="<%= therapist.firstName %>" >
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Last Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="lastName" value="<%= therapist.lastName %>" >
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Phone Number</label>
-                            <input type="text" class="form-control" name="phone" value="<%= therapist.phone %>">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Gender</label>
-                            <select class="form-control select"  name="gender">
-                                <option value="Male"<%= therapist.gender === "Male" ? "selected" : "" %>>Male</option>
-                                <option value="Female" <%= therapist.gender === "Female" ? "selected" : "" %>>Female</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group mb-0">
-                            <label>Date of Birth</label>
-                            <input type="date" class="form-control" name="dateOfBirth" value="<%= therapist.dateOfBirth ? therapist.dateOfBirth.toISOString().split('T')[0] : '' %>">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="control-label">City</label>
-                            <input type="text" class="form-control" name="city" value="<%= therapist.city %>">
-                        </div>
-                    </div>
 
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="control-label">State / Province</label>
-                            <input type="text" class="form-control" name="state" value="<%= therapist.state %>">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- /Basic Information -->
-    
-        <!-- About Me -->
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">About Me</h4>
-                <div class="form-group mb-0">
-                    <label>Biography</label>
-                    <textarea class="form-control" rows="5" name="bio"><%= therapist.bio || '' %></textarea>
-                </div>
-            </div>
-        </div>
-        <!-- /About Me -->
-        
-        <!-- Clinic Info -->
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Clinic Info</h4>
-                <div class="row form-row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Clinic Name</label>
-                            <input type="text" class="form-control" name="clinicName" value="<%= therapist.clinicName %>">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Clinic Address</label>
-                            <input type="text" class="form-control" name="clinicAddress" value="<%= therapist.clinicAddress %>">
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-        </div>
-        <!-- /Clinic Info -->
+    <h1>Upload Your CV</h1>
 
-        
-        
-        
-        
-        <!-- Services and Specialization -->
-        <div class="card services-card">
-            <div class="card-body">
-                <h4 class="card-title">Services and Specialization</h4>
-                <div class="form-group">
-                    <label>Services</label>
-                    <input type="text" data-role="tagsinput" class="input-tags form-control" placeholder="Enter Services" name="services" value="<%= therapist.services %>" id="services">
-                    <small class="form-text text-muted">Note : Type & Press enter to add new services</small>
-                </div> 
-                <div class="form-group mb-0">
-                    <label>Specialization </label>
-                    <input class="input-tags form-control" type="text" data-role="tagsinput" placeholder="Enter Specialization" name="specialties" value="<%= therapist.specialties ? therapist.specialties.join(', ') : '' %>" id="specialist">
-                    <small class="form-text text-muted">Note : Type & Press  enter to add new specialization</small>
-                </div> 
-            </div>              
-        </div>
-        <!-- /Services and Specialization -->
-     
-        <!-- Education -->
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Education</h4>
-                <div class="education-info">
-                    <div class="row form-row education-cont">
-                        <div class="col-12 col-md-10 col-lg-11">
-                            <div class="row form-row">
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="form-group">
-                                        <label>Degree</label>
-                                        <input type="text" class="form-control" name="degree" value="<%= therapist.education?.[0]?.degree || '' %>">
-                                    </div> 
-                                </div>
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="form-group">
-                                        <label>College/Institute</label>
-                                        <input type="text" class="form-control" name="college" value="<%= therapist.education?.[0]?.college || '' %>">
-                                    </div> 
-                                </div>
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="form-group">
-                                        <label>Year of Completion</label>
-                                        <input type="text" class="form-control" name="yearOfCompletion" value="<%= therapist.education?.[0]?.yearOfCompletion || '' %>">
-                                    </div> 
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="add-more">
-                    <a href="javascript:void(0);" class="add-education"><i class="fa fa-plus-circle"></i> Add More</a>
-                </div>
-            </div>
-        </div>
-        <!-- /Education -->
-    
-        <!-- Experience -->
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Experience</h4>
-                <div class="experience-info">
-                    <div class="row form-row experience-cont">
-                        <div class="col-12 col-md-10 col-lg-11">
-                            <div class="row form-row">
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="form-group">
-                                        <label>Clinic Name</label>
-                                        <input type="text" class="form-control" name="clinicExperience" value="<%= therapist.experience?.[0]?.clinicExperience || '' %>">
-                                    </div> 
-                                </div>
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="form-group">
-                                        <label>From</label>
-                                        <input type="date" class="form-control" name="from" value="<%= therapist.experience?.[0]?.from instanceof Date ? therapist.experience[0].from.toISOString().split('T')[0] : '' %>">
-                                    </div> 
-                                </div>
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="form-group">
-                                        <label>To</label>
-                                        <input type="date" class="form-control" name="to" value="<%= therapist.experience?.[0]?.to instanceof Date ? therapist.experience[0].to.toISOString().split('T')[0] : '' %>">
-                                    </div> 
-                                </div>
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="form-group">
-                                        <label>Designation</label>
-                                        <input type="text" class="form-control" name="designation" value="<%= therapist.experience?.[0]?.designation || '' %>">
-                                    </div> 
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="add-more">
-                    <a href="javascript:void(0);" class="add-experience"><i class="fa fa-plus-circle"></i> Add More</a>
-                </div>
-            </div>
-        </div>
-        <!-- /Experience -->
-        
-        <!-- Awards -->
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Awards</h4>
-                <div class="awards-info">
-                    <div class="row form-row awards-cont">
-                        <div class="col-12 col-md-5">
-                            <div class="form-group">
-                              <label>Awards</label>
-                              <input type="text" class="form-control" name="awards" value="<%= therapist.awards?.[0]?.name || '' %>">
-                            </div> 
-                          </div>
-                          <div class="col-12 col-md-5">
-                            <div class="form-group">
-                              <label>Year</label>
-                              <input type="number" class="form-control" name="awardYear" value="<%= therapist.awards?.[0]?.year || '' %>">
-                            </div> 
-                          </div>
-                    </div>
-                </div>
-                <div class="add-more">
-                    <a href="javascript:void(0);" class="add-award"><i class="fa fa-plus-circle"></i> Add More</a>
-                </div>
-            </div>
-        </div>
-        <!-- /Awards -->
-         
-        <!-- Availability -->
-
-        <div class="card">
-            <div class="card-body">
-              <h4 class="card-title">Availability Schedule</h4>
-              <p class="card-text text-muted">Set your available days and times when patients can book appointments (30 mins) </p>
-              
-              <div class="availability-slots">
-                <% 
-                  const availableSlots = therapist.availability && therapist.availability.length > 0 
-                    ? therapist.availability 
-                    : [{ day: '', startTime: '', endTime: '' }];
-                %>
-                
-                <% availableSlots.forEach((slot, index) => { %>
-                  <div class="row form-row availability-row mb-3">
-                    <div class="col-12 col-md-4">
-                      <div class="form-group">
-                        <label>Day</label>
-                        <select class="form-control select day-select" name="availableDays[]" data-index="<%= index %>">
-                          <option value="">Select Day</option>
-                          <% weekdays.forEach(day => { %>
-                            <option value="<%= day %>" <%= slot.day === day ? 'selected' : '' %>><%= day %></option>
-                          <% }) %>
-                        </select>
-                      </div>
-                    </div>
-                    
-                    <div class="col-12 col-md-4">
-                      <div class="form-group">
-                        <label>Start Time</label>
-                        <select class="form-control select start-time" name="startTime[]" data-index="<%= index %>">
-                          <option value="">Select Time</option>
-                          <% timeSlots.forEach(time => { %>
-                            <option value="<%= time.value %>" <%= slot.startTime === time.value ? 'selected' : '' %>><%= time.display %></option>
-                          <% }) %>
-                        </select>
-                      </div>
-                    </div>
-                    
-                    <div class="col-12 col-md-3">
-                      <div class="form-group">
-                        <label>End Time</label>
-                        <select class="form-control select end-time" name="endTime[]" data-index="<%= index %>">
-                            <option value="">Select End Time</option>
-                            <% timeSlots.forEach(time => { %>
-                              <option value="<%= time.value %>" <%= slot.endTime === time.value ? 'selected' : '' %>><%= time.display %></option>
-                            <% }) %>
-                          </select>
-                          
-                      </div>
-                    </div>
-                    
-                    <% if (index > 0 || availableSlots.length > 1) { %>
-                      <div class="col-12 col-md-1">
-                        <a href="javascript:void(0)" class="btn btn-danger remove-availability mt-4">
-                          <i class="fa fa-trash"></i>
-                        </a>
-                      </div>
-                    <% } %>
-                  </div>
-                <% }) %>
-              </div>
-              
-              <div class="add-more">
-                <a href="javascript:void(0);" class="add-availability"><i class="fa fa-plus-circle"></i> Add More</a>
-              </div>
-            </div>
-          </div>
-          <!-- /Availability -->
-        
-        
-        
-        <div class="submit-section submit-btn-bottom">
-            <button type="submit" class="btn btn-primary submit-btn">Save Changes</button>
-        </div>
+    <form id="upload-form">
+        <input type="file" id="cv-file" name="file" accept=".pdf" required />
+        <button type="submit">Upload CV</button>
+        <div id="upload-loading" class="loading">Processing your CV, please wait...</div>
+        <div id="upload-error" class="error"></div>
     </form>
+
+    <div id="fields">
+        <h2>Review & Edit Your Details</h2>
+        <form id="submit-form">
+            <!-- Hidden field to store therapist ID -->
+            <input type="hidden" id="therapist_id" name="therapist_id" value="<%= therapist._id %>">
+
+            <label>First Name</label>
+            <input type="text" id="first_name" name="first_name" required class="wide-input" value="<%= therapist.firstName || '' %>" />
+
+            <label>Last Name</label>
+            <input type="text" id="last_name" name="last_name" required class="wide-input" value="<%= therapist.lastName || '' %>" />
+
+            <label>Email</label>
+            <input type="email" id="email" name="email" required class="wide-input" value="<%= therapist.email || '' %>" />
+
+            <label>Phone Number</label>
+            <input type="text" id="phone" name="phone" class="wide-input" value="<%= therapist.phone || '' %>" />
+
+            <label>Address</label>
+            <input type="text" id="address" name="address" class="wide-input" />
+
+            <label>Education</label>
+            <div id="education-container"></div>
+            <button type="button" onclick="addEducationField()" class="add-btn">Add Another Education</button>
+
+            <label>Certifications (comma-separated)</label>
+            <input type="text" id="certifications" name="certifications" placeholder="e.g., CBT, DBT" class="wide-input" value="<%= therapist.certifications ? therapist.certifications.join(', ') : '' %>" />
+
+            <label>Awards (comma-separated)</label>
+            <input type="text" id="awards" name="awards" placeholder="e.g., Best Therapist 2023" class="wide-input" value="<%= therapist.awards ? therapist.awards.map(award => award.name).join(', ') : '' %>" />
+
+            <label>Specialization (comma-separated)</label>
+            <input type="text" id="specialization" name="specialization" placeholder="e.g., Anxiety, Addiction" class="wide-input" value="<%= therapist.specialties ? therapist.specialties.join(', ') : '' %>" />
+
+            <label>Thesis</label>
+            <input type="text" id="thesis" name="thesis" class="wide-input" />
+
+            <label>Work Experience</label>
+            <div id="work-experience-container"></div>
+            <button type="button" onclick="addWorkExperienceField()" class="add-btn">Add Another Work Experience</button>
+
+            <label>Skills (comma-separated)</label>
+            <input type="text" id="skills" name="skills" placeholder="e.g., Communication, Empathy, CBT" class="wide-input" value="<%= therapist.services ? therapist.services.join(', ') : '' %>" />
+
+            <input type="hidden" id="total_experience_years" name="total_experience_years" value="0">
+            <input type="hidden" id="badge_level" name="badge_level" value="1">
+
+            <button type="submit">Submit Final Info</button>
+            <div id="submit-loading" class="loading">Saving your information...</div>
+            <div id="submit-error" class="error"></div>
+        </form>
     </div>
-    <!-- jQuery -->
-    <script src="/js/jquery-3.2.1.min.js"></script>
 
-    <!-- jQuery -->
-    <script src="/js/jquery.min.js"></script>
-    
-    <!-- Bootstrap Core JS -->
-    <script src="/js/popper.min.js"></script>
-    <script src="/js/bootstrap.min.js"></script>
-    
-    <!-- Select2 JS -->
-    <script src="/plugins/select2/js/select2.min.js"></script>
+    <div id="resultContainer"></div>
 
-    <!-- Dropzone JS -->
-    <script src="/plugins/dropzone/dropzone.min.js"></script>
+    <script>
+        const uploadForm = document.getElementById('upload-form');
+        const submitForm = document.getElementById('submit-form');
+        const fields = document.getElementById('fields');
+        const resultContainer = document.getElementById('resultContainer');
+        const uploadLoading = document.getElementById('upload-loading');
+        const uploadError = document.getElementById('upload-error');
+        const submitLoading = document.getElementById('submit-loading');
+        const submitError = document.getElementById('submit-error');
 
-    <!-- Bootstrap Tagsinput JS -->
-    <script src="/plugins/bootstrap-tagsinput/js/bootstrap-tagsinput.js"></script>
+        // Initialize with one empty field for each
+        addEducationField();
+        addWorkExperienceField();
 
-    <!-- Profile Settings JS -->
-    <script src="/js/profile-settings.js"></script>
+        // Function to add education fields
+        function addEducationField(degree = '', institution = '', year = '') {
+            const container = document.getElementById('education-container');
+            const index = container.children.length;
 
-    <!-- Slimscroll JS -->
-    <script src="/plugins/slimscroll/jquery.slimscroll.min.js"></script>
-    
-    <!-- Custom JS -->
-    <script  src="/js/script.js"></script>
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'education-entry';
+            entryDiv.innerHTML = `
+                <input type="text" id="education_degree_${index}" placeholder="Degree" value="${degree}" class="wide-input">
+                <input type="text" id="education_institution_${index}" placeholder="Institution" value="${institution}" class="wide-input">
+                <input type="text" id="education_year_${index}" placeholder="Year" value="${year}" class="wide-input">
+                <button type="button" onclick="this.parentElement.remove()">Remove</button>
+            `;
+            container.appendChild(entryDiv);
+        }
+
+        // Function to add work experience fields
+        function addWorkExperienceField(jobTitle = '', company = '', startDate = '', endDate = '') {
+            const container = document.getElementById('work-experience-container');
+            const index = container.children.length;
+
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'work-experience-entry';
+            entryDiv.innerHTML = `
+                <input type="text" id="job_title_${index}" placeholder="Job Title" value="${jobTitle}" class="wide-input">
+                <input type="text" id="company_${index}" placeholder="Company" value="${company}" class="wide-input">
+                <input type="text" id="start_date_${index}" placeholder="Start Year (e.g., 2020)" value="${startDate}" class="wide-input">
+                <input type="text" id="end_date_${index}" placeholder="End Year or 'Present' (e.g., 2022 or Present)" value="${endDate}" class="wide-input">
+                <button type="button" onclick="this.parentElement.remove()">Remove</button>
+            `;
+            container.appendChild(entryDiv);
+        }
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            uploadError.textContent = '';
+            uploadLoading.style.display = 'block';
+            
+            const formData = new FormData();
+            formData.append('file', document.getElementById('cv-file').files[0]);
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/upload-cv/', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to upload CV');
+                }
+
+                const data = await response.json();
+                console.log("CV data received:", data);
+
+                // Clear existing dynamic fields
+                document.getElementById('education-container').innerHTML = '';
+                document.getElementById('work-experience-container').innerHTML = '';
+
+                document.getElementById('first_name').value = data["First Name"] || document.getElementById('first_name').value;
+                document.getElementById('last_name').value = data["Last Name"] || document.getElementById('last_name').value;
+                document.getElementById('email').value = data["Email"] || document.getElementById('email').value;
+                document.getElementById('phone').value = data["Phone Number"] || document.getElementById('phone').value;
+                document.getElementById('address').value = data["Address"] || "";
+                document.getElementById('certifications').value = data["Certifications"]?.join(", ") || document.getElementById('certifications').value;
+                document.getElementById('awards').value = data["Awards"]?.join(", ") || document.getElementById('awards').value;
+                document.getElementById('specialization').value = data["Specialization"]?.join(", ") || document.getElementById('specialization').value;
+                document.getElementById('thesis').value = data["Thesis"] || "";
+                document.getElementById('skills').value = data["Skills"]?.join(", ") || document.getElementById('skills').value;
+
+                if (data["Education"] && data["Education"].length > 0) {
+                    data["Education"].forEach(edu => {
+                        addEducationField(edu.Degree || "", edu.Institution || "", edu.Year || "");
+                    });
+                } else {
+                    addEducationField();
+                }
+
+                if (data["Work Experience"] && data["Work Experience"].length > 0) {
+                    data["Work Experience"].forEach(exp => {
+                        addWorkExperienceField(
+                            exp["Job Title"] || "",
+                            exp["Company"] || "",
+                            exp["Start Date"] || "",
+                            exp["End Date"] || ""
+                        );
+                    });
+                } else {
+                    addWorkExperienceField(); 
+                }
+
+                fields.style.display = 'block';
+            } catch (error) {
+                console.error("Upload error:", error);
+                uploadError.textContent = error.message;
+            } finally {
+                uploadLoading.style.display = 'none';
+            }
+        });
+
+        submitForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            submitError.textContent = '';
+            submitLoading.style.display = 'block';
+            
+            try {
+                const educationEntries = [];
+                const educationDivs = document.querySelectorAll('#education-container .education-entry');
+                educationDivs.forEach(div => {
+                    educationEntries.push({
+                        Degree: div.querySelector('[id^="education_degree_"]').value,
+                        Institution: div.querySelector('[id^="education_institution_"]').value,
+                        Year: div.querySelector('[id^="education_year_"]').value
+                    });
+                });
+
+                const workExperienceEntries = [];
+                const workDivs = document.querySelectorAll('#work-experience-container .work-experience-entry');
+                let totalExperienceYears = 0;
+                const currentYear = new Date().getFullYear();
+
+                function parseYear(dateStr) {
+                    if (!dateStr) return null;
+                    const yearMatch = dateStr.match(/(\d{4})/);
+                    return yearMatch ? parseInt(yearMatch[1]) : null;
+                }
+
+                workDivs.forEach(div => {
+                    const startDateStr = div.querySelector('[id^="start_date_"]').value;
+                    const endDateStr = div.querySelector('[id^="end_date_"]').value;
+                    
+                    workExperienceEntries.push({
+                        "Job Title": div.querySelector('[id^="job_title_"]').value,
+                        "Company": div.querySelector('[id^="company_"]').value,
+                        "Start Date": startDateStr,
+                        "End Date": endDateStr
+                    });
+
+                    const startYear = parseYear(startDateStr);
+                    let endYear = parseYear(endDateStr);
+
+                    if (startYear) {
+                        if (endDateStr.toLowerCase().includes("present") || !endYear) {
+                            endYear = currentYear;
+                        }
+
+                        if (endYear && endYear >= startYear) {
+                            totalExperienceYears += (endYear - startYear);
+                        }
+                    }
+                });
+
+                let badgeLevel = 1;
+                if (totalExperienceYears >= 5) {
+                    badgeLevel = 3;
+                } else if (totalExperienceYears >= 3) {
+                    badgeLevel = 2;
+                }
+
+                document.getElementById('total_experience_years').value = totalExperienceYears;
+                document.getElementById('badge_level').value = badgeLevel;
+
+                const formData = new FormData(submitForm);
+                formData.set('education', JSON.stringify(educationEntries));
+                formData.set('work_experience', JSON.stringify(workExperienceEntries));
+
+                for (let [key, value] of formData.entries()) {
+                    console.log(key, value);
+                }
+
+                const response = await fetch('http://127.0.0.1:8000/submit-cv/', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to submit CV');
+                }
+
+                const result = await response.json();
+                console.log("Submission result:", result);
+
+                resultContainer.innerHTML = `
+                    <h2>Submission Successful!</h2>
+                    <p>${result.message || ''}</p>
+                    <p>Total Years of Experience: ${totalExperienceYears}</p>
+                    <p>Badge Level: ${badgeLevel}</p>
+                `;
+                fields.style.display = 'none';
+
+                // Redirect to registration-complete page after successful submission
+                window.location.href = '/therapist/registration-complete';
+            } catch (error) {
+                console.error("Submission error:", error);
+                submitError.textContent = error.message;
+            } finally {
+                submitLoading.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

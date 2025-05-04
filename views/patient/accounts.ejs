@@ -164,20 +164,31 @@
 			<!-- Page Wrapper -->
             <div class="page-wrapper">
                 <div class="content container-fluid">
-					<% if (success && success.length > 0) { %>
-						<div class="alert alert-success alert-dismissible fade show" role="alert">
-							<%= success %>
-							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
+					<% if (successMessage && successMessage.length > 0) { %>
+						<div
+						  class="alert alert-success alert-dismissible fade show"
+						  role="alert"
+						>
+						  <%= successMessage %>
+						  <button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="alert"
+							aria-label="Close"
+						  ></button>
 						</div>
-						<% } %>
-						<% if (error && error.length > 0) { %>
-						<div class="alert alert-danger alert-dismissible fade show" role="alert">
-							<%= error %>
-							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
+						<% } %> <% if (errorMessage && errorMessage.length > 0) { %>
+						<div
+						  class="alert alert-danger alert-dismissible fade show"
+						  role="alert"
+						>
+						  <%= errorMessage %>
+						  <button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="alert"
+							aria-label="Close"
+						  ></button>
 						</div>
 						<% } %>
 					<!-- Page Header -->

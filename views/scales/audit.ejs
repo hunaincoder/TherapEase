@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AUDIT - Alcohol Use Screening</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .result {
+        margin-top: 2rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+      }
+      .mild {
+        background-color: #fff8e1;
+        border: 1px solid #ffc107;
+      }
+      .moderate {
+        background-color: #ffe0b2;
+        border: 1px solid #ff9800;
+      }
+      .severe {
+        background-color: #ffebee;
+        border: 1px solid #f44336;
+      }
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-weight: bold;
+        color: white;
+      }
+      .badge-1 {
+        background-color: #ffc107;
+      }
+      .badge-2 {
+        background-color: #ff9800;
+      }
+      .badge-3 {
+        background-color: #f44336;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1rem;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+      <h1 class="text-2xl font-bold mb-4">
+        Alcohol Use Disorders Identification Test (AUDIT)
+      </h1>
+      <p class="mb-4">
+        Drinking alcohol can affect your health and some medications you may
+        take. Please help us provide you with the best medical care by answering
+        the questions below.
+      </p>
+      <p class="mb-4 font-semibold">
+        One drink equals: 12 oz. beer | 5 oz. wine | 1.5 oz. liquor (one shot)
+      </p>
+
+      <form id="auditForm" onsubmit="event.preventDefault(); calculateScore()">
+        <table>
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th>Options (Score)</th>
+            </tr>
+          </thead>
+          <tbody id="questionsContainer"></tbody>
+        </table>
+        <button
+          type="submit"
+          class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Submit
+        </button>
+      </form>
+
+      <div id="results" class="result hidden">
+        <h2 class="text-xl font-semibold">Your AUDIT Results</h2>
+        <p>
+          <strong>Total Score:</strong> <span id="totalScore"></span> (out of
+          40)
+        </p>
+        <p><strong>Severity:</strong> <span id="severity"></span></p>
+        <p><strong>Badge:</strong> <span id="badge"></span></p>
+      </div>
+    </div>
+
+    <script>
+      const questions = [
+        {
+          text: "How often do you have a drink containing alcohol?",
+          options: [
+            "Never (0)",
+            "Monthly or less (1)",
+            "2-4 times a month (2)",
+            "2-3 times a week (3)",
+            "4 or more times a week (4)",
+          ],
+        },
+        {
+          text: "How many drinks containing alcohol do you have on a typical day when you are drinking?",
+          options: [
+            "0-2 (0)",
+            "3 or 4 (1)",
+            "5 or 6 (2)",
+            "7-9 (3)",
+            "10 or more (4)",
+          ],
+        },
+        {
+          text: "How often do you have five or more drinks on one occasion?",
+          options: [
+            "Never (0)",
+            "Less than monthly (1)",
+            "Monthly (2)",
+            "Weekly (3)",
+            "Daily or almost daily (4)",
+          ],
+        },
+        {
+          text: "How often during the last year have you found that you were not able to stop drinking once you had started?",
+          options: [
+            "Never (0)",
+            "Less than monthly (1)",
+            "Monthly (2)",
+            "Weekly (3)",
+            "Daily or almost daily (4)",
+          ],
+        },
+        {
+          text: "How often during the last year have you failed to do what was normally expected of you because of drinking?",
+          options: [
+            "Never (0)",
+            "Less than monthly (1)",
+            "Monthly (2)",
+            "Weekly (3)",
+            "Daily or almost daily (4)",
+          ],
+        },
+        {
+          text: "How often during the last year have you needed a first drink in the morning to get yourself going after a heavy drinking session?",
+          options: [
+            "Never (0)",
+            "Less than monthly (1)",
+            "Monthly (2)",
+            "Weekly (3)",
+            "Daily or almost daily (4)",
+          ],
+        },
+        {
+          text: "How often during the last year have you had a feeling of guilt or remorse after drinking?",
+          options: [
+            "Never (0)",
+            "Less than monthly (1)",
+            "Monthly (2)",
+            "Weekly (3)",
+            "Daily or almost daily (4)",
+          ],
+        },
+        {
+          text: "How often during the last year have you been unable to remember what happened the night before because of your drinking?",
+          options: [
+            "Never (0)",
+            "Less than monthly (1)",
+            "Monthly (2)",
+            "Weekly (3)",
+            "Daily or almost daily (4)",
+          ],
+        },
+        {
+          text: "Have you or someone else been injured because of your drinking?",
+          options: [
+            "No (0)",
+            "Yes, but not in the last year (2)",
+            "Yes, in the last year (4)",
+          ],
+        },
+        {
+          text: "Has a relative, friend, doctor, or other health care worker been concerned about your drinking or suggested you cut down?",
+          options: [
+            "No (0)",
+            "Yes, but not in the last year (2)",
+            "Yes, in the last year (4)",
+          ],
+        },
+      ];
+
+      function createQuestionForm() {
+        const container = document.getElementById("questionsContainer");
+
+        questions.forEach((question, index) => {
+          const row = document.createElement("tr");
+
+          const questionCell = document.createElement("td");
+          questionCell.textContent = `${index + 1}. ${question.text}`;
+          row.appendChild(questionCell);
+
+          const optionsCell = document.createElement("td");
+          const optionsGroup = document.createElement("div");
+          optionsGroup.className = "flex flex-col gap-1";
+
+          question.options.forEach((option, i) => {
+            const label = document.createElement("label");
+            label.className = "inline-flex items-center";
+
+            const radio = document.createElement("input");
+            radio.type = "radio";
+            radio.name = `q${index + 1}`;
+            radio.value = i;
+            radio.className = "mr-2";
+            radio.required = true;
+
+            label.appendChild(radio);
+            label.appendChild(document.createTextNode(option));
+            optionsGroup.appendChild(label);
+          });
+
+          optionsCell.appendChild(optionsGroup);
+          row.appendChild(optionsCell);
+
+          container.appendChild(row);
+        });
+      }
+
+      function calculateScore() {
+        let totalScore = 0;
+
+        for (let i = 1; i <= questions.length; i++) {
+          const selected = document.querySelector(
+            `input[name="q${i}"]:checked`
+          );
+          if (!selected) {
+            alert(`Please answer question ${i}`);
+            return;
+          }
+
+          const optionIndex = parseInt(selected.value);
+          const optionText = questions[i - 1].options[optionIndex];
+          const scoreMatch = optionText.match(/\((\d+)\)/);
+
+          if (scoreMatch) {
+            totalScore += parseInt(scoreMatch[1]);
+          }
+        }
+
+        let severity;
+        let severityClass;
+        let badge;
+        let badgeClass;
+
+        if (totalScore <= 7) {
+          severity = "Mild risk";
+          severityClass = "mild";
+          badge = "1";
+          badgeClass = "badge-1";
+        } else if (totalScore >= 8 && totalScore <= 15) {
+          severity = "Moderate risk";
+          severityClass = "moderate";
+          badge = "2";
+          badgeClass = "badge-2";
+        } else {
+          severity = "Severe risk";
+          severityClass = "severe";
+          badge = "3";
+          badgeClass = "badge-3";
+        }
+
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.className = `result ${severityClass}`;
+
+        document.getElementById("totalScore").textContent = totalScore;
+        document.getElementById("severity").textContent = severity;
+
+        const badgeSpan = document.getElementById("badge");
+        badgeSpan.textContent = badge;
+        badgeSpan.className = `badge ${badgeClass}`;
+
+        resultsDiv.classList.remove("hidden");
+      }
+
+      createQuestionForm();
+    </script>
+  </body>
+</html>

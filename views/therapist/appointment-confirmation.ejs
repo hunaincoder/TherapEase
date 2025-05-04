@@ -116,16 +116,24 @@
                   ><i class="fe fe-layout"></i> <span> Appointment</span></a
                 >
               </li>
-             
+              <li>
+                <a href="/therapist/appointment-list"
+                  ><i class="fe fe-layout"></i>
+                  <span> Appointments list</span></a
+                >
+              </li>
+
               <li>
                 <a href="/therapist/invoices"
                   ><i class="fe fe-document"></i> <span>Invoice</span></a
                 >
               </li>
 
-              <li> 
-								<a href="/therapist/profile"><i class="fe fe-user"></i> <span>Profile</span></a>
-							</li>
+              <li>
+                <a href="/therapist/profile"
+                  ><i class="fe fe-user"></i> <span>Profile</span></a
+                >
+              </li>
 
               <li>
                 <a href="/therpist/payout"
@@ -146,6 +154,33 @@
       <!-- Page Wrapper -->
       <div class="page-wrapper">
         <div class="content container-fluid">
+          <% if (successMessage && successMessage.length > 0) { %>
+						<div
+						  class="alert alert-success alert-dismissible fade show"
+						  role="alert"
+						>
+						  <%= successMessage %>
+						  <button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="alert"
+							aria-label="Close"
+						  ></button>
+						</div>
+						<% } %> <% if (errorMessage && errorMessage.length > 0) { %>
+						<div
+						  class="alert alert-danger alert-dismissible fade show"
+						  role="alert"
+						>
+						  <%= errorMessage %>
+						  <button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="alert"
+							aria-label="Close"
+						  ></button>
+						</div>
+						<% } %>
           <!-- Page Header -->
           <div class="page-header">
             <div class="row">

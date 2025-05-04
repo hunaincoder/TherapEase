@@ -15,7 +15,7 @@ const AppointmentSchema = new mongoose.Schema({
   time: { type: String, required: true },
   sessionType: {
     type: String,
-    enum: ["Video", "Audio", "Text"],
+    enum: ["video", "audio", "text"],
     required: true,
   },
   status: {
@@ -24,7 +24,6 @@ const AppointmentSchema = new mongoose.Schema({
     default: "Scheduled",
   },
   notes: { type: String },
-  videoCallUrl: { type: String },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

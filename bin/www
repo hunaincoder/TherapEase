@@ -1,75 +1,142 @@
 #!/usr/bin/env node
 
-/**
- * Module dependencies.
- */
+const app = require("../app");
+const debug = require("debug")("therapease:server");
+const http = require("http");
+const { Server } = require("socket.io");
+const mongoose = require("mongoose");
+const AppointmentModel = require("../models/appointments.js");
 
-var app = require('../app');
-var debug = require('debug')('therapease:server');
-var http = require('http');
+const port = normalizePort(process.env.PORT || "3000");
+app.set("port", port);
 
-/**
- * Get port from environment and store in Express.
- */
+const server = http.createServer(app);
 
-var port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
+const io = new Server(server, {
+  cors: {
+    origin: true,
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+  path: "/socket.io/",
+  transports: ["websocket", "polling"],
+  allowEIO3: true,
+});
 
-/**
- * Create HTTP server.
- */
+const roomOffers = new Map();
 
-var server = http.createServer(app);
+io.on("connection", async (socket) => {
+  try {
+    const { roomId, userId, isTherapist } = socket.handshake.query;
 
-/**
- * Listen on provided port, on all network interfaces.
- */
+    if (!roomId) {
+      throw new Error("Room ID is missing");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(roomId)) {
+      throw new Error("Invalid room ID format");
+    }
+
+    const appointment = await AppointmentModel.findById(roomId);
+    if (!appointment) {
+      throw new Error("Appointment not found");
+    }
+
+    if (
+      userId !== appointment.patientId.toString() &&
+      userId !== appointment.therapistId.toString()
+    ) {
+      throw new Error("Unauthorized access to session");
+    }
+
+    socket.join(roomId);
+    console.log(`User ${userId} joined room ${roomId}`);
+
+    socket.emit("joinConfirmed", { roomId, userId });
+
+    socket
+      .to(roomId)
+      .emit("userJoined", { userId, isTherapist: isTherapist === "true" });
+
+    socket.on("join", ({ roomId, userId, isTherapist }) => {
+      console.log(`Received join event for user ${userId} in room ${roomId}`);
+      socket.to(roomId).emit("userJoined", { userId, isTherapist });
+    });
+
+    socket.on("offer", (data) => {
+      console.log(
+        `Received offer from ${data.userId} in room ${data.roomId}, broadcasting to room`
+      );
+      roomOffers.set(data.roomId, data.offer);
+      socket.to(data.roomId).emit("offer", data);
+    });
+
+    socket.on("offerRequest", ({ roomId, userId }) => {
+      console.log(`Received offer request from ${userId} in room ${roomId}`);
+      const offer = roomOffers.get(roomId);
+      if (offer) {
+        socket.emit("offer", { offer, roomId, userId: userId });
+        console.log(`Sent stored offer to ${userId} in room ${roomId}`);
+      } else {
+        console.log(`No stored offer available for room ${roomId}`);
+      }
+    });
+
+    socket.on("answer", (data) => {
+      console.log(
+        `Received answer from ${data.userId} in room ${data.roomId}, broadcasting to room`
+      );
+      socket.to(data.roomId).emit("answer", data);
+    });
+
+    socket.on("iceCandidate", (data) => {
+      console.log(
+        `Received ICE candidate from ${data.userId} in room ${data.roomId}, broadcasting to room`
+      );
+      socket.to(data.roomId).emit("iceCandidate", data);
+    });
+
+    socket.on("disconnect", () => {
+      console.log(`User ${userId} left room ${roomId}`);
+      socket.to(roomId).emit("userLeft", { userId });
+    });
+  } catch (err) {
+    console.error("Connection error:", {
+      message: err.message,
+      roomId: socket.handshake.query.roomId || "undefined",
+      userId: socket.handshake.query.userId || "undefined",
+      isTherapist: socket.handshake.query.isTherapist || "undefined",
+      socketId: socket.id,
+      stack: err.stack,
+    });
+    socket.emit("error", { message: err.message });
+    socket.disconnect();
+  }
+});
 
 server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
-
-/**
- * Normalize a port into a number, string, or false.
- */
+server.on("error", onError);
+server.on("listening", onListening);
 
 function normalizePort(val) {
-  var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
+  const port = parseInt(val, 10);
+  if (isNaN(port)) return val;
+  if (port >= 0) return port;
   return false;
 }
 
-/**
- * Event listener for HTTP server "error" event.
- */
-
 function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
+  if (error.syscall !== "listen") throw error;
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  const bind = typeof port === "string" ? `Pipe ${port}` : `Port ${port}`;
 
-  // handle specific listen errors with friendly messages
   switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
+    case "EACCES":
+      console.error(`${bind} requires elevated privileges`);
       process.exit(1);
       break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
+    case "EADDRINUSE":
+      console.error(`${bind} is already in use`);
       process.exit(1);
       break;
     default:
@@ -77,14 +144,9 @@ function onError(error) {
   }
 }
 
-/**
- * Event listener for HTTP server "listening" event.
- */
-
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  const addr = server.address();
+  const bind = typeof addr === "string" ? `pipe ${addr}` : `port ${addr.port}`;
+  debug(`Listening on ${bind}`);
+  console.log(`🚀 Server signaling on http://localhost:${port}`);
 }

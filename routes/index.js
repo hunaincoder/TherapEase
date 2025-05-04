@@ -9,6 +9,8 @@ const PatientModel = require("../models/patient");
 const TransactionModel = require("../models/transaction");
 const AppointmentModel = require("../models/appointments");
 const moment = require("moment");
+const mongoose = require("mongoose");
+const flash = require("connect-flash");
 
 router.use("/", authRoutes);
 
@@ -136,7 +138,8 @@ router.get("/dashboard", isLoggedIn, async function (req, res) {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error loading dashboard");
+    req.flash("errorMessage", "Error loading dashboard");
+    res.redirect("/dashboard");
   }
 });
 
@@ -146,7 +149,8 @@ router.get("/profile", isLoggedIn, async function (req, res) {
     res.render("admin/profile", { admin });
   } catch (err) {
     console.error(err);
-    res.status(500).send("Internal Server Error");
+    req.flash("errorMessage", "Error loading profile");
+    res.redirect("/dashboard");
   }
 });
 
@@ -162,11 +166,12 @@ router.post("/profile/update", isLoggedIn, async function (req, res) {
       updatedAt: new Date(),
     };
     await AdminModel.findByIdAndUpdate(adminId, updatedData);
-
+    req.flash("successMessage", "Profile updated successfully!");
     res.redirect("/profile");
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error updating profile");
+    req.flash("errorMessage", "Error updating profile");
+    res.redirect("/profile");
   }
 });
 
@@ -194,7 +199,8 @@ router.get("/appointment-list", isLoggedIn, async function (req, res) {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error fetching appointments");
+    req.flash("errorMessage", "Error fetching appointments");
+    res.redirect("/dashboard");
   }
 });
 
@@ -214,8 +220,9 @@ router.get("/therapist-list", isLoggedIn, async function (req, res) {
     });
     res.render("admin/therapist-list", { admin, therapists });
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
+    console.error("Error in /therapist-list:", error.stack);
+    req.flash("errorMessage", "Error fetching therapist list");
+    res.redirect("/dashboard");
   }
 });
 
@@ -224,14 +231,15 @@ router.post("/delete-therapist/:id", async (req, res) => {
   try {
     const deletedtherapist = await TherapistModel.findByIdAndDelete(id);
     if (!deletedtherapist) {
-      return res.status(404).send("Therapist not found");
+      req.flash("errorMessage", "Therapist not found");
+      return res.redirect("/therapist-list");
     }
     req.flash("successMessage", "Therapist deleted successfully!");
-
     res.redirect("/therapist-list");
-  } catch {
+  } catch (error) {
     console.error(error);
-    res.status(500).send("Error deleting therapist");
+    req.flash("errorMessage", "Error deleting therapist");
+    res.redirect("/therapist-list");
   }
 });
 
@@ -241,7 +249,8 @@ router.get("/therapist-profile/:id", isLoggedIn, async (req, res) => {
     const therapist = await TherapistModel.findById(req.params.id);
 
     if (!therapist) {
-      return res.status(404).send("Therapist not found");
+      req.flash("errorMessage", "Therapist not found");
+      return res.redirect("/therapist-list");
     }
 
     res.render("admin/therapist-profile", {
@@ -251,7 +260,8 @@ router.get("/therapist-profile/:id", isLoggedIn, async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error fetching therapist profile");
+    req.flash("errorMessage", "Error fetching therapist profile");
+    res.redirect("/therapist-list");
   }
 });
 
@@ -263,7 +273,8 @@ router.get("/patient-list", isLoggedIn, async function (req, res) {
     res.render("admin/patient-list", { admin, patients });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error fetching patient list");
+    req.flash("errorMessage", "Error fetching patient list");
+    res.redirect("/dashboard");
   }
 });
 
@@ -272,14 +283,15 @@ router.post("/delete-patient/:id", async (req, res) => {
   try {
     const deletedpatient = await PatientModel.findByIdAndDelete(id);
     if (!deletedpatient) {
-      return res.status(404).send("patient not found");
+      req.flash("errorMessage", "Patient not found");
+      return res.redirect("/patient-list");
     }
-    req.flash("successMessage", "patient deleted successfully!");
-
+    req.flash("successMessage", "Patient deleted successfully!");
     res.redirect("/patient-list");
-  } catch {
+  } catch (error) {
     console.error(error);
-    res.status(500).send("Error deleting patient");
+    req.flash("errorMessage", "Error deleting patient");
+    res.redirect("/patient-list");
   }
 });
 
@@ -294,7 +306,8 @@ router.get("/transactions-list", isLoggedIn, async function (req, res) {
     res.render("admin/transactions-list", { admin, transactions });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error fetching transactions");
+    req.flash("errorMessage", "Error fetching transactions");
+    res.redirect("/dashboard");
   }
 });
 
@@ -306,7 +319,8 @@ router.post("/delete-transaction/:id", async (req, res) => {
     res.redirect("/transactions-list");
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error deleting transaction");
+    req.flash("errorMessage", "Error deleting transaction");
+    res.redirect("/transactions-list");
   }
 });
 
@@ -320,7 +334,8 @@ router.get("/invoice/:id", isLoggedIn, async (req, res) => {
       .populate("appointment");
 
     if (!transaction) {
-      return res.status(404).send("Transaction not found");
+      req.flash("errorMessage", "Transaction not found");
+      return res.redirect("/transactions-list");
     }
 
     if (
@@ -328,7 +343,8 @@ router.get("/invoice/:id", isLoggedIn, async (req, res) => {
       !transaction.therapist ||
       !transaction.appointment
     ) {
-      return res.status(400).send("Incomplete transaction data");
+      req.flash("errorMessage", "Incomplete transaction data");
+      return res.redirect("/transactions-list");
     }
 
     res.render("admin/invoice", {
@@ -347,7 +363,8 @@ router.get("/invoice/:id", isLoggedIn, async (req, res) => {
     });
   } catch (error) {
     console.error("Invoice Error:", error);
-    res.status(500).send("Error generating invoice");
+    req.flash("errorMessage", "Error generating invoice");
+    res.redirect("/transactions-list");
   }
 });
 
@@ -358,40 +375,61 @@ router.get("/therapist-approval", isLoggedIn, async function (req, res) {
 
     res.render("admin/therapist-approval", { therapists, admin });
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Error fetching therapist list");
+    console.error("Error fetching therapist approval list:", err);
+    req.flash("errorMessage", "Error fetching therapist list");
+    res.redirect("/dashboard");
   }
 });
 
-router.post("/approve-therapist/:id", async (req, res) => {
+router.post("/approve-therapist/:id", isLoggedIn, async (req, res) => {
   const { id } = req.params;
   try {
-    const therapist = await TherapistModel.findById(id);
-    if (therapist) {
-      therapist.status = "Approved";
-      await therapist.save();
-      res.redirect("/therapist-approval");
-    } else {
-      res.status(404).send("Therapist not found");
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      req.flash("errorMessage", "Invalid therapist ID");
+      return res.redirect("/therapist-approval");
     }
+
+    const therapist = await TherapistModel.findById(id);
+    if (!therapist) {
+      req.flash("errorMessage", "Therapist not found");
+      return res.redirect("/therapist-approval");
+    }
+
+    therapist.status = "Approved";
+    await therapist.save();
+
+    req.flash("successMessage", "Therapist approved successfully!");
+    res.redirect("/therapist-approval");
   } catch (error) {
-    res.status(500).send("Error approving therapist");
+    console.error("Error approving therapist:", error);
+    req.flash("errorMessage", `Error approving therapist: ${error.message}`);
+    res.redirect("/therapist-approval");
   }
 });
 
-router.post("/reject-therapist/:id", async (req, res) => {
+router.post("/reject-therapist/:id", isLoggedIn, async (req, res) => {
   const { id } = req.params;
   try {
-    const therapist = await TherapistModel.findById(id);
-    if (therapist) {
-      therapist.status = "Rejected";
-      await therapist.save();
-      res.redirect("/therapist-approval");
-    } else {
-      res.status(404).send("Therapist not found");
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      req.flash("errorMessage", "Invalid therapist ID");
+      return res.redirect("/therapist-approval");
     }
+
+    const therapist = await TherapistModel.findById(id);
+    if (!therapist) {
+      req.flash("errorMessage", "Therapist not found");
+      return res.redirect("/therapist-approval");
+    }
+
+    therapist.status = "Rejected";
+    await therapist.save();
+
+    req.flash("successMessage", "Therapist rejected successfully!");
+    res.redirect("/therapist-approval");
   } catch (error) {
-    res.status(500).send("Error approving therapist");
+    console.error("Error rejecting therapist:", error);
+    req.flash("errorMessage", `Error rejecting therapist: ${error.message}`);
+    res.redirect("/therapist-approval");
   }
 });
 
@@ -408,7 +446,8 @@ router.get("/payment-approval", isLoggedIn, async function (req, res) {
     res.render("admin/payment-approval", { admin, transactions });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error fetching payment approval list");
+    req.flash("errorMessage", "Error fetching payment approval list");
+    res.redirect("/dashboard");
   }
 });
 
@@ -418,17 +457,20 @@ router.post("/approve-payment/:id", isLoggedIn, async (req, res) => {
     const transaction = await TransactionModel.findById(transactionId);
 
     if (!transaction) {
-      res.status(404).send("Transaction not found");
+      req.flash("errorMessage", "Transaction not found");
+      return res.redirect("/payment-approval");
     }
 
     transaction.therapistPayout = "paid";
     transaction.datePaid = new Date();
     await transaction.save();
 
+    req.flash("successMessage", "Payment approved successfully!");
     res.redirect("/payment-approval");
   } catch (error) {
     console.error("Error approving payment:", error);
-    res.status(500).send("Error approving payment");
+    req.flash("errorMessage", "Error approving payment");
+    res.redirect("/payment-approval");
   }
 });
 
@@ -438,17 +480,20 @@ router.post("/reject-payment/:id", isLoggedIn, async (req, res) => {
     const transaction = await TransactionModel.findById(transactionId);
 
     if (!transaction) {
-      res.status(404).send("Transaction not found");
+      req.flash("errorMessage", "Transaction not found");
+      return res.redirect("/payment-approval");
     }
 
     transaction.therapistPayout = "rejected";
     transaction.datePaid = new Date();
     await transaction.save();
 
+    req.flash("successMessage", "Payment rejected successfully!");
     res.redirect("/payment-approval");
   } catch (error) {
     console.error("Error rejecting payment:", error);
-    res.status(500).send("Error approving payment");
+    req.flash("errorMessage", "Error rejecting payment");
+    res.redirect("/payment-approval");
   }
 });
 
@@ -465,7 +510,8 @@ router.get("/refunds-approval", isLoggedIn, async function (req, res) {
     res.render("admin/refunds-approval", { admin, transactions });
   } catch (error) {
     console.error("Error fetching refunds approval list:", error);
-    res.status(500).send("Error fetching refunds approval list");
+    req.flash("errorMessage", "Error fetching refunds approval list");
+    res.redirect("/dashboard");
   }
 });
 
@@ -475,17 +521,20 @@ router.post("/approve-refund/:id", isLoggedIn, async (req, res) => {
     const transaction = await TransactionModel.findById(transactionId);
 
     if (!transaction) {
-      res.status(404).send("Transaction not found");
+      req.flash("errorMessage", "Transaction not found");
+      return res.redirect("/refunds-approval");
     }
 
     transaction.patientPayout = "refunded";
     transaction.datePaid = new Date();
     await transaction.save();
 
+    req.flash("successMessage", "Refund approved successfully!");
     res.redirect("/refunds-approval");
   } catch (error) {
     console.error("Error approving refund:", error);
-    res.status(500).send("Error approving refund");
+    req.flash("errorMessage", "Error approving refund");
+    res.redirect("/refunds-approval");
   }
 });
 
@@ -495,17 +544,20 @@ router.post("/reject-refund/:id", isLoggedIn, async (req, res) => {
     const transaction = await TransactionModel.findById(transactionId);
 
     if (!transaction) {
-      res.status(404).send("Transaction not found");
+      req.flash("errorMessage", "Transaction not found");
+      return res.redirect("/refunds-approval");
     }
 
     transaction.patientPayout = "rejected";
     transaction.datePaid = new Date();
     await transaction.save();
 
+    req.flash("successMessage", "Refund rejected successfully!");
     res.redirect("/refunds-approval");
   } catch (error) {
     console.error("Error rejecting refund:", error);
-    res.status(500).send("Error rejecting refund");
+    req.flash("errorMessage", "Error rejecting refund");
+    res.redirect("/refunds-approval");
   }
 });
 
@@ -516,36 +568,44 @@ router.post("/change-password", isLoggedIn, async function (req, res) {
     const admin = await AdminModel.findById(adminId);
 
     if (!oldpass || !newpass || !confirmpass) {
-      return res.status(400).send("Please fill all fields");
+      req.flash("errorMessage", "Please fill all fields");
+      return res.redirect("/profile");
     }
     if (newpass !== confirmpass) {
-      return res
-        .status(400)
-        .send("New Password and Confirm Password do not match");
+      req.flash(
+        "errorMessage",
+        "New Password and Confirm Password do not match"
+      );
+      return res.redirect("/profile");
     }
 
     if (!admin) {
-      return res.status(404).send("Admin not found");
+      req.flash("errorMessage", "Admin not found");
+      return res.redirect("/profile");
     }
 
     admin.authenticate(oldpass, async function (err, user, passwordError) {
       if (err || passwordError) {
-        return res.status(400).send("Old Password is incorrect");
+        req.flash("errorMessage", "Old Password is incorrect");
+        return res.redirect("/profile");
       }
 
       await admin.setPassword(newpass);
       await admin.save();
+      req.flash("successMessage", "Password changed successfully!");
+      res.redirect("/profile");
     });
-
-    res.redirect("/profile");
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error changing password");
+    req.flash("errorMessage", "Error changing password");
+    res.redirect("/profile");
   }
 });
 
 router.get("/login", function (req, res) {
-  res.render("admin/login", { message: "Login failed, try again." });
+  res.render("admin/login", {
+    message: req.flash("errorMessage") || "Login failed, try again.",
+  });
 });
 
 router.get("/register", function (req, res) {
@@ -556,17 +616,20 @@ router.post("/register", async function (req, res) {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
-    return res.status(400).send("All fields are required");
+    req.flash("errorMessage", "All fields are required");
+    return res.redirect("/register");
   }
 
   const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
   if (!emailPattern.test(email)) {
-    return res.status(400).send("Invalid email format");
+    req.flash("errorMessage", "Invalid email format");
+    return res.redirect("/register");
   }
 
   const existingUser = await AdminModel.findOne({ email });
   if (existingUser) {
-    return res.status(400).send("Email is already in use");
+    req.flash("errorMessage", "Email is already in use");
+    return res.redirect("/register");
   }
 
   const data = new AdminModel({
@@ -577,32 +640,39 @@ router.post("/register", async function (req, res) {
   AdminModel.register(data, req.body.password)
     .then(function () {
       passport.authenticate("admin-local")(req, res, function () {
+        req.flash("successMessage", "Admin registered successfully!");
         res.redirect("/dashboard");
       });
     })
     .catch(function (err) {
       console.error(err);
-      res.status(500).send("Error registering admin");
+      req.flash("errorMessage", "Error registering admin");
+      res.redirect("/register");
     });
 });
 
 router.post("/login", function (req, res, next) {
   passport.authenticate("admin-local", function (err, user, info) {
     if (err) {
-      return next(err);
+      req.flash("errorMessage", "Authentication error");
+      return res.redirect("/login");
     }
     if (!user) {
-      return res.status(400).send("Invalid email or password");
+      req.flash("errorMessage", "Invalid email or password");
+      return res.redirect("/login");
     }
 
     req.login(user, function (err) {
       if (err) {
-        return next(err);
+        req.flash("errorMessage", "Login failed");
+        return res.redirect("/login");
       }
       req.session.save((err) => {
         if (err) {
-          return next(err);
+          req.flash("errorMessage", "Session save error");
+          return res.redirect("/login");
         }
+        req.flash("successMessage", "Logged in successfully!");
         return res.redirect("/dashboard");
       });
     });
@@ -612,23 +682,46 @@ router.post("/login", function (req, res, next) {
 router.get("/logout", function (req, res, next) {
   req.logout(function (err) {
     if (err) {
-      return next(err);
+      req.flash("errorMessage", "Error during logout");
+      return res.redirect("/dashboard");
     }
-
-    res.clearCookie("connect.sid");
-
+    res.clearCookie("admin.sid");
     req.session.destroy((err) => {
-      if (err) return next(err);
+      if (err) {
+        console.error("Session destroy error:", err);
+        return res.redirect("/dashboard");
+      }
       res.redirect("/login");
     });
   });
 });
 
 function isLoggedIn(req, res, next) {
-  if (req.isAuthenticated() && !req.user.status) {
+  if (req.isAuthenticated()) {
     return next();
   }
+  req.flash("errorMessage", "Please log in to access this page");
   res.redirect("/login");
+}
+
+async function isAdmin(req, res, next) {
+  if (!req.isAuthenticated()) {
+    req.flash("errorMessage", "Please log in to access this page");
+    return res.redirect("/login");
+  }
+  try {
+    const admin = await AdminModel.findOne({ email: req.user.email });
+    if (!admin) {
+      req.flash("errorMessage", "Access denied: Admins only");
+      return res.redirect("/dashboard"); // Redirect to a user-appropriate page
+    }
+    req.user = admin; // Ensure req.user is the admin document
+    next();
+  } catch (error) {
+    console.error("Error in isAdmin middleware:", error);
+    req.flash("errorMessage", "Error verifying admin access");
+    res.redirect("/login");
+  }
 }
 
 module.exports = router;

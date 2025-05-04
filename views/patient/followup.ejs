@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Follow-up Questions</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .scale {
+        margin-bottom: 30px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 20px;
+      }
+      .question {
+        margin-bottom: 15px;
+      }
+      textarea {
+        width: 100%;
+        height: 60px;
+        margin-top: 5px;
+      }
+      button {
+        padding: 10px 20px;
+        margin-top: 20px;
+      }
+      h2 {
+        color: #2c3e50;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Follow-up Questions</h1>
+    <form id="followup-form" action="/client/followup" method="POST">
+      <div id="scales-questions"></div>
+      <input type="hidden" id="topScalesInput" name="topScales" value="" />
+      <button type="submit">Submit Answers</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+      const topScales = JSON.parse(sessionStorage.getItem("topScales"));
+      document.getElementById("topScalesInput").value =
+        JSON.stringify(topScales);
+
+      async function loadSpecificQuestions() {
+        try {
+          const response = await fetch(
+            "http://localhost:8001/get-specific-questions/",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ top_3: topScales }),
+            }
+          );
+
+          if (!response.ok)
+            throw new Error("Failed to load specific questions");
+
+          const scalesQuestions = await response.json();
+          const container = document.getElementById("scales-questions");
+
+          for (const [scaleName, questions] of Object.entries(
+            scalesQuestions
+          )) {
+            const scaleDiv = document.createElement("div");
+            scaleDiv.className = "scale";
+            scaleDiv.innerHTML = `<h2>${scaleName}</h2>`;
+
+            questions.forEach((question, index) => {
+              const qDiv = document.createElement("div");
+              qDiv.className = "question";
+              qDiv.innerHTML = `
+                  <label>${question}</label><br>
+                  <textarea name="answers[${scaleName}][${index}]" required></textarea>
+                `;
+              scaleDiv.appendChild(qDiv);
+            });
+
+            container.appendChild(scaleDiv);
+          }
+        } catch (error) {
+          console.error("Error loading specific questions:", error);
+          alert(
+            "Failed to load follow-up questions. Check console for details."
+          );
+        }
+      }
+
+      document
+        .getElementById("followup-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const form = e.target;
+          const formData = new FormData(form);
+          const resultDiv = document.getElementById("result");
+
+          try {
+            // Verify and log topScales from sessionStorage
+            const topScales = JSON.parse(
+              sessionStorage.getItem("topScales") || "[]"
+            );
+            console.log("topScales from sessionStorage:", topScales);
+            if (
+              !Array.isArray(topScales) ||
+              topScales.length === 0 ||
+              !topScales.every((s) => s && typeof s.scale === "string")
+            ) {
+              throw new Error("Invalid or empty topScales in sessionStorage");
+            }
+
+            // Convert form data to a structured object
+            const requestData = {
+              answers: {},
+              topScales: topScales,
+            };
+
+            for (const [key, value] of formData.entries()) {
+              if (key.startsWith("answers[")) {
+                const match = key.match(/answers\[([^\]]+)\]\[([^\]]+)\]/);
+                if (match) {
+                  const scale = match[1];
+                  const index = match[2];
+                  if (!requestData.answers[scale])
+                    requestData.answers[scale] = [];
+                  requestData.answers[scale][index] = {
+                    question: key,
+                    answer: value,
+                  };
+                }
+              }
+            }
+
+            console.log(
+              "Sending to API:",
+              JSON.stringify(requestData, null, 2)
+            );
+
+            // Call the API to determine the final scale
+            const determineRes = await fetch(
+              "http://localhost:8001/determine-final-scale/",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(requestData),
+              }
+            );
+
+            const determineData = await determineRes.json();
+            console.log("Final scale response:", determineData);
+
+            if (!determineRes.ok) {
+              throw new Error(
+                `API request failed with status ${determineRes.status}: ${
+                  determineData.detail || "Unknown error"
+                }`
+              );
+            }
+
+            if (!determineData.finalScale) {
+              throw new Error(
+                `Final scale not found in API response: ${JSON.stringify(
+                  determineData
+                )}`
+              );
+            }
+
+            // Submit to backend route as JSON
+            const submitData = {
+              answers: requestData.answers,
+              finalScale: determineData.finalScale,
+              rationale: determineData.rationale,
+            };
+
+            const submitRes = await fetch(form.action, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(submitData),
+            });
+
+            const responseData = await submitRes.json();
+            console.log("Backend response:", responseData);
+
+            if (!submitRes.ok) {
+              throw new Error(
+                `Backend submission failed with status ${submitRes.status}: ${
+                  responseData.error || "Unknown error"
+                }`
+              );
+            }
+
+            if (responseData.redirect) {
+              window.location.href = responseData.redirect;
+            } else {
+              throw new Error("Missing redirect URL in response");
+            }
+          } catch (error) {
+            console.error("Submission error:", error);
+            resultDiv.innerHTML = `
+        <p style="color: red;">Error: ${error.message}</p>
+        <p>Please try again or contact support if the issue persists.</p>
+      `;
+          }
+        });
+      loadSpecificQuestions();
+    </script>
+  </body>
+</html>

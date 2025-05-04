@@ -43,6 +43,10 @@ const PatientSchema = new mongoose.Schema({
     },
   ],
 
+  hasCompletedScreening: { type: Boolean, default: false },
+  recommendedScale: { type: String },
+  rationale: { type: String },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

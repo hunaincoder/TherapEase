@@ -1,0 +1,41 @@
+[
+    {
+      "question": "Can you describe how you have been feeling emotionally over the past few weeks?",
+      "response_type": "text"
+    },
+    {
+      "question": "Have you experienced any changes in your daily habits or routines that you have noticed recently? How has this affected you?",
+      "response_type": "text"
+    },
+    {
+      "question": "Can you tell me about a time when you felt overwhelmed? What caused it, and how did you cope?",
+      "response_type": "text"
+    },
+    {
+      "question": "What are some things you’ve been thinking about that seem to cause you a lot of distress or discomfort?",
+      "response_type": "text"
+    },
+    {
+      "question": "How do you typically cope with situations that make you anxious or uncomfortable?",
+      "response_type": "text"
+    },
+    {
+      "question": "Have there been any significant life changes that have affected how you view yourself or your relationships with others?",
+      "response_type": "text"
+    },
+    {
+      "question": "Do you feel like you have control over your actions and decisions, or do you ever feel like something is taking over your thoughts or behavior?",
+      "response_type": "text"
+    },
+    {
+      "question": "Have you had trouble sleeping lately? If so, what do you think is affecting your sleep?",
+      "response_type": "text"
+    },
+    {
+      "question": "Can you describe a situation or experience where you felt disconnected from your emotions or from others around you?",
+      "response_type": "text"
+    }
+   
+  ]
+  
+  

@@ -7,7 +7,10 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const moment = require("moment-timezone");
 const flash = require("connect-flash");
+const ConnectMongo = require("./config/DB");
+const mongoose = require("mongoose");
 require("dotenv").config();
+const { scheduleAppointmentStatusUpdate } = require("./jobs/updateAppointmentStatus");
 
 var indexRouter = require("./routes/index");
 var TherapistRoutes = require("./routes/therapistroutes");
@@ -26,19 +29,75 @@ app.use(cookieParser());
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.use(
-  session({
-    secret: "hunain",
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-      secure: false,
-      httpOnly: true,
-      sameSite: "strict",
-    },
-  })
-);
 
+ConnectMongo().then(() => {
+  console.log("MongoDB connected, starting appointment status cron job");
+  scheduleAppointmentStatusUpdate();
+});
+
+const adminSession = session({
+  name: "admin.sid",
+  secret: process.env.SESSION_SECRET || "hunain",
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: "admin_sessions",
+  }),
+  cookie: {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: "strict",
+    maxAge: 24 * 60 * 60 * 1000,
+  },
+});
+
+const therapistSession = session({
+  name: "therapist.sid",
+  secret: process.env.SESSION_SECRET || "hunain",
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: "therapist_sessions",
+  }),
+  cookie: {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: "strict",
+    maxAge: 24 * 60 * 60 * 1000,
+  },
+});
+
+const patientSession = session({
+  name: "patient.sid",
+  secret: process.env.SESSION_SECRET || "hunain",
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: "patient_sessions",
+  }),
+  cookie: {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: "strict",
+    maxAge: 24 * 60 * 60 * 1000,
+  },
+});
+
+app.use((req, res, next) => {
+  if (req.path.startsWith("/ws") || req.path.startsWith("/socket.io")) {
+    return next();
+  }
+  if (req.path.startsWith("/therapist")) {
+    therapistSession(req, res, next);
+  } else if (req.path.startsWith("/client")) {
+    patientSession(req, res, next);
+  } else {
+    adminSession(req, res, next);
+  }
+});
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -49,15 +108,40 @@ app.use((req, res, next) => {
 });
 
 passport.serializeUser((user, done) => {
-  done(null, user.id);
+  const key =
+    user instanceof AdminModel
+      ? "admin"
+      : user instanceof TherapistModel
+      ? "therapist"
+      : "patient";
+  done(null, { id: user.id, type: key });
 });
 
-passport.deserializeUser(async (id, done) => {
-  const user =
-    (await AdminModel.findById(id)) ||
-    (await TherapistModel.findById(id)) ||
-    (await PatientModel.findById(id));
-  done(null, user);
+passport.deserializeUser(async (obj, done) => {
+  try {
+    let user;
+    switch (obj.type) {
+      case "admin":
+        user = await AdminModel.findById(obj.id);
+        break;
+      case "therapist":
+        user = await TherapistModel.findById(obj.id);
+        break;
+      case "patient":
+        user = await PatientModel.findById(obj.id);
+        break;
+      default:
+        return done(null, false);
+    }
+
+    if (!user) {
+      return done(null, false);
+    }
+    done(null, user);
+  } catch (err) {
+    console.error("Error in deserializeUser:", err);
+    done(err, null);
+  }
 });
 
 app.use((req, res, next) => {
@@ -75,8 +159,8 @@ app.use(express.static(path.join(__dirname, "assets")));
 
 app.use(flash());
 app.use((req, res, next) => {
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
+  res.locals.successMessage = req.flash("successMessage");
+  res.locals.errorMessage = req.flash("errorMessage");
   next();
 });
 

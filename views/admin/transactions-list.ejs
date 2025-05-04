@@ -145,6 +145,11 @@
                   ><i class="fe fe-file"></i> <span>Payment Approval</span></a
                 >
               </li>
+              <li >
+                <a href="/refunds-approval"
+                  ><i class="fe fe-file"></i> <span>refund Approval</span></a
+                >
+              </li>
             </ul>
           </div>
         </div>
@@ -169,7 +174,35 @@
             </div>
           </div>
           <!-- /Page Header -->
-
+          <div class="container mt-3">
+            <% if (successMessage && successMessage.length > 0) { %>
+            <div
+              class="alert alert-success alert-dismissible fade show"
+              role="alert"
+            >
+              <%= successMessage %>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+            <% } %> <% if (errorMessage && errorMessage.length > 0) { %>
+            <div
+              class="alert alert-danger alert-dismissible fade show"
+              role="alert"
+            >
+              <%= errorMessage %>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+            <% } %>
+          </div>
           <div class="row">
             <div class="col-sm-12">
               <div class="card">
@@ -202,9 +235,9 @@
                           </td>
                           <td>
                             <h2 class="table-avatar">
-                                <%= transaction.patient.firstname %> <%=
-                                transaction.patient.lastname %>
-                            </h2>	
+                              <%= transaction.patient.firstname %> <%=
+                              transaction.patient.lastname %>
+                            </h2>
                           </td>
                           <td>PKR <%= transaction.totalAmount.toFixed(2) %></td>
                           <td class="text-center">
@@ -213,27 +246,31 @@
                             >
                               <%= transaction.status.charAt(0).toUpperCase() +
                               transaction.status.slice(1) %>
-                            </span>	
+                            </span>
                           </td>
                           <td class="text-right">
-							<div class="actions">
-								<a href="/invoice/<%= transaction._id %>" 
-									class="btn btn-sm bg-success-light mr-2">
-								   <i class="fe fe-eye"></i> View
-								 </a>
-								<button class="btn btn-sm bg-danger-light" onclick="window.print()">
-								  <i class="fe fe-printer"></i> Print
-								</button>
-								<form
-                              action="/delete-transaction/<%= transaction._id %>"
-                              method="POST"
-                            >
-                              <button type="submit" class="btn btn-danger">
-                                Delete
+                            <div class="actions">
+                              <a
+                                href="/invoice/<%= transaction._id %>"
+                                class="btn btn-sm bg-success-light mr-2"
+                              >
+                                <i class="fe fe-eye"></i> View
+                              </a>
+                              <button
+                                class="btn btn-sm bg-danger-light"
+                                onclick="window.print()"
+                              >
+                                <i class="fe fe-printer"></i> Print
                               </button>
-                            </form>
-							  </div>
-                            
+                              <form
+                                action="/delete-transaction/<%= transaction._id %>"
+                                method="POST"
+                              >
+                                <button type="submit" class="btn btn-danger">
+                                  Delete
+                                </button>
+                              </form>
+                            </div>
                           </td>
                         </tr>
                         <% }); %>

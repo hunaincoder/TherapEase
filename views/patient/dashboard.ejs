@@ -187,6 +187,33 @@
       <!-- Page Wrapper -->
       <div class="page-wrapper">
         <div class="content container-fluid">
+          <% if (successMessage && successMessage.length > 0) { %>
+            <div
+              class="alert alert-success alert-dismissible fade show"
+              role="alert"
+            >
+              <%= successMessage %>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+            <% } %> <% if (errorMessage && errorMessage.length > 0) { %>
+            <div
+              class="alert alert-danger alert-dismissible fade show"
+              role="alert"
+            >
+              <%= errorMessage %>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+            <% } %>
           <div class="page-header">
             <div class="row mt-3">
               <!-- Upcoming Field -->
@@ -345,6 +372,24 @@
                                         >
                                           <i class="far fa-eye"></i> View
                                         </a>
+                                        <% if (appointment.canJoinCall) { %>
+                                          <a
+                                            href="/client/video-call/<%= appointment._id %>"
+                                            class="btn btn-primary"
+                                          >
+                                            Join Video Call
+                                          </a>
+                                          <% } else if
+                                          (moment().isBefore(appointment.windowStart)) { %>
+                                          <button class="btn btn-secondary" disabled>
+                                            Call available in <%=
+                                            appointment.windowStart.fromNow() %>
+                                          </button>
+                                          <% } else { %>
+                                          <button class="btn btn-secondary" disabled>
+                                            Call ended
+                                          </button>
+                                          <% } %>
                                       </div>
                                     </td>
                                   </tr>

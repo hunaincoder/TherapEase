@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Self-Consciousness Scale</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .result {
+        margin-top: 2rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #ddd;
+      }
+      .mild {
+        background-color: #fff8e1;
+        border: 1px solid #ffc107;
+      }
+      .moderate {
+        background-color: #ffe0b2;
+        border: 1px solid #ff9800;
+      }
+      .severe {
+        background-color: #ffebee;
+        border: 1px solid #f44336;
+      }
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-weight: bold;
+        color: white;
+      }
+      .badge-1 {
+        background-color: #ffc107;
+      }
+      .badge-2 {
+        background-color: #ff9800;
+      }
+      .badge-3 {
+        background-color: #f44336;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 p-8">
+    <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
+      <h1 class="text-2xl font-bold mb-4">Self-Consciousness Scale (SCS)</h1>
+      <p class="mb-4">
+        Please answer the following questions about yourself. For each
+        statement, indicate how much it is like you.
+      </p>
+      <p class="mb-4 font-semibold">
+        Rating Scale:<br />
+        0 = Not like me at all | 1 = A little like me | 2 = Somewhat like me | 3
+        = A lot like me
+      </p>
+
+      <form id="scsForm" onsubmit="event.preventDefault(); calculateScore()">
+        <div id="questionsContainer" class="space-y-6"></div>
+        <button
+          type="submit"
+          class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Submit
+        </button>
+      </form>
+
+      <div id="results" class="result hidden">
+        <h2 class="text-xl font-semibold">Your Self-Consciousness Results</h2>
+        <p>
+          <strong>Private Self-Consciousness:</strong>
+          <span id="privateScore"></span> (out of 27)
+        </p>
+        <p>
+          <strong>Public Self-Consciousness:</strong>
+          <span id="publicScore"></span> (out of 21)
+        </p>
+        <p>
+          <strong>Social Anxiety:</strong> <span id="socialScore"></span> (out
+          of 18)
+        </p>
+        <p><strong>Severity:</strong> <span id="severity"></span></p>
+        <p><strong>Badge:</strong> <span id="badge"></span></p>
+      </div>
+    </div>
+
+    <script>
+      const questions = [
+        {
+          text: "I'm always trying to figure myself out.",
+          subscale: "private",
+        },
+        {
+          text: "I'm concerned about my style of doing things.",
+          subscale: "public",
+        },
+        {
+          text: "It takes me time to get over my shyness in new situations.",
+          subscale: "social",
+        },
+        { text: "I think about myself a lot.", subscale: "private" },
+        {
+          text: "I care a lot about how I present myself to others.",
+          subscale: "public",
+        },
+        { text: "I often daydream about myself.", subscale: "private" },
+        {
+          text: "It's hard for me to work when someone is watching me.",
+          subscale: "social",
+        },
+        {
+          text: "I never take a hard look at myself.",
+          subscale: "private",
+          reverse: true,
+        },
+        { text: "I get embarrassed very easily.", subscale: "social" },
+        {
+          text: "I'm self-conscious about the way I look.",
+          subscale: "public",
+        },
+        {
+          text: "It's easy for me to talk to strangers.",
+          subscale: "social",
+          reverse: true,
+        },
+        {
+          text: "I generally pay attention to my inner feelings.",
+          subscale: "private",
+        },
+        {
+          text: "I usually worry about making a good impression.",
+          subscale: "public",
+        },
+        {
+          text: "I'm constantly thinking about my reasons for doing things.",
+          subscale: "private",
+        },
+        {
+          text: "I feel nervous when I speak in front of a group.",
+          subscale: "social",
+        },
+        {
+          text: "Before I leave my house, I check how I look.",
+          subscale: "public",
+        },
+        {
+          text: "I sometimes step back (in my mind) in order to examine myself from a distance.",
+          subscale: "private",
+        },
+        {
+          text: "I'm concerned about what other people think of me.",
+          subscale: "public",
+        },
+        {
+          text: "I'm quick to notice changes in my mood.",
+          subscale: "private",
+        },
+        { text: "I'm usually aware of my appearance.", subscale: "public" },
+        {
+          text: "I know the way my mind works when I work through a problem.",
+          subscale: "private",
+        },
+        { text: "Large groups make me nervous.", subscale: "social" },
+      ];
+
+      function createQuestionForm() {
+        const container = document.getElementById("questionsContainer");
+
+        questions.forEach((question, index) => {
+          const questionDiv = document.createElement("div");
+          questionDiv.className = "question";
+
+          const questionText = document.createElement("p");
+          questionText.className = "font-medium mb-2";
+          questionText.textContent = `${index + 1}. ${question.text}`;
+          questionDiv.appendChild(questionText);
+
+          const radioGroup = document.createElement("div");
+          radioGroup.className = "radio-group flex gap-4 flex-wrap";
+
+          for (let i = 0; i < 4; i++) {
+            const label = document.createElement("label");
+            label.className = "inline-flex items-center";
+
+            const radio = document.createElement("input");
+            radio.type = "radio";
+            radio.name = `q${index + 1}`;
+            radio.value = i;
+            radio.className = "mr-1";
+            radio.required = true;
+
+            label.appendChild(radio);
+            label.appendChild(
+              document.createTextNode(
+                i === 0
+                  ? "Not at all (0)"
+                  : i === 1
+                  ? "A little (1)"
+                  : i === 2
+                  ? "Somewhat (2)"
+                  : "A lot (3)"
+              )
+            );
+            radioGroup.appendChild(label);
+          }
+
+          questionDiv.appendChild(radioGroup);
+          container.appendChild(questionDiv);
+        });
+      }
+
+      function calculateScore() {
+        let privateScore = 0;
+        let publicScore = 0;
+        let socialScore = 0;
+
+        for (let i = 1; i <= questions.length; i++) {
+          const selected = document.querySelector(
+            `input[name="q${i}"]:checked`
+          );
+          if (!selected) {
+            alert(`Please answer question ${i}`);
+            return;
+          }
+
+          let value = parseInt(selected.value);
+          const question = questions[i - 1];
+
+          if (question.reverse) {
+            value = 3 - value;
+          }
+
+          if (question.subscale === "private") {
+            privateScore += value;
+          } else if (question.subscale === "public") {
+            publicScore += value;
+          } else if (question.subscale === "social") {
+            socialScore += value;
+          }
+        }
+
+        const totalScore = privateScore + publicScore + socialScore;
+        let severity;
+        let severityClass;
+        let badge;
+        let badgeClass;
+
+        if (totalScore <= 30) {
+          severity = "Mild self-consciousness";
+          severityClass = "mild";
+          badge = "1";
+          badgeClass = "badge-1";
+        } else if (totalScore >= 31 && totalScore <= 45) {
+          severity = "Moderate self-consciousness";
+          severityClass = "moderate";
+          badge = "2";
+          badgeClass = "badge-2";
+        } else {
+          severity = "Severe self-consciousness";
+          severityClass = "severe";
+          badge = "3";
+          badgeClass = "badge-3";
+        }
+
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.className = `result ${severityClass}`;
+
+        document.getElementById("privateScore").textContent = privateScore;
+        document.getElementById("publicScore").textContent = publicScore;
+        document.getElementById("socialScore").textContent = socialScore;
+        document.getElementById("severity").textContent = severity;
+
+        const badgeSpan = document.getElementById("badge");
+        badgeSpan.textContent = badge;
+        badgeSpan.className = `badge ${badgeClass}`;
+
+        resultsDiv.classList.remove("hidden");
+      }
+
+      createQuestionForm();
+    </script>
+  </body>
+</html>

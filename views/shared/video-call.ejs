@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TherapEase Video Session</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f7fa;
+        overflow: hidden;
+      }
+      #video-container {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      #local-video,
+      #remote-video {
+        width: 45%;
+        max-height: 40%;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        margin: 10px;
+        background: #000;
+      }
+      #local-video {
+        position: absolute;
+        bottom: 80px;
+        right: 20px;
+        width: 200px;
+        height: 150px;
+      }
+      .session-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .session-info {
+        font-size: 14px;
+      }
+      .session-timer {
+        background: #4a6fa5;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .end-call-container {
+        position: fixed;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        z-index: 100;
+      }
+      .end-call-btn {
+        background: #ff5f5f;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-size: 16px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(255, 95, 95, 0.3);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .end-call-btn:hover {
+        background: #e53e3e;
+        transform: scale(1.05);
+      }
+      .end-call-btn i {
+        font-size: 18px;
+      }
+      .connection-status {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        padding: 10px;
+        font-weight: bold;
+        z-index: 101;
+        transition: all 0.3s ease;
+        opacity: 0;
+      }
+      .status-connecting {
+        background: #f0ad4e;
+        opacity: 1;
+      }
+      .status-connected {
+        background: #5cb85c;
+        opacity: 1;
+      }
+      .status-error {
+        background: #d9534f;
+        color: white;
+        opacity: 1;
+      }
+      .controls-container {
+        position: fixed;
+        bottom: 80px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        z-index: 100;
+      }
+      .control-btn {
+        background: white;
+        color: #4a6fa5;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .control-btn:hover {
+        transform: scale(1.1);
+      }
+      .control-btn.muted {
+        background: #f8d7da;
+        color: #dc3545;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="session-header">
+      <div class="session-info">
+        <strong>Session with:</strong>
+        <%= sessionPartnerName || 'Unknown Participant' %>
+        <span style="margin: 0 10px">•</span>
+        <strong>Time:</strong> <%= appointmentDateFormatted || 'N/A' %>, <%=
+        appointment.time || 'N/A' %> - <%= appointmentEndTimeFormatted || 'N/A'
+        %>
+      </div>
+      <div class="session-timer" id="sessionTimer">
+        <i class="fas fa-clock"></i> 30:00
+      </div>
+    </div>
+
+    <div class="connection-status" id="connectionStatus">
+      Connecting to session...
+    </div>
+
+    <div id="video-container">
+      <video id="remote-video" autoplay playsinline></video>
+      <video id="local-video" autoplay playsinline muted></video>
+    </div>
+
+    <div class="controls-container">
+      <button class="control-btn" id="toggleMicBtn">
+        <i class="fas fa-microphone"></i>
+      </button>
+      <button class="control-btn" id="toggleVideoBtn">
+        <i class="fas fa-video"></i>
+      </button>
+    </div>
+
+    <div class="end-call-container">
+      <button class="end-call-btn" id="endCallBtn">
+        <i class="fas fa-phone-slash"></i> End Session
+      </button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+      // Configuration
+      const appointmentId = '<%= appointment && appointment._id ? appointment._id : "" %>';
+      const userId = '<%= user && user._id ? user._id : "anonymous" %>';
+      const isTherapist = <%= typeof isTherapist !== 'undefined' && isTherapist ? true : false %>;
+      const stunServers = '<%= process.env.STUN_SERVERS || "stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302" %>'.split(',');
+
+      // Connection status indicator
+      const connectionStatus = document.getElementById('connectionStatus');
+      const showStatus = (message, type) => {
+        connectionStatus.textContent = message;
+        connectionStatus.className = 'connection-status';
+        connectionStatus.classList.add(`status-${type}`);
+        setTimeout(() => {
+          if (type !== 'error') {
+            connectionStatus.style.opacity = '0';
+          }
+        }, 3000);
+      };
+
+      const configuration = {
+        iceServers: stunServers.map(server => ({ urls: server.trim() }))
+      };
+
+      let socket = null;
+      let pc = null;
+      let localStream = null;
+      let remoteStream = new MediaStream();
+      let isReconnecting = false;
+      let hasInitiatedOffer = false;
+      let hasReceivedOffer = false;
+      let otherUserJoined = false;
+
+      // DOM elements
+      const localVideo = document.getElementById('local-video');
+      const remoteVideo = document.getElementById('remote-video');
+      const endCallBtn = document.getElementById('endCallBtn');
+      const timerElement = document.getElementById('sessionTimer');
+      const toggleMicBtn = document.getElementById('toggleMicBtn');
+      const toggleVideoBtn = document.getElementById('toggleVideoBtn');
+
+      // Validate ObjectId format
+      function isValidObjectId(id) {
+        return /^[0-9a-fA-F]{24}$/.test(id);
+      }
+
+      // 30-minute timer
+      let timeRemaining = 30 * 60;
+      const updateTimer = () => {
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        timerElement.innerHTML = `<i class="fas fa-clock"></i> ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          endCall();
+        } else {
+          timeRemaining--;
+        }
+      };
+      const timerInterval = setInterval(updateTimer, 1000);
+
+      // End call function
+      function endCall() {
+        if (pc) {
+          pc.close();
+          pc = null;
+        }
+        if (localStream) {
+          localStream.getTracks().forEach(track => track.stop());
+        }
+        if (socket && socket.connected) {
+          socket.disconnect();
+        }
+        clearInterval(timerInterval);
+        window.location.href = isTherapist ? '/therapist/appointment-list' : '/client/dashboard';
+      }
+
+      // Event listeners
+      endCallBtn.addEventListener('click', () => {
+        if (confirm('End this therapy session?')) {
+          endCall();
+        }
+      });
+
+      toggleMicBtn.addEventListener('click', () => {
+        if (localStream) {
+          const audioTrack = localStream.getAudioTracks()[0];
+          if (audioTrack) {
+            audioTrack.enabled = !audioTrack.enabled;
+            toggleMicBtn.innerHTML = audioTrack.enabled ?
+              '<i class="fas fa-microphone"></i>' :
+              '<i class="fas fa-microphone-slash"></i>';
+            toggleMicBtn.classList.toggle('muted', !audioTrack.enabled);
+          }
+        }
+      });
+
+      toggleVideoBtn.addEventListener('click', () => {
+        if (localStream) {
+          const videoTrack = localStream.getVideoTracks()[0];
+          if (videoTrack) {
+            videoTrack.enabled = !videoTrack.enabled;
+            toggleVideoBtn.innerHTML = videoTrack.enabled ?
+              '<i class="fas fa-video"></i>' :
+              '<i class="fas fa-video-slash"></i>';
+            toggleVideoBtn.classList.toggle('muted', !videoTrack.enabled);
+          }
+        }
+      });
+
+      // Auto-end call after 30 minutes
+      setTimeout(endCall, 30 * 60 * 1000);
+
+      // WebRTC peer connection setup
+      async function setupPeerConnection() {
+        if (pc) {
+          pc.close();
+        }
+
+        pc = new RTCPeerConnection(configuration);
+
+        if (localStream) {
+          localStream.getTracks().forEach(track => {
+            pc.addTrack(track, localStream);
+          });
+        }
+
+        pc.onicecandidate = (event) => {
+          if (event.candidate && socket.connected) {
+            console.log(`Sending ICE candidate from ${userId}`);
+            socket.emit('iceCandidate', {
+              candidate: event.candidate,
+              roomId: appointmentId,
+              userId: userId
+            });
+          }
+        };
+
+        pc.oniceconnectionstatechange = () => {
+          console.log('ICE connection state:', pc.iceConnectionState);
+          if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+            showStatus('Media connection issue. Trying to reconnect...', 'error');
+            if (!isReconnecting) {
+              isReconnecting = true;
+              setTimeout(() => {
+                isReconnecting = false;
+                resetAndReconnect();
+              }, 2000);
+            }
+          } else if (pc.iceConnectionState === 'connected') {
+            showStatus('Media connection established!', 'connected');
+          }
+        };
+
+        pc.ontrack = (event) => {
+          event.streams[0].getTracks().forEach(track => {
+            remoteStream.addTrack(track);
+          });
+          remoteVideo.srcObject = remoteStream;
+          console.log('Remote stream received');
+          showStatus('Remote participant connected!', 'connected');
+        };
+
+        return pc;
+      }
+
+      // Get media stream
+      async function getMedia() {
+        try {
+          localStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 720 }, height: { ideal: 720 } },
+            audio: true
+          });
+          localVideo.srcObject = localStream;
+          console.log('Local media accessed successfully');
+          return localStream;
+        } catch (err) {
+          console.error('Media access error:', err);
+          showStatus('Camera or microphone access failed. Please check permissions.', 'error');
+          alert('Please allow camera and microphone access to join the session.');
+          return null;
+        }
+      }
+
+      // Initiate offer
+      async function initiateOffer() {
+        if (hasInitiatedOffer) {
+          console.log(`${userId} Offer already initiated, skipping`);
+          return;
+        }
+        hasInitiatedOffer = true;
+        try {
+          console.log(`${userId} initiating offer`);
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          console.log(`${userId} sending offer to room ${appointmentId}`);
+          socket.emit('offer', {
+            offer,
+            roomId: appointmentId,
+            userId: userId
+          });
+        } catch (err) {
+          console.error('Error creating offer:', err);
+          showStatus('Error initiating call: ' + err.message, 'error');
+          hasInitiatedOffer = false;
+        }
+      }
+
+      // Socket.IO event handlers
+      function setupSocket() {
+        socket = io({
+          path: '/socket.io/',
+          reconnection: true,
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+          timeout: 20000,
+          transports: ["websocket", "polling"],
+          query: {
+            roomId: appointmentId,
+            userId: userId,
+            isTherapist: isTherapist
+          }
+        });
+
+        socket.on('connect', () => {
+          console.log(`${appointmentId}:${userId} Socket.IO connected: ${socket.id}, transport: ${socket.io.engine.transport.name}`);
+          showStatus('Signaling connection established', 'connected');
+          socket.emit('join', {
+            roomId: appointmentId,
+            userId: userId,
+            isTherapist: isTherapist
+          });
+        });
+
+        socket.on('joinConfirmed', ({ roomId, userId }) => {
+          console.log(`${roomId}:${userId} Join confirmed for room ${roomId}, user ${userId}`);
+          showStatus(`Joined session ${roomId}`, 'connected');
+          if (!isTherapist) {
+            // Patient waits for offer
+            setTimeout(() => {
+              if (!hasReceivedOffer && !otherUserJoined) {
+                console.log(`${appointmentId}:${userId} No offer or other user joined after waiting, retrying join`);
+                socket.emit('join', {
+                  roomId: appointmentId,
+                  userId: userId,
+                  isTherapist: isTherapist
+                });
+              }
+            }, 10000);
+          }
+        });
+
+        socket.on('userJoined', async ({ userId: joinedUserId, isTherapist: joinedIsTherapist }) => {
+          console.log(`${appointmentId}:${userId} User joined: ${joinedUserId}, isTherapist: ${joinedIsTherapist}`);
+          showStatus('Other participant joined. Setting up call...', 'connecting');
+          otherUserJoined = true;
+          // Therapist initiates offer when patient joins
+          if (isTherapist && !joinedIsTherapist) {
+            initiateOffer();
+          }
+        });
+
+        socket.on('offer', async ({ offer, userId: senderId }) => {
+          console.log(`${appointmentId}:${userId} Received offer from ${senderId}`);
+          hasReceivedOffer = true;
+          try {
+            if (pc.signalingState !== 'stable' && pc.signalingState !== 'have-local-offer') {
+              console.warn(`${appointmentId}:${userId} Ignoring offer due to signaling state: ${pc.signalingState}`);
+              return;
+            }
+            // Reset local offer if it exists and accept the new offer
+            if (pc.signalingState === 'have-local-offer') {
+              console.log(`${appointmentId}:${userId} Resetting local offer due to received offer from ${senderId}`);
+              pc.setLocalDescription({ type: 'rollback' });
+            }
+            await pc.setRemoteDescription(new RTCSessionDescription(offer));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            console.log(`${appointmentId}:${userId} Sent answer to ${senderId}`);
+            socket.emit('answer', {
+              answer,
+              roomId: appointmentId,
+              userId: userId
+            });
+          } catch (err) {
+            console.error(`${appointmentId}:${userId} Error handling offer:`, err);
+            showStatus('Error during call setup: ' + err.message, 'error');
+          }
+        });
+
+        socket.on('answer', async ({ answer, userId: senderId }) => {
+          console.log(`${appointmentId}:${userId} Received answer from ${senderId}`);
+          try {
+            if (pc.signalingState !== 'have-local-offer') {
+              console.warn(`${appointmentId}:${userId} Ignoring answer due to signaling state: ${pc.signalingState}`);
+              return;
+            }
+            await pc.setRemoteDescription(new RTCSessionDescription(answer));
+            showStatus('Call connected!', 'connected');
+          } catch (err) {
+            console.error(`${appointmentId}:${userId} Error handling answer:`, err);
+            showStatus('Error during call setup: ' + err.message, 'error');
+          }
+        });
+
+        socket.on('iceCandidate', async ({ candidate, userId: senderId }) => {
+          console.log(`${appointmentId}:${userId} Received ICE candidate from ${senderId}`);
+          try {
+            if (!pc.remoteDescription) {
+              console.warn(`${appointmentId}:${userId} Delaying ICE candidate processing until remote description is set`);
+              setTimeout(() => {
+                if (pc.remoteDescription) {
+                  pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(err => console.error(`${appointmentId}:${userId} Delayed ICE candidate error:`, err));
+                } else {
+                  console.error(`${appointmentId}:${userId} Still no remote description, discarding ICE candidate`);
+                }
+              }, 1000);
+            } else {
+              await pc.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+          } catch (err) {
+            console.error(`${appointmentId}:${userId} Error adding ICE candidate:`, err);
+          }
+        });
+
+        socket.on('userLeft', ({ userId: leftUserId }) => {
+          console.log(`${appointmentId}:${userId} User left: ${leftUserId}`);
+          showStatus('Other participant left the session', 'error');
+          endCall();
+        });
+
+        socket.on('error', ({ message }) => {
+          console.error(`${appointmentId}:${userId} Socket.IO server error:`, message);
+          showStatus(`Server error: ${message}`, 'error');
+          if (message.includes('Room ID') || message.includes('Appointment not found')) {
+            alert('Invalid session ID. Please return to dashboard.');
+            endCall();
+          }
+        });
+
+        socket.on('connect_error', (err) => {
+          console.error(`${appointmentId}:${userId} Socket.IO connection error: ${err.message}, type: ${err.type}, transport: ${socket.io.engine.transport.name}`);
+          let userMessage = `Connection failed: ${err.message}. Retrying...`;
+          if (err.message.includes('websocket error')) {
+            userMessage = 'Unable to connect to session. Please check your network or firewall settings.';
+          } else if (err.message.includes('timeout')) {
+            userMessage = 'Connection timed out. Retrying...';
+          }
+          showStatus(userMessage, 'error');
+        });
+
+        socket.on('reconnect', (attempt) => {
+          console.log(`${appointmentId}:${userId} Socket.IO reconnected after ${attempt} attempts`);
+          showStatus('Reconnected to session!', 'connected');
+          resetAndReconnect();
+        });
+
+        socket.on('reconnect_failed', () => {
+          console.error(`${appointmentId}:${userId} Socket.IO reconnection failed`);
+          showStatus('Failed to reconnect. Please refresh the page or check your network.', 'error');
+          alert('Unable to reconnect to the session. Please refresh the page or contact support.');
+        });
+
+        socket.io.on('transport', (transport) => {
+          console.log(`${appointmentId}:${userId} Socket.IO transport changed: ${transport.name}`);
+        });
+      }
+
+      function resetAndReconnect() {
+        hasInitiatedOffer = false;
+        hasReceivedOffer = false;
+        otherUserJoined = false;
+        setupPeerConnection()
+          .then(() => {
+            if (socket.connected) {
+              socket.emit('join', {
+                roomId: appointmentId,
+                userId: userId,
+                isTherapist: isTherapist
+              });
+            }
+          })
+          .catch(err => {
+            console.error(`${appointmentId}:${userId} Error during reconnection:`, err);
+            showStatus('Failed to reconnect: ' + err.message, 'error');
+          });
+      }
+
+      async function init() {
+        showStatus('Setting up video session...', 'connecting');
+
+        try {
+          if (!appointmentId || !isValidObjectId(appointmentId)) {
+            showStatus('Invalid session ID. Cannot start call.', 'error');
+            alert('Invalid session ID. Please return to dashboard.');
+            window.location.href = isTherapist ? '/therapist/appointment-list' : '/client/dashboard';
+            return;
+          }
+
+          const stream = await getMedia();
+          if (!stream) {
+            showStatus('Failed to access camera/microphone', 'error');
+            return;
+          }
+
+          await setupPeerConnection();
+          setupSocket();
+
+        } catch (err) {
+          console.error(`${appointmentId}:${userId} Initialization error:`, err);
+          showStatus('Failed to initialize session: ' + err.message, 'error');
+        }
+      }
+
+      window.addEventListener('load', init);
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && (!socket || !socket.connected)) {
+          console.log(`${appointmentId}:${userId} Page became visible. Attempting to reconnect...`);
+          if (socket) {
+            socket.connect();
+          } else if (isValidObjectId(appointmentId)) {
+            setupSocket();
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

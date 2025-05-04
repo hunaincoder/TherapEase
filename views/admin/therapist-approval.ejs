@@ -161,6 +161,11 @@
                   ><i class="fe fe-file"></i> <span>Payment Approval</span></a
                 >
               </li>
+              <li >
+                <a href="/refunds-approval"
+                  ><i class="fe fe-file"></i> <span>refund Approval</span></a
+                >
+              </li>
             </ul>
           </div>
         </div>
@@ -186,7 +191,35 @@
             </div>
           </div>
           <!-- /Page Header -->
-
+          <div class="container mt-3">
+            <% if (successMessage && successMessage.length > 0) { %>
+            <div
+              class="alert alert-success alert-dismissible fade show"
+              role="alert"
+            >
+              <%= successMessage %>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+            <% } %> <% if (errorMessage && errorMessage.length > 0) { %>
+            <div
+              class="alert alert-danger alert-dismissible fade show"
+              role="alert"
+            >
+              <%= errorMessage %>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+              ></button>
+            </div>
+            <% } %>
+          </div>
           <div class="row">
             <div class="col-sm-12">
               <div class="card">
@@ -209,27 +242,39 @@
                         <tr>
                           <td>
                             <h2 class="table-avatar">
-                              <a href="/therapist-profile/<%= therapist._id %>" class="avatar avatar-sm mr-2"
+                              <a
+                                href="/therapist-profile/<%= therapist._id %>"
+                                class="avatar avatar-sm mr-2"
                                 ><img
                                   class="avatar-img rounded-circle"
                                   src="/img/doctors/doctor-thumb-01.jpg"
                                   alt="User Image"
                               /></a>
-                              <a href="/therapist-profile/<%= therapist._id %>"><%= therapist.username %></a>
+                              <a href="/therapist-profile/<%= therapist._id %>"
+                                ><%= therapist.username %></a
+                              >
                             </h2>
                           </td>
                           <td></td>
 
                           <td><a href="/profile">Veiw Pofile</a></td>
                           <td>
-                            <form action="/approve-therapist/<%= therapist._id %>" method="POST" style="display: inline;">
+                            <form
+                              action="/approve-therapist/<%= therapist._id %>"
+                              method="POST"
+                              style="display: inline"
+                            >
                               <button type="submit" class="text-success me-4">
                                 <i class="bi bi-check-circle"></i> Accept
                               </button>
                             </form>
                           </td>
                           <td>
-                            <form action="/reject-therapist/<%= therapist._id %>" method="POST" style="display: inline;">
+                            <form
+                              action="/reject-therapist/<%= therapist._id %>"
+                              method="POST"
+                              style="display: inline"
+                            >
                               <button type="submit" class="text-danger">
                                 <i class="bi bi-x-circle"></i> Reject
                               </button>

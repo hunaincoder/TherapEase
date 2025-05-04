@@ -213,6 +213,33 @@
           <!-- Page Content -->
           <div class="content">
             <div class="container-fluid">
+              <% if (successMessage && successMessage.length > 0) { %>
+              <div
+                class="alert alert-success alert-dismissible fade show"
+                role="alert"
+              >
+                <%= successMessage %>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="alert"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <% } %> <% if (errorMessage && errorMessage.length > 0) { %>
+              <div
+                class="alert alert-danger alert-dismissible fade show"
+                role="alert"
+              >
+                <%= errorMessage %>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="alert"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <% } %>
               <div class="row">
                 <div class="col-md-12 col-lg-4 col-xl-3 theiaStickySidebar">
                   <!-- Search Filter -->
@@ -242,25 +269,26 @@
                             </label>
                           </div>
                         </div>
-
-                        <!-- Specialty Filter -->
-                        <div class="filter-widget">
-                          <h4>Select Specialist</h4>
-                          <% let specialtiesList = ["PTSD", "OCD", "Depression", "Anxiety"]; %>
-                          <% specialtiesList.forEach(specialty => { %>
-                            <div>
-                              <label class="custom_check">
-                                <input
-                                  type="checkbox"
-                                  name="specialties"
-                                  value="<%= specialty %>"
-                                  <% if (selectedSpecialties.includes(specialty)) { %>checked<% } %>
-                                />
-                                <span class="checkmark"></span> <%= specialty %>
-                              </label>
-                            </div>
-                          <% }); %>
-                        </div>
+<!-- Specialty Filter -->
+<div class="filter-widget">
+  <h4>Select Specialist</h4>
+  <% let specialtiesList = ["PTSD", "OCD", "Depression", "Anxiety"]; %>
+  <% specialtiesList.forEach(function(specialty) { %>
+    <div>
+      <label class="custom_check">
+        <input
+          type="checkbox"
+          name="specialties"
+          value="<%= specialty %>"
+          <% if (selectedSpecialties && selectedSpecialties.includes(specialty)) { %>
+            checked
+          <% } %>
+        />
+        <span class="checkmark"></span> <%= specialty %>
+      </label>
+    </div>
+  <% }); %>
+</div>
 
                         <!-- Search Button -->
                         <div class="btn-search">
@@ -280,7 +308,9 @@
                       <div class="card">
                         <div class="card-body">
                           <div class="table-responsive">
-                            <table class="datatable table table-hover table-center mb-0">
+                            <table
+                              class="datatable table table-hover table-center mb-0"
+                            >
                               <thead>
                                 <tr>
                                   <th>Doctor Name</th>
@@ -292,51 +322,67 @@
                               </thead>
                               <tbody>
                                 <% if (therapists && therapists.length > 0) { %>
-                                  <% therapists.forEach(function(therapist) { %>
-                                    <tr>
-                                      <td>
-                                        <h2 class="table-avatar">
-                                          <a href="/client/therapist-profile/<%= therapist._id %>" class="avatar avatar-sm mr-2">
-                                            <img class="avatar-img rounded-circle" src="<%= therapist.profilePicture %>" alt="Therapist Image" />
-                                          </a>
-                                          <a href="/client/therapist-profile/<%= therapist._id %>">
-                                            <%= therapist.username %>
-                                          </a>
-                                        </h2>
-                                      </td>
-                                      <td>
-                                        <% if (therapist.specialties && therapist.specialties.length > 0) { %>
-                                          <%= therapist.specialties.join(', ') %>
-                                        <% } else { %>
-                                          N/A
-                                        <% } %>
-                                      </td>
-                                      <td>Rs.<%= therapist.fee %></td>
-                                      <td>
-                                        <a href="/client/therapist-profile/<%= therapist._id %>">
-                                          View Profile
-                                        </a>
-                                      </td>
-                                      <td>
-                                        <a href="/client/therapist-booking/<%= therapist._id %>" class="btn btn-danger">
-                                          Book session
-                                        </a>
-                                      </td>
-                                    </tr>
-                                  <% }); %>
-                                <% } else { %>
-                                  <tr>
-                                    <td colspan="5" class="text-center">
-                                      No therapists found matching your criteria.
-                                    </td>
-                                  </tr>
+                                <% therapists.forEach(function(therapist) { %>
+                                <tr>
+                                  <td>
+                                    <h2 class="table-avatar">
+                                      <a
+                                        href="/client/therapist-profile/<%= therapist._id %>"
+                                        class="avatar avatar-sm mr-2"
+                                      >
+                                        <img
+                                          class="avatar-img rounded-circle"
+                                          src="<%= therapist.profilePicture %>"
+                                          alt="Therapist Image"
+                                        />
+                                      </a>
+                                      <a
+                                        href="/client/therapist-profile/<%= therapist._id %>"
+                                      >
+                                        <%= therapist.username %>
+                                      </a>
+                                    </h2>
+                                  </td>
+                                  <td>
+                                    <% if (therapist.specialties &&
+                                    therapist.specialties.length > 0) { %> <%=
+                                    therapist.specialties.join(', ') %> <% }
+                                    else { %> N/A <% } %>
+                                  </td>
+                                  <td>Rs.<%= therapist.fee %></td>
+                                  <td>
+                                    <a
+                                      href="/client/therapist-profile/<%= therapist._id %>"
+                                    >
+                                      View Profile
+                                    </a>
+                                  </td>
+                                  <td>
+                                    <a
+                                      href="/client/therapist-booking/<%= therapist._id %>"
+                                      class="btn btn-danger"
+                                    >
+                                      Book session
+                                    </a>
+                                  </td>
+                                </tr>
+                                <% }); %> <% } else { %>
+                                <tr>
+                                  <td colspan="5" class="text-center">
+                                    No therapists found matching your criteria.
+                                  </td>
+                                </tr>
                                 <% } %>
                               </tbody>
                             </table>
                           </div>
-                          
+
                           <div class="load-more text-center mt-4">
-                            <a class="btn btn-primary btn-sm" href="javascript:void(0);">Load More</a>
+                            <a
+                              class="btn btn-primary btn-sm"
+                              href="javascript:void(0);"
+                              >Load More</a
+                            >
                           </div>
                         </div>
                       </div>

@@ -259,6 +259,33 @@
               </div>
             </div> -->
 
+            <% if (successMessage && successMessage.length > 0) { %>
+              <div
+                class="alert alert-success alert-dismissible fade show"
+                role="alert"
+              >
+                <%= successMessage %>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="alert"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <% } %> <% if (errorMessage && errorMessage.length > 0) { %>
+              <div
+                class="alert alert-danger alert-dismissible fade show"
+                role="alert"
+              >
+                <%= errorMessage %>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="alert"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <% } %>
             <div class="col-md-6 col-md-8 mx-auto">
               <!-- Booking Summary -->
               <div class="card booking-card">
