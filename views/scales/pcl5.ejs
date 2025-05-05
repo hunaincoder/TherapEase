@@ -229,7 +229,7 @@
             throw new Error(data.error || "Failed to save PCL-5 results");
           }
 
-          window.location.href = "/client/dashboard";
+          window.location.href = data.redirect || "/client/patient-profile";
         } catch (error) {
           console.error("Error saving PCL-5 results:", error);
           alert(`Error: ${error.message}`);

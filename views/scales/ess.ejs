@@ -227,7 +227,7 @@
             throw new Error(data.error || "Failed to save ESS results");
           }
 
-          window.location.href = "/client/dashboard";
+          window.location.href = data.redirect || "/client/patient-profile";
         } catch (error) {
           console.error("Error saving ESS results:", error);
           alert(`Error: ${error.message}`);
