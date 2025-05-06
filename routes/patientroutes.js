@@ -492,28 +492,52 @@ router.post("/therapy-profile", isLoggedIn, async (req, res) => {
 
     console.log("Updated patient with therapy profile:", updatedPatient);
 
-    // Get the latest scale result badge
     let patientBadge = null;
     let patientProblem = null;
+    let patientSeverity = null;
+
     if (updatedPatient.scaleResults && updatedPatient.recommendedScale) {
       const scaleResult = updatedPatient.scaleResults.get(
         updatedPatient.recommendedScale
       );
-      if (scaleResult && scaleResult.badge) {
-        patientBadge = scaleResult.badge;
+      if (scaleResult) {
+        patientBadge = scaleResult.badge || null;
+        patientSeverity = scaleResult.severity || null;
+        console.log("Extracted scale result:", {
+          patientBadge,
+          patientSeverity,
+        });
+      } else {
+        console.warn(
+          "No scale result found for recommendedScale:",
+          updatedPatient.recommendedScale
+        );
       }
+    } else {
+      console.warn("Missing scaleResults or recommendedScale:", {
+        scaleResults: updatedPatient.scaleResults,
+        recommendedScale: updatedPatient.recommendedScale,
+      });
     }
 
-    // Extract problem from therapy profile or recommended scale
     patientProblem = extractProblem(
       updatedPatient.therapyProfile.primary_concern,
       updatedPatient.recommendedScale
     );
 
-    // Redirect to therapist-search with filters
+    if (patientBadge && isNaN(parseInt(patientBadge, 10))) {
+      console.warn(
+        `Invalid patientBadge value: ${patientBadge}. Setting to null.`
+      );
+      patientBadge = null;
+    }
+
     const queryParams = new URLSearchParams();
     if (patientBadge) queryParams.append("badge", patientBadge);
     if (patientProblem) queryParams.append("specialties", patientProblem);
+    if (patientSeverity) queryParams.append("severity", patientSeverity);
+
+    console.log("Redirect query parameters:", queryParams.toString());
 
     return res.status(200).json({
       message: "Screening process completed successfully",
@@ -713,7 +737,9 @@ router.get("/video-call/:id", isLoggedIn, async (req, res) => {
 
 router.get("/therapist-search", isLoggedIn, async function (req, res) {
   try {
-    const patient = await patientModel.findOne({ email: req.user.email });
+    const patient = await patientModel.findOne({
+      email: { $regex: `^${req.user.email}$`, $options: "i" },
+    });
 
     const specialtyOptions = [
       "PTSD",
@@ -727,31 +753,41 @@ router.get("/therapist-search", isLoggedIn, async function (req, res) {
       "Body Image",
     ];
 
-    let query = { status: "Approved" };
+    let query = { status: { $regex: "^Approved$", $options: "i" } };
 
-    // Apply badge filter
     if (req.query.badge) {
-      query.badge = req.query.badge;
+      const badgeValue = parseInt(req.query.badge, 10);
+      if (!isNaN(badgeValue)) {
+        query.badge = badgeValue;
+      } else {
+        console.warn(`Invalid badge value received: ${req.query.badge}`);
+      }
     }
 
-    // Apply specialty filter
     if (req.query.specialties) {
       const specialtiesParam = Array.isArray(req.query.specialties)
         ? req.query.specialties
         : [req.query.specialties];
 
       const validSpecialties = specialtiesParam.filter((specialty) =>
-        specialtyOptions.includes(specialty)
+        specialtyOptions.some(
+          (opt) => opt.toLowerCase() === specialty.toLowerCase()
+        )
       );
 
       if (validSpecialties.length > 0) {
-        query.specialties = { $in: validSpecialties };
+        query.specialties = {
+          $in: validSpecialties.map((s) => new RegExp(`^${s}$`, "i")),
+        };
       }
     }
 
-    // Apply gender filter if provided
     if (req.query.gender) {
-      query.gender = req.query.gender;
+      query.gender = { $regex: `^${req.query.gender}$`, $options: "i" };
+    }
+
+    if (req.query.severity) {
+      console.log("Received severity filter:", req.query.severity);
     }
 
     const therapists = await TherapistModel.find(query).lean();
@@ -768,6 +804,7 @@ router.get("/therapist-search", isLoggedIn, async function (req, res) {
       selectedGender: req.query.gender || "",
       selectedSpecialties,
       selectedBadge: req.query.badge || "",
+      selectedSeverity: req.query.severity || "",
       specialtyOptions,
       messages: req.flash(),
     });

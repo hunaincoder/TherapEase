@@ -72,10 +72,8 @@ Return JSON object with this structure:
         model = genai.GenerativeModel("gemini-1.5-pro")
         response = model.generate_content(prompt)
 
-        # Debug print to inspect Gemini output
         print("Raw Gemini response:\n", response.text)
 
-        # Extract JSON block
         json_match = re.search(r"\{[\s\S]*\}", response.text)
         if not json_match:
             raise HTTPException(
@@ -84,13 +82,11 @@ Return JSON object with this structure:
 
         response_text = json_match.group().strip()
 
-        # Remove markdown code block formatting if present
         if response_text.startswith("```json"):
             response_text = response_text[len("```json"):].strip()
         if response_text.endswith("```"):
             response_text = response_text[:-3].strip()
 
-        # Load JSON
         parsed = json.loads(response_text)
 
         return {
