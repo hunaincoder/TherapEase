@@ -288,6 +288,7 @@ router.get("/video-call/:id", isLoggedIn, async (req, res) => {
     const appointmentId = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(appointmentId)) {
+      console.error(`Invalid appointment ID format: ${appointmentId}`);
       req.flash("error", "Invalid appointment ID format");
       return res.redirect("/therapist/appointment-list");
     }
@@ -297,14 +298,13 @@ router.get("/video-call/:id", isLoggedIn, async (req, res) => {
       .populate("therapistId");
 
     if (!appointment) {
+      console.error(`Appointment not found for ID: ${appointmentId}`);
       req.flash("error", "Appointment not found");
       return res.redirect("/therapist/appointment-list");
     }
 
-    if (
-      appointment.patientId._id.toString() !== req.user._id.toString() &&
-      appointment.therapistId._id.toString() !== req.user._id.toString()
-    ) {
+    if (appointment.therapistId._id.toString() !== req.user._id.toString()) {
+      console.error(`Unauthorized access attempt by user: ${req.user._id}`);
       req.flash("error", "Unauthorized access");
       return res.redirect("/therapist/appointment-list");
     }
@@ -319,6 +319,11 @@ router.get("/video-call/:id", isLoggedIn, async (req, res) => {
       return res.redirect("/therapist/appointment-list");
     }
 
+    if (!moment().isSame(moment(appointment.date), "day")) {
+      req.flash("error", "This appointment is not scheduled for today");
+      return res.redirect("/therapist/appointment-list");
+    }
+
     const appointmentDateTime = moment.tz(
       `${moment(appointment.date).format("YYYY-MM-DD")} ${appointment.time}`,
       "YYYY-MM-DD HH:mm",
@@ -328,11 +333,6 @@ router.get("/video-call/:id", isLoggedIn, async (req, res) => {
     const windowStart = moment(appointmentDateTime).subtract(5, "minutes");
     const windowEnd = moment(appointmentDateTime).add(30, "minutes");
     const now = moment().tz("Asia/Karachi");
-
-    if (!now.isSame(appointmentDateTime, "day")) {
-      req.flash("error", "This appointment is not scheduled for today");
-      return res.redirect("/therapist/appointment-list");
-    }
 
     if (now.isBefore(windowStart)) {
       req.flash("error", "Call is not available yet");
@@ -347,13 +347,9 @@ router.get("/video-call/:id", isLoggedIn, async (req, res) => {
     res.render("shared/video-call", {
       user: req.user,
       appointment,
-      sessionPartnerName: req.user._id.equals(appointment.therapistId._id)
-        ? `${appointment.patientId.firstname} ${appointment.patientId.lastname}`
-        : `${appointment.therapistId.firstName} ${appointment.therapistId.lastName}`,
-      displayName: req.user.firstname
-        ? `${req.user.firstname} ${req.user.lastname || ""}`
-        : req.user.username,
-      isTherapist: req.user instanceof TherapistModel,
+      sessionPartnerName: `${appointment.patientId.firstname} ${appointment.patientId.lastname}`,
+      displayName: `${req.user.firstName} ${req.user.lastName || ""}`,
+      isTherapist: true,
       appointmentDateFormatted: moment(appointment.date).format("MMM Do YYYY"),
       appointmentEndTimeFormatted: moment(appointment.time, "HH:mm")
         .add(30, "minutes")
@@ -362,6 +358,12 @@ router.get("/video-call/:id", isLoggedIn, async (req, res) => {
       messages: req.flash(),
     });
   } catch (error) {
+    console.error("Error accessing video call:", {
+      appointmentId: req.params.id,
+      userId: req.user._id,
+      error: error.message,
+      stack: error.stack,
+    });
     req.flash("error", "Internal Server Error");
     res.redirect("/therapist/appointment-list");
   }

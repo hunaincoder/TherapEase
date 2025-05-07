@@ -194,13 +194,11 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-      // Configuration
       const appointmentId = '<%= appointment && appointment._id ? appointment._id : "" %>';
       const userId = '<%= user && user._id ? user._id : "anonymous" %>';
       const isTherapist = <%= typeof isTherapist !== 'undefined' && isTherapist ? true : false %>;
       const stunServers = '<%= process.env.STUN_SERVERS || "stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302" %>'.split(',');
 
-      // Connection status indicator
       const connectionStatus = document.getElementById('connectionStatus');
       const showStatus = (message, type) => {
         connectionStatus.textContent = message;
@@ -225,8 +223,10 @@
       let hasInitiatedOffer = false;
       let hasReceivedOffer = false;
       let otherUserJoined = false;
+      let mediaRecorder = null;
+      let recordedChunks = [];
+      let isRecording = false;
 
-      // DOM elements
       const localVideo = document.getElementById('local-video');
       const remoteVideo = document.getElementById('remote-video');
       const endCallBtn = document.getElementById('endCallBtn');
@@ -234,12 +234,10 @@
       const toggleMicBtn = document.getElementById('toggleMicBtn');
       const toggleVideoBtn = document.getElementById('toggleVideoBtn');
 
-      // Validate ObjectId format
       function isValidObjectId(id) {
         return /^[0-9a-fA-F]{24}$/.test(id);
       }
 
-      // 30-minute timer
       let timeRemaining = 30 * 60;
       const updateTimer = () => {
         const minutes = Math.floor(timeRemaining / 60);
@@ -254,8 +252,39 @@
       };
       const timerInterval = setInterval(updateTimer, 1000);
 
-      // End call function
+      async function saveRecording() {
+        if (recordedChunks.length === 0) return;
+
+        const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+        const formData = new FormData();
+        formData.append('audio', blob, `session-${appointmentId}-${Date.now()}.webm`);
+        formData.append('appointmentId', appointmentId);
+        formData.append('userId', userId);
+        formData.append('isTherapist', isTherapist);
+
+        try {
+          const response = await fetch('/client/save-recording', {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
+          if (result.success) {
+            showStatus('Recording saved successfully', 'connected');
+            recordedChunks = [];
+          } else {
+            showStatus('Failed to save recording: ' + result.message, 'error');
+          }
+        } catch (err) {
+          console.error('Error saving recording:', err);
+          showStatus('Error saving recording', 'error');
+        }
+      }
+
       function endCall() {
+        if (isRecording && mediaRecorder) {
+          mediaRecorder.stop();
+          isRecording = false;
+        }
         if (pc) {
           pc.close();
           pc = null;
@@ -270,7 +299,6 @@
         window.location.href = isTherapist ? '/therapist/appointment-list' : '/client/dashboard';
       }
 
-      // Event listeners
       endCallBtn.addEventListener('click', () => {
         if (confirm('End this therapy session?')) {
           endCall();
@@ -303,10 +331,8 @@
         }
       });
 
-      // Auto-end call after 30 minutes
       setTimeout(endCall, 30 * 60 * 1000);
 
-      // WebRTC peer connection setup
       async function setupPeerConnection() {
         if (pc) {
           pc.close();
@@ -359,7 +385,6 @@
         return pc;
       }
 
-      // Get media stream
       async function getMedia() {
         try {
           localStream = await navigator.mediaDevices.getUserMedia({
@@ -368,6 +393,26 @@
           });
           localVideo.srcObject = localStream;
           console.log('Local media accessed successfully');
+
+          // Start recording automatically
+          const audioStream = new MediaStream(localStream.getAudioTracks());
+          mediaRecorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
+
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              recordedChunks.push(event.data);
+            }
+          };
+
+          mediaRecorder.onstop = async () => {
+            await saveRecording();
+            isRecording = false;
+          };
+
+          mediaRecorder.start(1000); // Record in 1-second chunks
+          isRecording = true;
+          showStatus('Recording started automatically', 'connected');
+
           return localStream;
         } catch (err) {
           console.error('Media access error:', err);
@@ -377,7 +422,6 @@
         }
       }
 
-      // Initiate offer
       async function initiateOffer() {
         if (hasInitiatedOffer) {
           console.log(`${userId} Offer already initiated, skipping`);
@@ -401,7 +445,6 @@
         }
       }
 
-      // Socket.IO event handlers
       function setupSocket() {
         socket = io({
           path: '/socket.io/',
@@ -431,7 +474,6 @@
           console.log(`${roomId}:${userId} Join confirmed for room ${roomId}, user ${userId}`);
           showStatus(`Joined session ${roomId}`, 'connected');
           if (!isTherapist) {
-            // Patient waits for offer
             setTimeout(() => {
               if (!hasReceivedOffer && !otherUserJoined) {
                 console.log(`${appointmentId}:${userId} No offer or other user joined after waiting, retrying join`);
@@ -449,7 +491,6 @@
           console.log(`${appointmentId}:${userId} User joined: ${joinedUserId}, isTherapist: ${joinedIsTherapist}`);
           showStatus('Other participant joined. Setting up call...', 'connecting');
           otherUserJoined = true;
-          // Therapist initiates offer when patient joins
           if (isTherapist && !joinedIsTherapist) {
             initiateOffer();
           }
@@ -463,7 +504,6 @@
               console.warn(`${appointmentId}:${userId} Ignoring offer due to signaling state: ${pc.signalingState}`);
               return;
             }
-            // Reset local offer if it exists and accept the new offer
             if (pc.signalingState === 'have-local-offer') {
               console.log(`${appointmentId}:${userId} Resetting local offer due to received offer from ${senderId}`);
               pc.setLocalDescription({ type: 'rollback' });

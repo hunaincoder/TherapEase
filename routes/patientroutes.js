@@ -91,6 +91,90 @@ function extractProblem(primaryConcern, recommendedScale) {
   return null;
 }
 
+const audioStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(__dirname, "../assets/audio/recordings");
+    fs.mkdir(dir, { recursive: true }).then(() => cb(null, dir));
+  },
+  filename: (req, file, cb) => {
+    cb(null, `session-${req.body.appointmentId}-${Date.now()}.webm`);
+  },
+});
+
+const audioUpload = multer({
+  storage: audioStorage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === "audio/webm") {
+      cb(null, true);
+    } else {
+      cb(new Error("Only audio/webm files are allowed"), false);
+    }
+  },
+  limits: { fileSize: 50 * 1024 * 1024 },
+});
+
+router.post(
+  "/save-recording",
+  isLoggedIn,
+  audioUpload.single("audio"),
+  async (req, res) => {
+    try {
+      const { appointmentId, userId, isTherapist } = req.body;
+
+      if (
+        !mongoose.Types.ObjectId.isValid(appointmentId) ||
+        !mongoose.Types.ObjectId.isValid(userId)
+      ) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid appointment or user ID" });
+      }
+
+      const appointment = await AppointmentModel.findById(appointmentId);
+      if (!appointment) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Appointment not found" });
+      }
+
+      const isValidUser =
+        (isTherapist === "true" &&
+          appointment.therapistId.toString() === userId) ||
+        (isTherapist === "false" &&
+          appointment.patientId.toString() === userId);
+
+      if (!isValidUser) {
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized to save recording for this appointment",
+        });
+      }
+
+      if (!req.file) {
+        return res
+          .status(400)
+          .json({ success: false, message: "No audio file uploaded" });
+      }
+
+      appointment.recording = {
+        path: `/audio/recordings/${req.file.filename}`,
+        recordedBy: new mongoose.Types.ObjectId(userId),
+        recordedAt: new Date(),
+        isTherapist: isTherapist === "true",
+      };
+
+      await appointment.save();
+
+      res.json({ success: true, message: "Recording saved successfully" });
+    } catch (error) {
+      console.error("Error saving recording:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Failed to save recording" });
+    }
+  }
+);
+
 router.get("/login", function (req, res) {
   res.render("patient/login", { messages: req.flash() });
 });
