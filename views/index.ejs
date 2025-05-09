@@ -1,488 +1,562 @@
-<!DOCTYPE html> 
-<html lang="en">
-	
-<!-- doccure/index.html  30 Nov 2019 04:12:03 GMT -->
-<head>
+<DOCUMENT filename="index.ejs">
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=0"
+      />
+      <title>TherapEase</title>
+      <link type="image/x-icon" href="/img/logo.png" rel="icon" />
+      <script src="https://cdn.tailwindcss.com"></script>
 
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-		<title>Doccure</title>
-		
-		<!-- Favicons -->
-		<link type="image/x-icon" href="/img/logo.png" rel="icon">
-		
-		<!-- Bootstrap CSS -->
-		<link rel="stylesheet" href="/css/bootstrap.min.css">
-		
-		<!-- Fontawesome CSS -->
-		<link rel="stylesheet" href="/plugins/fontawesome/css/fontawesome.min.css">
-		<link rel="stylesheet" href="/plugins/fontawesome/css/all.min.css">
-		
-		<!-- Main CSS -->
-		<link rel="stylesheet" href="/css/style.css">
-		<link rel="stylesheet" href="/css/patient-style.css">
+      <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      />
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      />
+      <link rel="stylesheet" href="/css/landing-page.css" />
+    </head>
+    <body>
+      <div class="main-wrapper">
+        <header class="header">
+          <nav class="navbar navbar-expand-lg header-nav">
+            <div class="navbar-header">
+              <a id="mobile_btn" href="javascript:void(0);">
+                <span class="bar-icon">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </span>
+              </a>
+              <a href="/" class="navbar-brand logo">
+                <img src="/img/logo.png" class="img-fluid" alt="Logo" />
+              </a>
+            </div>
 
-		
-		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-		<!--[if lt IE 9]>
-			<script src="assets/js/html5shiv.min.js"></script>
-			<script src="assets/js/respond.min.js"></script>
-		<![endif]-->
-	
-	</head>
-	<body>
+            <ul class="nav header-navbar-rht">
+              <li class="nav-item contact-item">
+                <div class="header-contact-img">
+                  <i class="far fa-hospital"></i>
+                </div>
+                <div class="header-contact-detail">
+                  <p class="contact-header">Contact</p>
+                  <p class="contact-info-header">+92 333 232311</p>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link header-login" href="/client/login"
+                  >LOGIN / SIGNUP</a
+                >
+              </li>
+            </ul>
+          </nav>
+        </header>
 
-		<!-- Main Wrapper -->
-		<div class="main-wrapper">
-		
-			<!-- Header -->
-			<header class="header">
-				<nav class="navbar navbar-expand-lg header-nav">
-					<div class="navbar-header">
-						<a id="mobile_btn" href="javascript:void(0);">
-							<span class="bar-icon">
-								<span></span>
-								<span></span>
-								<span></span>
-							</span>
-						</a>
-						<a href="/" class="navbar-brand logo">
-							<img src="/img/logo.png" class="img-fluid" alt="Logo">
-						</a>
-					</div>
-					<div class="main-menu-wrapper">
-						<div class="menu-header">
-							<a href="/" class="menu-logo">
-								<img src="/img/logo.png" class="img-fluid" alt="Logo">
-							</a>
-							<a id="menu_close" class="menu-close" href="javascript:void(0);">
-								<i class="fas fa-times"></i>
-							</a>
-						</div>
-						<ul class="main-nav">
-							<li class="active">
-								<a href="/">Home</a>
-							<li class="login-link">
-								<a href="/client/login">Login / Signup</a>
-							</li>
-						</ul>		 
-					</div>		 
-					<ul class="nav header-navbar-rht">
-						<li class="nav-item contact-item">
-							<div class="header-contact-img">
-								<i class="far fa-hospital"></i>							
-							</div>
-							<div class="header-contact-detail">
-								<p class="contact-header">Contact</p>
-								<p class="contact-info-header"> +92 333 232311</p>
-							</div>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link header-login" href="/client/login">login / Signup </a>
-						</li>
-					</ul>
-				</nav>
-			</header>
-			<!-- /Header -->
-			
-			<!-- Home Banner -->
-			<section class="section section-search">
-				<div class="container-fluid">
-					<div class="banner-wrapper">
-						<div class="banner-header text-center" style="margin-top: 30px;">
-							<h1>Therapy, Make an Appointment</h1>
-							<p>Discover the best Therapist for you.</p>
-						</div>
+        <section class="section section-search">
+          <div class="container mx-auto px-4">
+            <div class="banner-wrapper">
+              <div class="banner-header text-center mt-10">
+                <h1
+                  class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 animate-fadeIn"
+                >
+                  Find Your Path to Healing
+                </h1>
+                <p
+                  class="text-lg md:text-xl text-white max-w-2xl mx-auto opacity-90"
+                >
+                  Discover the best therapists for your journey to mental
+                  wellness and personal growth.
+                </p>
+              </div>
+              <div
+                class="card cursor-pointer"
+                onclick="location.href='/client/register';"
+              >
+                <h1 class="title">Individual Therapy</h1>
+                <p class="subtitle">
+                  Start your healing journey
+                  <span class="arrow"></span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-						<div class="card">
-							<h1 class="title">Individual</h1>
-							<p class="subtitle">
-								For myself
-								<span class="arrow"></span>
-							</p>
-						</div>
-					</div>
-				</div>
-			</section>
-			<!-- /Home Banner -->
-			<style>
-				.card {
-					background: linear-gradient(145deg, #4CAF50, #388E3C);
-					border-radius: 16px;
-					padding: 24px;
-					width: 300px;
-					color: white;
-					font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-					box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-					margin-left: 30%;
-				}
-		
-				.title {
-					font-size: 32px;
-					font-weight: 600;
-					margin: 0 0 8px 0;
-				}
-		
-				.subtitle {
-					font-size: 16px;
-					opacity: 0.9;
-					display: flex;
-					align-items: center;
-					gap: 4px;
-				}
-		
-				.arrow {
-					display: inline-block;
-					transform: rotate(-45deg);
-					border: solid white;
-					border-width: 0 2px 2px 0;
-					padding: 3px;
-					margin-left: 4px;
-				}
-			</style>
-			
-		  
-			<!-- Popular Section -->
-			<section class="section section-doctor">
-				<div class="container-fluid">
-				   <div class="row">
-						<div class="col-lg-4">
-							<div class="section-header ">
-								<h2>Our Top Therapists</h2>
-								<p>At TherapEase, we take pride in connecting you with the best mental health professionals. Our certified therapists are here to guide you through life’s challenges with compassion and expertise </p>
-							</div>
-							<div class="about-content">
-								<p> <strong> Experienced & Trusted:</strong> Each therapist has years of experience helping individuals and families thrive.</p>
-								<p> <strong> Specialized Care:</strong> From personal growth to relationship healing, our therapists are equipped with specialized skills to meet your unique needs</p>
-								<p> <strong> Verified & Reliable:</strong> From personal growth to relationship healing, our therapists are equipped with specialized skills to meet your unique needs</p>
-							</p>
-								
-							</div>
-						</div>
-						<div class="col-lg-8">
-							<div class="doctor-slider slider">
-							
-								<!-- Doctor Widget -->
-								<div class="profile-widget">
-									<div class="doc-img">
-										<a href="doctor-profile.html">
-											<img class="img-fluid" alt="User Image" src="/img/doctors/doctor-thumb-01.jpg" height="200px" width="200px">
-										</a>
-										<a href="javascript:void(0)" class="fav-btn">
-											<i class="far fa-bookmark"></i>
-										</a>
-									</div>
-									<div class="pro-content">
-										<h3 class="title">
-											<a href="">ahmed usmani</a> 
-											<i class="fas fa-check-circle verified"></i>
-										</h3>
-										<p class="speciality">Consultant and Phsycologist</p>
-										
-										<ul class="available-info">
-											
-											<li>
-												<i class="far fa-clock"></i> Available on Fri, 22 Mar
-											</li>
-											<li>
-												<i class="far fa-money-bill-alt"></i> PKR 1000 - PKR 2000
-												<i class="fas fa-info-circle" data-toggle="tooltip" title="Lorem Ipsum"></i>
-											</li>
-										</ul>
-										
-									</div>
-								</div>
-								<!-- /Doctor Widget -->
-								 <!-- Doctor Widget -->
-								<div class="profile-widget">
-									<div class="doc-img">
-										<a href="doctor-profile.html">
-											<img class="img-fluid" alt="User Image" src="/img/doctors/doctor-thumb-01.jpg" height="200px" width="200px">
-										</a>
-										<a href="javascript:void(0)" class="fav-btn">
-											<i class="far fa-bookmark"></i>
-										</a>
-									</div>
-									<div class="pro-content">
-										<h3 class="title">
-											<a href="">ahmed usmani</a> 
-											<i class="fas fa-check-circle verified"></i>
-										</h3>
-										<p class="speciality">Consultant and Phsycologist</p>
-										
-										<ul class="available-info">
-											
-											<li>
-												<i class="far fa-clock"></i> Available on Fri, 22 Mar
-											</li>
-											<li>
-												<i class="far fa-money-bill-alt"></i> PKR 1000 - PKR 2000
-												<i class="fas fa-info-circle" data-toggle="tooltip" title="Lorem Ipsum"></i>
-											</li>
-										</ul>
-										
-									</div>
-								</div>
-								<!-- /Doctor Widget -->
-								 <!-- Doctor Widget -->
-								<div class="profile-widget">
-									<div class="doc-img">
-										<a href="doctor-profile.html">
-											<img class="img-fluid" alt="User Image" src="/img/doctors/doctor-thumb-01.jpg" height="200px" width="200px">
-										</a>
-										<a href="javascript:void(0)" class="fav-btn">
-											<i class="far fa-bookmark"></i>
-										</a>
-									</div>
-									<div class="pro-content">
-										<h3 class="title">
-											<a href="">ahmed usmani</a> 
-											<i class="fas fa-check-circle verified"></i>
-										</h3>
-										<p class="speciality">Consultant and Phsycologist</p>
-										
-										<ul class="available-info">
-											
-											<li>
-												<i class="far fa-clock"></i> Available on Fri, 22 Mar
-											</li>
-											<li>
-												<i class="far fa-money-bill-alt"></i> PKR 1000 - PKR 2000
-												<i class="fas fa-info-circle" data-toggle="tooltip" title="Lorem Ipsum"></i>
-											</li>
-										</ul>
-										
-									</div>
-								</div>
-								<!-- /Doctor Widget -->
-								
-						
-							
-							</div>
-						</div>
-				   </div>
-				</div>
-			</section>
-			<!-- /Popular Section -->
-		   
-			<section class="faq-section">
-				<div class="faq-container">
-				  <h2>FAQs</h2>
-				  <div class="faq">
-					<h3>What is TherapEase?</h3>
-					<p>TherapEase is an online platform connecting individuals with licensed therapists for personalized therapy sessions. We aim to make mental health care accessible, flexible, and reliable.</p>
-				  </div>
-				  <div class="faq">
-					<h3>How does online therapy work?</h3>
-					<p>Online therapy at TherapEase allows you to connect with certified therapists via video, voice, or text sessions. After completing a quick screening, you’ll be matched with a therapist based on your specific needs.</p>
-				  </div>
-				  <div class="faq">
-					<h3>What types of therapy do you offer?</h3>
-					<p>We offer individual therapy, child therapy, couple therapy, and specialized services like teen or relationship counseling. Each therapy session is tailored to your unique goals.</p>
-				  </div>
-				  <div class="faq">
-					<h3>Are my conversations private and secure?</h3>
-					<p>Absolutely. Your privacy is our priority. We use advanced encryption methods to ensure all communications and data are secure and confidential.</p>
-				  </div>
-				  <div class="faq">
-					<h3>How do I pay for therapy sessions?</h3>
-					<p>Payments are processed online through secure gateways. You can pay via debit/credit cards or other supported methods.</p>
-				  </div>
-				</div>
-			  </section>
-			  
-			  <style>
+        <section
+          id="therapists"
+          class="section section-doctor py-20 bg-gray-50"
+        >
+          <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div class="lg:col-span-1">
+                <div class="section-header sticky top-20">
+                  <h2 class="text-3xl font-bold text-green-800 mb-6">
+                    Our Expert Therapists
+                  </h2>
+                  <p class="text-gray-600 mb-6">
+                    At TherapEase, we take pride in connecting you with the best
+                    mental health professionals. Our certified therapists are
+                    here to guide you through life's challenges with compassion
+                    and expertise.
+                  </p>
+                  <div class="about-content text-gray-600 space-y-4">
+                    <p>
+                      <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                      <strong>Experienced & Trusted:</strong> Each therapist has
+                      years of experience helping individuals and families
+                      thrive.
+                    </p>
+                    <p>
+                      <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                      <strong>Specialized Care:</strong> From personal growth to
+                      relationship healing, our therapists are equipped with
+                      specialized skills to meet your unique needs.
+                    </p>
+                    <p>
+                      <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                      <strong>Verified & Reliable:</strong> All therapists are
+                      thoroughly vetted to ensure top-quality care.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="lg:col-span-2">
+                <div
+                  class="doctor-slider grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
+                >
+                  <% if (therapists && therapists.length > 0) { %> <%
+                  therapists.forEach(therapist => { %>
+                  <div class="profile-widget">
+                    <div
+                      class="doc-img relative overflow-hidden"
+                      style="height: 220px"
+                    >
+                      <a href="/client/login">
+                        <img
+                          class="img-fluid w-full h-full object-cover"
+                          alt="Therapist Image"
+                          src="<%= therapist.profilePicture || '/img/doctors/doctor-thumb-01.jpg' %>"
+                        />
+                      </a>
+                      <a
+                        href="javascript:void(0)"
+                        class="fav-btn absolute top-3 right-3 bg-white p-2 rounded-full"
+                      >
+                        <i class="far fa-bookmark text-green-600"></i>
+                      </a>
+                    </div>
+                    <div class="pro-content">
+                      <h3 class="title text-lg font-semibold flex items-center">
+                        <a href="/client/login">
+                          Dr. <%= therapist.firstName %> <%= therapist.lastName
+                          %>
+                        </a>
+                        <i
+                          class="fas fa-check-circle verified text-green-500 ml-2"
+                        ></i>
+                      </h3>
+                      <p class="speciality text-gray-600">
+                        <%= therapist.specialties &&
+                        therapist.specialties.length > 0 ?
+                        therapist.specialties[0] : 'Therapist' %>
+                      </p>
 
-.faq-section {
-  padding: 50px 20px;
-  background-color: #ffffff;
-}
+                      <ul class="available-info text-sm text-gray-500">
+                        <li>
+                          <i class="far fa-clock mr-2 text-green-600"></i>
+                          <%= therapist.availabilityText %>
+                        </li>
+                        <li>
+                          <i
+                            class="far fa-money-bill-alt mr-2 text-green-600"
+                          ></i>
+                          PKR <%= therapist.fee %> - PKR <%= therapist.fee +
+                          1000 %>
+                        </li>
+                      </ul>
+                      <div class="mt-3 pt-3 border-t border-gray-200">
+                        <a
+                          href="/client/login"
+                          class="w-full block text-center py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                        >
+                          Book Appointment
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <% }); %> <% } else { %>
+                  <p class="text-gray-600 text-center col-span-2">
+                    No therapists available at the moment.
+                  </p>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-.faq-container {
-  max-width: 800px;
-  margin: 0 auto;
-}
+        <section class="features-section py-16 bg-white">
+          <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+              <h2 class="text-3xl font-bold text-green-800 mb-4">
+                Why Choose TherapEase?
+              </h2>
+              <p class="text-gray-600 max-w-3xl mx-auto">
+                Our platform offers comprehensive mental health services
+                designed with your needs in mind.
+              </p>
+            </div>
 
-.faq-container h2 {
-  text-align: center;
-  font-size: 2rem;
-  margin-bottom: 20px;
-  color: #0056b3;
-}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div
+                class="feature-item text-center p-6 rounded-xl bg-gray-50 hover:bg-green-50 transition-all duration-300 transform hover:-translate-y-2"
+              >
+                <div
+                  class="feature-icon mb-4 mx-auto bg-green-100 text-green-600 w-16 h-16 flex items-center justify-center rounded-full"
+                >
+                  <i class="fas fa-user-shield text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-green-800 mb-3">
+                  Complete Privacy
+                </h3>
+                <p class="text-gray-600">
+                  Your sessions and data are always secure and confidential.
+                </p>
+              </div>
 
-.faq {
-  margin-bottom: 20px;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 15px;
-}
+              <div
+                class="feature-item text-center p-6 rounded-xl bg-gray-50 hover:bg-green-50 transition-all duration-300 transform hover:-translate-y-2"
+              >
+                <div
+                  class="feature-icon mb-4 mx-auto bg-green-100 text-green-600 w-16 h-16 flex items-center justify-center rounded-full"
+                >
+                  <i class="fas fa-certificate text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-green-800 mb-3">
+                  Certified Therapists
+                </h3>
+                <p class="text-gray-600">
+                  All our therapists are licensed professionals with verified
+                  credentials.
+                </p>
+              </div>
 
-.faq h3 {
-  font-size: 1.2rem;
-  color: #0056b3;
-  cursor: pointer;
-  margin: 0;
-  transition: color 0.3s;
-}
+              <div
+                class="feature-item text-center p-6 rounded-xl bg-gray-50 hover:bg-green-50 transition-all duration-300 transform hover:-translate-y-2"
+              >
+                <div
+                  class="feature-icon mb-4 mx-auto bg-green-100 text-green-600 w-16 h-16 flex items-center justify-center rounded-full"
+                >
+                  <i class="fas fa-calendar-check text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-green-800 mb-3">
+                  Flexible Scheduling
+                </h3>
+                <p class="text-gray-600">
+                  Book sessions that fit your schedule with easy rescheduling
+                  options.
+                </p>
+              </div>
 
-.faq h3:hover {
-  color: #008cff;
-}
+              <div
+                class="feature-item text-center p-6 rounded-xl bg-gray-50 hover:bg-green-50 transition-all duration-300 transform hover:-translate-y-2"
+              >
+                <div
+                  class="feature-icon mb-4 mx-auto bg-green-100 text-green-600 w-16 h-16 flex items-center justify-center rounded-full"
+                >
+                  <i class="fas fa-comments text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-green-800 mb-3">
+                  Video call sessions
+                </h3>
+                <p class="text-gray-600">Video call therapy sessions.</p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-.faq p {
-  font-size: 1rem;
-  margin: 10px 0 0;
-  line-height: 1.6;
-  display: none;
-}
+        <section id="faq" class="faq-section py-20 bg-gray-50">
+          <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+              <h2 class="text-3xl font-bold text-green-800 mb-4">
+                Frequently Asked Questions
+              </h2>
+              <p class="text-gray-600 max-w-3xl mx-auto">
+                Find answers to common questions about TherapEase and our
+                services.
+              </p>
+            </div>
+            <div class="faq-container max-w-4xl mx-auto">
+              <div class="faq">
+                <h3 class="text-lg font-semibold text-green-700 cursor-pointer">
+                  What is TherapEase?
+                </h3>
+                <p class="text-gray-600 mt-2">
+                  TherapEase is an online platform connecting individuals with
+                  licensed therapists for personalized therapy sessions. We aim
+                  to make mental health care accessible, flexible, and reliable.
+                </p>
+              </div>
+              <div class="faq">
+                <h3 class="text-lg font-semibold text-green-700 cursor-pointer">
+                  How does online therapy work?
+                </h3>
+                <p class="text-gray-600 mt-2">
+                  Online therapy at TherapEase allows you to connect with
+                  certified therapists via video, voice, or text sessions. After
+                  completing a quick screening, you'll be matched with a
+                  therapist based on your specific needs.
+                </p>
+              </div>
+              <div class="faq">
+                <h3 class="text-lg font-semibold text-green-700 cursor-pointer">
+                  What types of therapy do you offer?
+                </h3>
+                <p class="text-gray-600 mt-2">
+                  We offer individual therapy, child therapy, couple therapy,
+                  and specialized services like teen or relationship counseling.
+                  Each therapy session is tailored to your unique goals.
+                </p>
+              </div>
+              <div class="faq">
+                <h3 class="text-lg font-semibold text-green-700 cursor-pointer">
+                  Are my conversations private and secure?
+                </h3>
+                <p class="text-gray-600 mt-2">
+                  Absolutely. Your privacy is our priority. We use advanced
+                  encryption methods to ensure all communications and data are
+                  secure and confidential.
+                </p>
+              </div>
+              <div class="faq">
+                <h3 class="text-lg font-semibold text-green-700 cursor-pointer">
+                  How do I pay for therapy sessions?
+                </h3>
+                <p class="text-gray-600 mt-2">
+                  Payments are processed online through secure gateways. You can
+                  pay via debit/credit cards or other supported methods.
+                </p>
+              </div>
+              <div class="faq">
+                <h3 class="text-lg font-semibold text-green-700 cursor-pointer">
+                  Can I change my therapist if I'm not satisfied?
+                </h3>
+                <p class="text-gray-600 mt-2">
+                  Yes, you can request a change at any time. We believe in
+                  finding the right match for effective therapy, so we make this
+                  process simple and straightforward.
+                </p>
+              </div>
+              <div class="faq">
+                <h3 class="text-lg font-semibold text-green-700 cursor-pointer">
+                  How often should I schedule therapy sessions?
+                </h3>
+                <p class="text-gray-600 mt-2">
+                  This varies based on individual needs. Most clients begin with
+                  weekly sessions, but your therapist will help determine the
+                  optimal frequency for your situation.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-.faq.open p {
-  display: block;
-}
+        <section id="contact" class="cta-section py-20 bg-green-600 text-white">
+          <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-6">
+              Ready to Start Your Journey?
+            </h2>
+            <p class="text-xl opacity-90 max-w-3xl mx-auto mb-8">
+              Take the first step toward better mental health today. Our
+              therapists are ready to support you.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+              <a
+                href="/client/register"
+                class="px-8 py-3 bg-white text-green-600 rounded-full hover:bg-green-50 transition-colors font-medium text-lg"
+                >Get Started</a
+              >
+            </div>
+          </div>
+        </section>
 
-/* Optional Styling for Responsiveness */
-@media (max-width: 768px) {
-  .faq-container {
-    padding: 0 10px;
-  }
+        <footer class="footer py-16">
+          <div class="footer-top">
+            <div class="container mx-auto px-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="footer-widget footer-about">
+                  <div class="footer-logo mb-6">
+                    <img
+                      src="/img/logo.png"
+                      class="h-12"
+                      alt="TherapEase Logo"
+                    />
+                  </div>
+                  <div class="footer-about-content">
+                    <p class="text-gray-300 mb-6">
+                      TherapEase is your trusted partner in mental wellness,
+                      connecting you with certified therapists to provide
+                      personalized care and support.
+                    </p>
+                  </div>
+                </div>
 
-  .faq h3 {
-    font-size: 1rem;
-  }
+                <div class="footer-widget footer-menu">
+                  <h2 class="footer-title text-xl font-semibold">For Users</h2>
+                  <ul class="space-y-3">
+                    <li>
+                      <a href="/client/login"
+                        ><i class="fas fa-angle-right mr-2"></i> Login</a
+                      >
+                    </li>
+                    <li>
+                      <a href="/client/register"
+                        ><i class="fas fa-angle-right mr-2"></i> Register</a
+                      >
+                    </li>
+                    <li>
+                      <a href="/therapist/register"
+                        ><i class="fas fa-angle-right mr-2"></i> Join as
+                        Therapist</a
+                      >
+                    </li>
+                  </ul>
+                </div>
 
-  .faq p {
-    font-size: 0.9rem;
-  }
-}
-			  </style>
+                <div class="footer-widget footer-contact">
+                  <h2 class="footer-title text-xl font-semibold">Contact Us</h2>
+                  <div class="footer-contact-info space-y-4">
+                    <p><i class="fas fa-phone-alt"></i> +92 322 333333</p>
+                    <p>
+                      <i class="fas fa-envelope"></i> support@therapease.com
+                    </p>
+                    <p>
+                      <i class="fas fa-map-marker-alt"></i> Karachi, Pakistan
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-			  <script>
-				const faqHeaders = document.querySelectorAll('.faq h3');
-				
-				faqHeaders.forEach(header => {
-				  header.addEventListener('click', () => {
-					const parent = header.parentElement;
-					parent.classList.toggle('open');
-				  });
-				});
-				</script>
-			
-			<!-- Footer -->
-			<footer class="footer">
-				
-				<!-- Footer Top -->
-				<div class="footer-top" style="background-color: #D3EEE7;">
-					<div class="container-fluid">
-						<div class="row">
-							<div class="col-lg-3 col-md-6">
-							
-								<!-- Footer Widget -->
-								<div class="footer-widget footer-about">
-									<div class="footer-logo">
-										<img src="/img/logo.png" height="60px" width="150px" alt="logo">
-									</div>
-									<div class="footer-about-content">
-										<p>TherapEase is your trusted partner in mental wellness, connecting you with certified therapists to provide personalized care and support. Our platform ensures secure, convenient, and effective therapy sessions tailored to your unique needs.</p>
-										<div class="social-icon">
-											<ul>
-												<li>
-													<a href="#" target="_blank"><i class="fab fa-facebook-f"></i> </a>
-												</li>
-												<li>
-													<a href="#" target="_blank"><i class="fab fa-twitter"></i> </a>
-												</li>
-												<li>
-													<a href="#" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-												</li>
-												<li>
-													<a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
-												</li>
-												<li>
-													<a href="#" target="_blank"><i class="fab fa-dribbble"></i> </a>
-												</li>
-											</ul>
-										</div>
-									</div>
-								</div>
-								<!-- /Footer Widget -->
-								
-							</div>
-							
-							<div class="col-lg-3 col-md-6">
-							
-								<!-- Footer Widget -->
-								<div class="footer-widget footer-menu">
-									<h2 class="footer-title">User login</h2>
-									<ul>
-										<li><a href="/client/login"><i class="fas fa-angle-double-right"></i> Login</a></li>
-										<li><a href="/client/register"><i class="fas fa-angle-double-right"></i> Register</a></li>
-									</ul>
-								</div>
-								<!-- /Footer Widget -->
-								
-							</div>
-							
-							<div class="col-lg-3 col-md-6">
-							
-								<!-- Footer Widget -->
-								<div class="footer-widget footer-menu">
-									<h2 class="footer-title">For therapist</h2>
-									<ul>
-										<li><a href="/therapist/login"><i class="fas fa-angle-double-right"></i> Login</a></li>
-										<li><a href="/therapist/register"><i class="fas fa-angle-double-right"></i> Register</a></li>
-									</ul>
-								</div>
-								<!-- /Footer Widget -->
-								
-							</div>
-							
-							<div class="col-lg-3 col-md-6">
-							
-								<!-- Footer Widget -->
-								<div class="footer-widget footer-contact">
-									<h2 class="footer-title">Contact Us</h2>
-									<div class="footer-contact-info">
-										
-										<p>
-											<i class="fas fa-phone-alt"></i>
-											+92 322 333333
-										</p>
-										<p class="mb-0">
-											<i class="fas fa-envelope"></i>
-											therapease@gmail.com
-										</p>
-									</div>
-								</div>
-								<!-- /Footer Widget -->
-								
-							</div>
-							
-						</div>
-					</div>
-				</div>
-				<!-- /Footer Top -->
-				
-				
-				
-			</footer>
-			<!-- /Footer -->
-		   
-	   </div>
-	   <!-- /Main Wrapper -->
-	  
-		<!-- jQuery -->
-		<script src="/js/jquery.min.js"></script>
-		
-		<!-- Bootstrap Core JS -->
-		<script src="/js/popper.min.js"></script>
-		<script src="/js/bootstrap.min.js"></script>
-		
-		<!-- Slick JS -->
-		<script src="/js/slick.js"></script>
-		
-		<!-- Custom JS -->
-		<script src="/js/script.js"></script>
-		
-	</body>
+          <div class="footer-bottom mt-8 pt-6 border-t border-gray-700">
+            <div class="container mx-auto px-4">
+              <div
+                class="flex flex-col md:flex-row justify-between items-center"
+              >
+                <p class="text-center text-gray-400 mb-4 md:mb-0">
+                  © 2025 TherapEase. All rights reserved.
+                </p>
+                <div class="flex space-x-4">
+                  <a
+                    href="/"
+                    class="text-gray-400 hover:text-white transition-colors"
+                    >Terms of Service</a
+                  >
+                  <a
+                    href="/"
+                    class="text-gray-400 hover:text-white transition-colors"
+                    >Privacy Policy</a
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </footer>
+      </div>
 
-<!-- doccure/index.html  30 Nov 2019 04:12:03 GMT -->
-</html>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+      <script>
+        document
+          .getElementById("mobile_btn")
+          ?.addEventListener("click", function () {
+            const nav = document.querySelector(".main-menu-wrapper");
+            if (nav) {
+              nav.classList.toggle("hidden");
+              nav.classList.toggle("open");
+            }
+          });
+
+        document
+          .getElementById("menu_close")
+          ?.addEventListener("click", function () {
+            const nav = document.querySelector(".main-menu-wrapper");
+            if (nav) {
+              nav.classList.add("hidden");
+              nav.classList.remove("open");
+            }
+          });
+
+        document.addEventListener("DOMContentLoaded", function () {
+          const faqHeaders = document.querySelectorAll(".faq h3");
+          faqHeaders.forEach((header) => {
+            const content = header.nextElementSibling;
+            if (content) {
+              content.style.display = "none";
+            }
+
+            header.addEventListener("click", () => {
+              const parent = header.parentElement;
+              const icon = header.querySelector("i");
+              const isOpen = parent.classList.contains("open");
+
+              document.querySelectorAll(".faq").forEach((faq) => {
+                if (faq !== parent) {
+                  faq.classList.remove("open");
+                  faq.querySelector("p").style.display = "none";
+                  const otherIcon = faq.querySelector("i");
+                  if (otherIcon) {
+                    otherIcon.classList.remove("fa-minus");
+                    otherIcon.classList.add("fa-plus");
+                  }
+                }
+              });
+
+              parent.classList.toggle("open");
+              content.style.display = parent.classList.contains("open")
+                ? "block"
+                : "none";
+              if (icon) {
+                icon.classList.toggle("fa-plus");
+                icon.classList.toggle("fa-minus");
+              }
+            });
+          });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+          const elements = document.querySelectorAll(
+            ".card, .profile-widget, .feature-item, .testimonial-item"
+          );
+          elements.forEach((el, index) => {
+            setTimeout(() => {
+              el.style.opacity = "1";
+              el.style.transform = "translateY(0)";
+            }, index * 100);
+          });
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+          anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute("href");
+            if (targetId === "#") return;
+
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+              window.scrollTo({
+                top: targetElement.offsetTop - 80,
+                behavior: "smooth",
+              });
+            }
+          });
+        });
+      </script>
+    </body>
+  </html>
+</DOCUMENT>

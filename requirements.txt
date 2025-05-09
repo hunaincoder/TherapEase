@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pdfplumber
+google-generativeai
+pymongo
+python-dotenv

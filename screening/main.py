@@ -332,7 +332,6 @@ async def determine_final_scale(data: dict = Body(...)):
                     )
                 answers_text += f"\nQ: {q['question']}\nA: {q['answer']}"
 
-        # Define the prompt with strict output requirements
         prompt = f"""
 Based on the user's detailed answers to follow-up questions for these scales:
 {', '.join([s['scale'] for s in data['topScales']])}
@@ -375,17 +374,14 @@ Consider:
 - Do NOT include any additional text, explanations, or markdown outside the JSON object.
 """
 
-        # Generate content using the Gemini model
         model = genai.GenerativeModel("gemini-1.5-pro")
         response = model.generate_content(prompt)
 
-        # Attempt to parse the response
         try:
             result = json.loads(response.text.strip())
             print("Parsed API response (direct):", result)
         except json.JSONDecodeError:
             print("Raw API response:", response.text)
-            # Try to extract JSON from Markdown code block
             json_match = re.search(r'```json\n(.*?)\n```', response.text, re.DOTALL)
             if json_match:
                 result = json.loads(json_match.group(1).strip())

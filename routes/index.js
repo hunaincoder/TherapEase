@@ -40,8 +40,27 @@ passport.use(
   )
 );
 
-router.get("/", function (req, res) {
-  res.render("index");
+router.get("/", async function (req, res) {
+  try {
+    const therapist = await TherapistModel.find({ status: "Approved" })
+      .limit(4)
+      .select(
+        "username firstName lastName specialties fee profilePicture badge availability"
+      );
+
+    const formattedTherapist = therapist.map((therapist) => ({
+      ...therapist._doc,
+      availabilityText:
+        therapist.availability.length > 0
+          ? `Available ${therapist.availability[0].day} (${therapist.availability[0].startTime} - ${therapist.availability[0].endTime})`
+          : "Availability TBD",
+    }));
+
+    res.render("index", { therapists: formattedTherapist });
+  } catch (error) {
+    console.error("Error fetching therapists for homepage:", error);
+    res.render("index", { therapists: [] });
+  }
 });
 
 router.get("/dashboard", isLoggedIn, async function (req, res) {
