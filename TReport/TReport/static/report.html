@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>After-Therapy Report</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            line-height: 1.6;
+        }
+        h1 { 
+            color: #2c3e50; 
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .report-section { 
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        .report-section:last-child {
+            border-bottom: none;
+        }
+        .section-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+        .section-content {
+            white-space: pre-wrap;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            min-height: 80px;
+        }
+        .section-content[contenteditable="true"] {
+            border: 1px dashed #ccc;
+        }
+        .back-button {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            width: 150px;
+            margin: 30px auto 0;
+        }
+        .back-button:hover {
+            background-color: #2980b9;
+        }
+        #saveBtn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #saveBtn:hover {
+            background-color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <h1>After-Therapy Session Report</h1>
+    <div id="reportContainer"></div>
+    <button id="saveBtn">Save Edits</button>
+    <a href="/" class="back-button">Back to Upload</a>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const reportText = sessionStorage.getItem("finalReport");
+            const container = document.getElementById("reportContainer");
+            
+            if (!reportText) {
+                container.innerHTML = "<p>No report data found. Please upload a session first.</p>";
+                return;
+            }
+
+            // Split the report into sections
+            const sections = reportText.split("\n\n");
+            
+            sections.forEach(section => {
+                if (!section.trim()) return;
+                
+                const titleEnd = section.indexOf(":");
+                if (titleEnd === -1) return;
+                
+                const title = section.substring(0, titleEnd).trim();
+                const content = section.substring(titleEnd + 1).trim();
+                
+                const sectionDiv = document.createElement("div");
+                sectionDiv.className = "report-section";
+                
+                const titleDiv = document.createElement("div");
+                titleDiv.className = "section-title";
+                titleDiv.textContent = title;
+                
+                const contentDiv = document.createElement("div");
+                contentDiv.className = "section-content";
+                contentDiv.contentEditable = "true";
+                contentDiv.textContent = content;
+                
+                sectionDiv.appendChild(titleDiv);
+                sectionDiv.appendChild(contentDiv);
+                container.appendChild(sectionDiv);
+            });
+        });
+
+   document.getElementById("saveBtn").addEventListener("click", () => {
+    const sections = document.querySelectorAll(".report-section");
+    const reportData = {};
+
+    sections.forEach(section => {
+        const key = section.querySelector(".section-title").textContent
+            .toLowerCase()
+            .replace(/\s+/g, "_"); // e.g. "Primary Concern" → "primary_concern"
+        const value = section.querySelector(".section-content").textContent.trim();
+        reportData[key] = value;
+    });
+
+    fetch("http://localhost:8000/save_report", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(reportData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === "Report saved") {
+            alert("Report successfully saved to database!");
+        } else {
+            alert("Failed to save the report.");
+            console.error(data);
+        }
+    })
+    .catch(error => {
+        alert("Error saving report.");
+        console.error(error);
+    });
+});
+
+    </script>
+</body>
+</html>

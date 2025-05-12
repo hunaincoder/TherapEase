@@ -68,6 +68,7 @@ const PatientSchema = new mongoose.Schema({
   hasCompletedScreening: { type: Boolean, default: false },
   recommendedScale: { type: String },
   rationale: { type: String },
+  confidence: { type: String },
 
   scaleResults: {
     type: Map,

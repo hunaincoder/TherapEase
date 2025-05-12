@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Follow-up Questions</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .scale {
+        margin-bottom: 30px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 20px;
+      }
+      .question {
+        margin-bottom: 15px;
+      }
+      textarea {
+        width: 100%;
+        height: 60px;
+        margin-top: 5px;
+      }
+      button {
+        padding: 10px 20px;
+        margin-top: 20px;
+      }
+      h2 {
+        color: #2c3e50;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Follow-up Questions</h1>
+    <form id="followup-form">
+      <div id="scales-questions"></div>
+      <button type="submit">Submit Answers</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+      const topScales = JSON.parse(sessionStorage.getItem("topScales"));
+
+      async function loadSpecificQuestions() {
+        try {
+          const response = await fetch(
+            "http://localhost:8001/get-specific-questions/",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ top_3: topScales }),
+            }
+          );
+
+          if (!response.ok)
+            throw new Error("Failed to load specific questions");
+
+          const scalesQuestions = await response.json();
+          const container = document.getElementById("scales-questions");
+
+          for (const [scaleName, questions] of Object.entries(
+            scalesQuestions
+          )) {
+            const scaleDiv = document.createElement("div");
+            scaleDiv.className = "scale";
+            scaleDiv.innerHTML = `<h2>${scaleName}</h2>`;
+
+            questions.forEach((question, index) => {
+              const qDiv = document.createElement("div");
+              qDiv.className = "question";
+              qDiv.innerHTML = `
+              <label>${question}</label><br>
+              <textarea name="${scaleName}_q${index}" required></textarea>
+            `;
+              scaleDiv.appendChild(qDiv);
+            });
+
+            container.appendChild(scaleDiv);
+          }
+        } catch (error) {
+          console.error("Error loading specific questions:", error);
+          alert(
+            "Failed to load follow-up questions. Check console for details."
+          );
+        }
+      }
+
+      document
+        .getElementById("followup-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+          const answers = {};
+
+          for (const [key, value] of formData.entries()) {
+            const [scale, qNum] = key.split("_");
+            if (!answers[scale]) answers[scale] = [];
+            answers[scale].push({
+              question: key,
+              answer: value,
+            });
+          }
+
+          const resultDiv = document.getElementById("result");
+          resultDiv.innerText = "Processing your answers...";
+
+          try {
+            const res = await fetch(
+              "http://localhost:8001/determine-final-scale/",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ answers, topScales }),
+              }
+            );
+
+            if (!res.ok) throw new Error("API request failed");
+
+            const data = await res.json();
+            console.log("Final scale response:", data);
+
+            if (data.finalScale) {
+              const saveRes = await fetch(
+                "http://localhost:3000/client/submit-followup",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    scale: data.finalScale,
+                    confidence: data.confidence || null,
+                    rationale: data.rationale || null,
+                  }),
+                  credentials: "include",
+                }
+              );
+
+              if (!saveRes.ok) {
+                const errorText = await saveRes.text();
+                throw new Error(
+                  `Failed to save follow-up data: ${saveRes.status} ${saveRes.statusText} - ${errorText}`
+                );
+              }
+              const saveData = await saveRes.json();
+              if (saveData.redirect) {
+                window.location.href = `http://localhost:3000${saveData.redirect}`;
+              } else {
+                resultDiv.innerHTML = `<p>Recommended scale: <strong>${data.finalScale}</strong></p>`;
+              }
+            } else {
+              resultDiv.innerHTML = `<pre>${JSON.stringify(
+                data,
+                null,
+                2
+              )}</pre>`;
+            }
+          } catch (error) {
+            console.error("Submission error:", error);
+            resultDiv.innerText = `Error: ${error.message}`;
+          }
+        });
+
+      loadSpecificQuestions();
+    </script>
+  </body>
+</html>

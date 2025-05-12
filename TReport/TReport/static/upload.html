@@ -1,0 +1,79 @@
+<!-- static/upload.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Audio</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #2c3e50; }
+        form { margin-top: 20px; }
+        input[type="file"] { margin-bottom: 10px; }
+        button { padding: 10px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #2980b9; }
+        #loading { display: none; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Upload Audio File for Therapy Session Analysis</h1>
+    <form id="uploadForm">
+        <input type="file" id="audioFile" accept=".mp3" required />
+        <button type="submit">Upload and Analyze</button>
+        <div id="loading">Processing... Please wait.</div>
+    </form>
+
+    <script>
+        document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById("audioFile");
+            const loadingIndicator = document.getElementById("loading");
+            const submitButton = document.querySelector("button[type='submit']");
+            
+            // Disable button and show loading
+            submitButton.disabled = true;
+            loadingIndicator.style.display = "block";
+
+            try {
+                const file = fileInput.files[0];
+                const formData = new FormData();
+                formData.append("file", file);
+
+                // Step 1: Diarize the audio
+                const diarizeResponse = await fetch("/diarize", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!diarizeResponse.ok) {
+                    const error = await diarizeResponse.json();
+                    throw new Error(error.detail || "Failed to process audio");
+                }
+
+                const diarizationData = await diarizeResponse.json();
+
+                // Step 2: Generate report
+                const reportResponse = await fetch("/generate_report", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ diarization_result: diarizationData.result }),
+                });
+
+                if (!reportResponse.ok) {
+                    const error = await reportResponse.json();
+                    throw new Error(error.detail || "Failed to generate report");
+                }
+
+                const reportData = await reportResponse.json();
+                
+                // Store report and redirect
+                sessionStorage.setItem("finalReport", reportData.report);
+                window.location.href = "/static/report.html";
+            } catch (err) {
+                alert("Error: " + err.message);
+            } finally {
+                submitButton.disabled = false;
+                loadingIndicator.style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>

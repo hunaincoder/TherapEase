@@ -288,11 +288,15 @@ router.post("/register", async function (req, res) {
 });
 
 router.get("/screening", isLoggedIn, (req, res) => {
-  res.render("patient/screening", { messages: req.flash() });
+  res.redirect("http://localhost:8001/static/index.html");
 });
 
 router.get("/followup", isLoggedIn, (req, res) => {
-  res.render("patient/followup", { messages: req.flash() });
+  res.redirect("http://localhost:8001/static/followup.html");
+});
+
+router.get("/normal", isLoggedIn, (req, res) => {
+  res.redirect("http://localhost:8001/static/normal.html");
 });
 
 router.post("/followup", isLoggedIn, upload.none(), async (req, res) => {
@@ -332,21 +336,37 @@ router.post("/followup", isLoggedIn, upload.none(), async (req, res) => {
 });
 
 router.post("/submit-followup", isLoggedIn, async (req, res) => {
-  const { scale, reason } = req.body;
+  console.log("Received request to /submit-followup");
+  console.log("Request body:", req.body);
+  console.log("Session:", req.session);
+  console.log("User:", req.user);
 
-  if (!scale || !reason) {
-    return res.status(400).json({ error: "Scale and reason are required." });
+  const { scale, confidence, rationale } = req.body;
+
+  if (!scale || !rationale) {
+    console.log("Missing scale or rationale");
+    return res.status(400).json({ error: "Scale and rationale are required." });
   }
 
   try {
-    const patient = await patientModel.findById(req.user._id);
-    patient.recommendedScale = scale;
-    patient.rationale = reason;
-    patient.hasCompletedScreening = false;
+    const updatedPatient = await patientModel.findByIdAndUpdate(
+      req.user._id,
+      {
+        hasCompletedScreening: false,
+        recommendedScale: scale,
+        confidence: confidence || null,
+        rationale: rationale,
+      },
+      { new: true }
+    );
 
-    await patient.save();
-    res.status(200).json({ message: "Follow-up submitted successfully." });
+    console.log("Updated patient with follow-up data:", updatedPatient);
+
+    return res.json({
+      redirect: `/client/scale/${scale.replace(/ /g, "_")}`,
+    });
   } catch (err) {
+    console.error("Error submitting follow-up:", err);
     res.status(500).json({ error: "Failed to submit follow-up." });
   }
 });
@@ -391,28 +411,6 @@ router.get("/scale/:scaleName", isLoggedIn, async (req, res) => {
   }
 });
 
-router.get("/scales/:scaleName", async (req, res) => {
-  const scaleName = req.params.scaleName;
-  const scalePath = path.join(__dirname, "scales", scaleName, "index.json");
-
-  try {
-    const data = await fs.readFile(scalePath, "utf8");
-    const json = JSON.parse(data);
-
-    if (!json || !json.scale) {
-      return res
-        .status(400)
-        .json({ error: "Invalid scale format: missing 'scale' field." });
-    }
-
-    res.json(json);
-  } catch (err) {
-    res
-      .status(500)
-      .json({ error: err.message || "Failed to load scale file." });
-  }
-});
-
 router.post("/save-scale-results", isLoggedIn, async (req, res) => {
   try {
     const { scaleName, totalScore, severity, badge } = req.body;
@@ -446,10 +444,6 @@ router.post("/save-scale-results", isLoggedIn, async (req, res) => {
     console.error("Error saving scale results:", error);
     return res.status(500).json({ error: "Failed to save scale results" });
   }
-});
-
-router.get("/normal", isLoggedIn, (req, res) => {
-  res.render("patient/normal", { messages: req.flash() });
 });
 
 router.get("/patient-profile", isLoggedIn, (req, res) => {
@@ -504,7 +498,7 @@ router.post("/patient-profile", isLoggedIn, async (req, res) => {
 
     console.log("Updated patient with profile data:", updatedPatient);
 
-    res.redirect("/client/therapy-profile");
+    return res.status(200).json({ redirect: "/client/therapy-profile" });
   } catch (error) {
     console.error("Error saving patient profile:", error);
     req.flash("error", "Failed to save patient profile");
@@ -513,7 +507,7 @@ router.post("/patient-profile", isLoggedIn, async (req, res) => {
 });
 
 router.get("/therapy-profile", isLoggedIn, (req, res) => {
-  res.render("patient/therapyProfile", {
+  res.render("patient/TherapyProfile", {
     messages: req.flash(),
     patient: req.user,
   });
@@ -578,7 +572,6 @@ router.post("/therapy-profile", isLoggedIn, async (req, res) => {
 
     let patientBadge = null;
     let patientProblem = null;
-    let patientSeverity = null;
 
     if (updatedPatient.scaleResults && updatedPatient.recommendedScale) {
       const scaleResult = updatedPatient.scaleResults.get(
@@ -586,10 +579,8 @@ router.post("/therapy-profile", isLoggedIn, async (req, res) => {
       );
       if (scaleResult) {
         patientBadge = scaleResult.badge || null;
-        patientSeverity = scaleResult.severity || null;
         console.log("Extracted scale result:", {
           patientBadge,
-          patientSeverity,
         });
       } else {
         console.warn(
@@ -619,7 +610,6 @@ router.post("/therapy-profile", isLoggedIn, async (req, res) => {
     const queryParams = new URLSearchParams();
     if (patientBadge) queryParams.append("badge", patientBadge);
     if (patientProblem) queryParams.append("specialties", patientProblem);
-    if (patientSeverity) queryParams.append("severity", patientSeverity);
 
     console.log("Redirect query parameters:", queryParams.toString());
 
@@ -726,6 +716,86 @@ router.get("/dashboard", isLoggedIn, async function (req, res) {
   }
 });
 
+router.get("/therapist-search", isLoggedIn, async function (req, res) {
+  try {
+    const patient = await patientModel.findOne({
+      email: { $regex: `^${req.user.email}$`, $options: "i" },
+    });
+
+    const specialtyOptions = [
+      "PTSD",
+      "OCD",
+      "Depression",
+      "Anxiety",
+      "Grief",
+      "Addiction",
+      "Sleep Disorder",
+      "Self-Esteem",
+      "Body Image",
+    ];
+
+    let query = { status: { $regex: "^Approved$", $options: "i" } };
+
+    if (req.query.badge) {
+      const badgeValue = parseInt(req.query.badge, 10);
+      if (!isNaN(badgeValue)) {
+        query.badge = badgeValue;
+      } else {
+        console.warn(`Invalid badge value received: ${req.query.badge}`);
+      }
+    }
+
+    if (req.query.specialties) {
+      const specialtiesParam = Array.isArray(req.query.specialties)
+        ? req.query.specialties
+        : [req.query.specialties];
+
+      const validSpecialties = specialtiesParam.filter((specialty) =>
+        specialtyOptions.some(
+          (opt) => opt.toLowerCase() === specialty.toLowerCase()
+        )
+      );
+
+      if (validSpecialties.length > 0) {
+        query.specialties = {
+          $in: validSpecialties.map((s) => new RegExp(`^${s}$`, "i")),
+        };
+      }
+    }
+
+    if (req.query.gender) {
+      query.gender = { $regex: `^${req.query.gender}$`, $options: "i" };
+    }
+
+    if (req.query.severity) {
+      console.log("Received severity filter:", req.query.severity);
+    }
+
+    const therapists = await TherapistModel.find(query).lean();
+
+    const selectedSpecialties = Array.isArray(req.query.specialties)
+      ? req.query.specialties
+      : req.query.specialties
+      ? [req.query.specialties]
+      : [];
+
+    res.render("patient/therapist-search", {
+      patient,
+      therapists,
+      selectedGender: req.query.gender || "",
+      selectedSpecialties,
+      selectedBadge: req.query.badge || "",
+      selectedSeverity: req.query.severity || "",
+      specialtyOptions,
+      messages: req.flash(),
+    });
+  } catch (error) {
+    console.error("Error in therapist search:", error);
+    req.flash("error", "Internal Server Error");
+    res.redirect("/client/dashboard");
+  }
+});
+
 router.get("/video-call/:id", isLoggedIn, async (req, res) => {
   try {
     const appointmentId = req.params.id;
@@ -814,86 +884,6 @@ router.get("/video-call/:id", isLoggedIn, async (req, res) => {
       error: error.message,
       stack: error.stack,
     });
-    req.flash("error", "Internal Server Error");
-    res.redirect("/client/dashboard");
-  }
-});
-
-router.get("/therapist-search", isLoggedIn, async function (req, res) {
-  try {
-    const patient = await patientModel.findOne({
-      email: { $regex: `^${req.user.email}$`, $options: "i" },
-    });
-
-    const specialtyOptions = [
-      "PTSD",
-      "OCD",
-      "Depression",
-      "Anxiety",
-      "Grief",
-      "Addiction",
-      "Sleep Disorder",
-      "Self-Esteem",
-      "Body Image",
-    ];
-
-    let query = { status: { $regex: "^Approved$", $options: "i" } };
-
-    if (req.query.badge) {
-      const badgeValue = parseInt(req.query.badge, 10);
-      if (!isNaN(badgeValue)) {
-        query.badge = badgeValue;
-      } else {
-        console.warn(`Invalid badge value received: ${req.query.badge}`);
-      }
-    }
-
-    if (req.query.specialties) {
-      const specialtiesParam = Array.isArray(req.query.specialties)
-        ? req.query.specialties
-        : [req.query.specialties];
-
-      const validSpecialties = specialtiesParam.filter((specialty) =>
-        specialtyOptions.some(
-          (opt) => opt.toLowerCase() === specialty.toLowerCase()
-        )
-      );
-
-      if (validSpecialties.length > 0) {
-        query.specialties = {
-          $in: validSpecialties.map((s) => new RegExp(`^${s}$`, "i")),
-        };
-      }
-    }
-
-    if (req.query.gender) {
-      query.gender = { $regex: `^${req.query.gender}$`, $options: "i" };
-    }
-
-    if (req.query.severity) {
-      console.log("Received severity filter:", req.query.severity);
-    }
-
-    const therapists = await TherapistModel.find(query).lean();
-
-    const selectedSpecialties = Array.isArray(req.query.specialties)
-      ? req.query.specialties
-      : req.query.specialties
-      ? [req.query.specialties]
-      : [];
-
-    res.render("patient/therapist-search", {
-      patient,
-      therapists,
-      selectedGender: req.query.gender || "",
-      selectedSpecialties,
-      selectedBadge: req.query.badge || "",
-      selectedSeverity: req.query.severity || "",
-      specialtyOptions,
-      messages: req.flash(),
-    });
-  } catch (error) {
-    console.error("Error in therapist search:", error);
     req.flash("error", "Internal Server Error");
     res.redirect("/client/dashboard");
   }

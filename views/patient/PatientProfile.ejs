@@ -90,7 +90,7 @@
                 <%= messages.error %>
             </div>
         <% } %>
-        <form id="patientForm" method="POST" action="/client/patient-profile">
+        <form id="patientForm">
             <div class="form-group">
                 <label for="name" class="required">Name:</label>
                 <input type="text" id="name" name="name" value="<%= patient.name || '' %>" required minlength="2" maxlength="50" pattern="[A-Za-z ]+">
@@ -160,7 +160,9 @@
     </div>
 
     <script>
-        document.getElementById("patientForm").addEventListener("submit", function(event) {
+        document.getElementById("patientForm").addEventListener("submit", async function(event) {
+            event.preventDefault(); 
+
             let isValid = true;
             
             document.querySelectorAll('.error').forEach(el => el.textContent = '');
@@ -192,7 +194,43 @@
             });
             
             if (!isValid) {
-                event.preventDefault();
+                return; // Stop if validation fails
+            }
+
+            // Collect form data
+            const formData = new FormData(document.getElementById("patientForm"));
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch("/client/patient-profile", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                    credentials: "include", // Include session cookies for authentication
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Failed to save patient profile: ${response.status} ${response.statusText} - ${errorText}`);
+                }
+
+                const result = await response.json();
+                console.log("Response:", result);
+
+                // Handle redirect
+                if (result.redirect) {
+                    window.location.href = result.redirect;
+                } else {
+                    alert("Profile saved, but no redirect provided.");
+                }
+            } catch (error) {
+                console.error("Error submitting patient profile:", error);
+                document.querySelector(".container").insertAdjacentHTML(
+                    "afterbegin",
+                    `<div class="message error">Error: ${error.message}</div>`
+                );
             }
         });
     </script>
