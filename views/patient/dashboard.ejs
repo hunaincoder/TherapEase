@@ -163,7 +163,7 @@
                 >
               </li>
               <li>
-  <a href="/client/therapy-reports"><i class="fe fe-file-text"></i> <span>Therapy Reports</span></a>
+  <a href="/client/therapy-reports"><i class="fe fe-file"></i> <span>Therapy Reports</span></a>
 </li>
               <li>
                 <a href="/client/accounts"
@@ -437,7 +437,6 @@
 
     <script>
       $(document).ready(function () {
-        // Initialize datepicker
         $(".datetimepicker").datetimepicker({
           format: "YYYY-MM-DD",
           icons: {
@@ -448,7 +447,6 @@
           },
         });
 
-        // Submit form when date is selected
         $(".datetimepicker").on("dp.change", function () {
           $("#dateFilterForm").submit();
         });

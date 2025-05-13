@@ -189,8 +189,7 @@
 											<thead>
 												<tr>
 													<th>Patient Name</th>
-													<th>Spent</th>
-													<th>Badge</th>
+													
 													<th>Actions</th>
 													
 												</tr>
@@ -200,16 +199,10 @@
 												<tr>
 													<td>
 														<h2 class="table-avatar">
-															<a href="/patient-profile"><%= patient.username %> </a>
+															<a href="/client-profile/<%= patient._id %>"><%= patient.username %> </a>
 														</h2>
 													</td>
-													<td>PKR 3000</td>
-													<td>
-														<i class="fe fe-star text-warning"></i>
-														<i class="fe fe-star text-warning"></i>
-														<i class="fe fe-star text-warning"></i>
-													</td>
-													<td>
+													             
 														<form action="/delete-patient/<%= patient._id %>" method="POST">
 															<button type="submit" class="btn btn-danger">Delete</button>
 														  </form>

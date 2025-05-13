@@ -345,8 +345,8 @@
 												  <tr>
 													<td>
 													  <h2 class="table-avatar">
-														<a href="#">
-														  <%= appointment.patientId.firstname %> <%= appointment.patientId.lastname %>
+														<a href="/therapist/client-profile/<%= appointment.patientId._id %>">
+														  <%= appointment.patientId.username %>
 														  <span>#PT<%= appointment.patientId._id.toString().slice(-4) %></span>
 														</a>
 													  </h2>
@@ -392,7 +392,7 @@
 												  <tr>
 													<td>
 													  <h2 class="table-avatar">
-														<a href="#"><%= transaction.patient.firstname %></a>
+														<%= transaction.patient.username %>
 													  </h2>
 													</td>
 													<td>PKR <%= transaction.totalAmount.toFixed(2) %></td>

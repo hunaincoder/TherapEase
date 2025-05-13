@@ -226,39 +226,8 @@
                       />
                     </div>
                   </div>
-                  <div class="col-12 col-md-6">
-                    <div class="form-group">
-                      <label>First Name</label>
-                      <input
-                        type="text"
-                        name="firstname"
-                        class="form-control"
-                        value="<%= patient.firstname || '' %>"
-                      />
-                    </div>
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <div class="form-group">
-                      <label>Last Name</label>
-                      <input
-                        type="text"
-                        name="lastname"
-                        class="form-control"
-                        value="<%= patient.lastname || '' %>"
-                      />
-                    </div>
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <div class="form-group">
-                      <label>Date of Birth</label>
-                      <input
-                        type="date"
-                        name="dob"
-                        class="form-control"
-                        value="<%= patient.dob ? patient.dob.toISOString().split('T')[0] : '' %>"
-                      />
-                    </div>
-                  </div>
+                  
+                  
                   <div class="col-12 col-md-6">
                     <div class="form-group">
                       <label>Age</label>
@@ -306,7 +275,6 @@
                   </div>
                 </div>
 
-                <!-- Contact Details -->
                 <h4 class="mb-3 mt-4">Contact Details</h4>
                 <div class="row form-row">
                   <div class="col-12 col-md-6">
@@ -320,17 +288,7 @@
                       />
                     </div>
                   </div>
-                  <div class="col-12 col-md-6">
-                    <div class="form-group">
-                      <label>Phone</label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        class="form-control"
-                        value="<%= patient.phone || '' %>"
-                      />
-                    </div>
-                  </div>
+                  
                   <div class="col-12 col-md-6">
                     <div class="form-group">
                       <label>Mobile</label>
@@ -364,16 +322,7 @@
                       />
                     </div>
                   </div>
-                  <div class="col-12 col-md-6">
-                    <div class="form-group">
-                      <label>Address</label>
-                      <textarea
-                        name="address"
-                        class="form-control"
-                        rows="4"
-                      ><%= patient.address || '' %></textarea>
-                    </div>
-                  </div>
+                  
                 </div>
 
                 <!-- Family Details -->
@@ -508,54 +457,7 @@
                   </div>
                 </div>
 
-                <!-- Bank Details -->
-                <h4 class="mb-3 mt-4">Bank Details</h4>
-                <div class="row form-row">
-                  <div class="col-12 col-md-6">
-                    <div class="form-group">
-                      <label>Bank Name</label>
-                      <input
-                        type="text"
-                        name="bankDetails.bankName"
-                        class="form-control"
-                        value="<%= patient.bankDetails?.bankName || '' %>"
-                      />
-                    </div>
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <div class="form-group">
-                      <label>Branch Name</label>
-                      <input
-                        type="text"
-                        name="bankDetails.branchName"
-                        class="form-control"
-                        value="<%= patient.bankDetails?.branchName || '' %>"
-                      />
-                    </div>
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <div class="form-group">
-                      <label>Account Number</label>
-                      <input
-                        type="text"
-                        name="bankDetails.accountNumber"
-                        class="form-control"
-                        value="<%= patient.bankDetails?.accountNumber || '' %>"
-                      />
-                    </div>
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <div class="form-group">
-                      <label>Account Name</label>
-                      <input
-                        type="text"
-                        name="bankDetails.accountName"
-                        class="form-control"
-                        value="<%= patient.bankDetails?.accountName || '' %>"
-                      />
-                    </div>
-                  </div>
-                </div>
+                  
 
                 <!-- Submit Button -->
                 <div class="submit-section mt-4">

@@ -394,7 +394,7 @@
                         <tr>
                           <td>
                             <h2 class="table-avatar">
-                              <a href="/patient-profile/<%= patient._id %>">
+                              <a href="/client-profile/<%= patient._id %>">
                                 <%= patient.username %>
                               </a>
                             </h2>
@@ -464,10 +464,9 @@
                           <td>
                             <h2 class="table-avatar">
                               <a
-                                href="/patient-profile/<%= appointment.patientId._id %>"
+                                href="/client-profile/<%= appointment.patientId._id %>"
                               >
-                                <%= appointment.patientId.firstname %> <%=
-                                appointment.patientId.lastname %>
+                                <%= appointment.patientId.username %>
                               </a>
                             </h2>
                           </td>

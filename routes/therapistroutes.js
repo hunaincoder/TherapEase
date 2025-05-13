@@ -12,6 +12,7 @@ const moment = require("moment");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const flash = require("connect-flash");
+const patientModel = require("../models/patient");
 
 router.use(flash());
 router.use(authRoutes);
@@ -420,6 +421,29 @@ router.get("/therapy-reports", isLoggedIn, async (req, res) => {
     console.error("Error fetching therapy reports:", error);
     req.flash("error", "Error fetching therapy reports");
     res.redirect("/therapist/dashboard");
+  }
+});
+
+router.get("/client-profile/:id", isLoggedIn, async function (req, res) {
+  try {
+    const therapist = await TherapistModel.findOne({ email: req.user.email });
+    const patient = await patientModel.findById(req.params.id);
+
+    if (!patient) {
+      req.flash("errorMessage", "Patient not found");
+      return res.redirect("/therapist/appointment-list");
+    }
+
+    res.render("therapist/patient-profile", {
+      therapist,
+      patient: patient,
+      successMessage: req.flash("successMessage"),
+      errorMessage: req.flash("errorMessage"),
+    });
+  } catch (error) {
+    console.error("Error fetching patient profile:", error);
+    req.flash("errorMessage", "Error fetching patient profile");
+    res.redirect("/therapist/appointment-list");
   }
 });
 

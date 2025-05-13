@@ -126,8 +126,10 @@
                 >
               </li>
               <li>
-  <a href="/therapy-reports"><i class="fe fe-file"></i> <span>Therapy Reports</span></a>
-</li>
+                <a href="/therapy-reports"
+                  ><i class="fe fe-file"></i> <span>Therapy Reports</span></a
+                >
+              </li>
               <li>
                 <a href="/transactions-list"
                   ><i class="fe fe-activity"></i> <span>Transactions</span></a
@@ -226,8 +228,8 @@
                         <tr>
                           <td>
                             <h2 class="table-avatar">
-                              <% if (appointment.therapistId?.profilePicture) {
-                              %>
+                              <% if (appointment.therapistId &&
+                              appointment.therapistId.profilePicture) { %>
                               <a
                                 href="/therapist-profile/<%= appointment.therapistId._id %>"
                                 class="avatar avatar-sm mr-2"
@@ -240,22 +242,26 @@
                               </a>
                               <% } %>
                               <a
-                                href="/therapist-profile/<%= appointment.therapistId._id %>"
+                                href="/therapist-profile/<%= appointment.therapistId ? appointment.therapistId._id : '' %>"
                               >
-                                <%= appointment.therapistId?.username || 'N/A'
-                                %>
+                                <%= appointment.therapistId ?
+                                appointment.therapistId.username : 'N/A' %>
                               </a>
                             </h2>
                           </td>
                           <td>
-                            <%= appointment.therapistId?.specialties?.[0] ||
-                            'General' %>
+                            <%= appointment.therapistId &&
+                            appointment.therapistId.specialties ?
+                            appointment.therapistId.specialties[0] : 'General'
+                            %>
                           </td>
                           <td>
                             <h2 class="table-avatar">
                               <a href="/profile">
-                                <%= appointment.patientId?.firstname %> <%=
-                                appointment.patientId?.lastname %>
+                                <%= appointment.patientId ?
+                                appointment.patientId.username : 'N/A' %> <%=
+                                appointment.patientId ?
+                                appointment.patientId.lastname : 'N/A' %>
                               </a>
                             </h2>
                           </td>
@@ -266,8 +272,9 @@
                             >
                           </td>
                           <td class="text-right">
-                            PKR <%= appointment.therapistId?.fee?.toFixed(2) ||
-                            '0.00' %>
+                            PKR <%= appointment.therapistId &&
+                            appointment.therapistId.fee ?
+                            appointment.therapistId.fee.toFixed(2) : '0.00' %>
                           </td>
                         </tr>
                         <% }); %>

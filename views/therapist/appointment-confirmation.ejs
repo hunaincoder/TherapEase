@@ -223,14 +223,13 @@
                         <tr>
                           <td>
                             <h2 class="table-avatar">
-                              <a href="#">
-                                <%= appointment.patientId.username %>
+															<a href="/therapist/client-profile/<%= patient._id %>"><%= patient.username %>
                                 <span
                                   >#PT<%=
                                   appointment.patientId._id.toString().slice(-4)
                                   %></span
                                 >
-                              </a>
+                               </a>
                             </h2>
                           </td>
                           <td>
@@ -256,6 +255,9 @@
                                   <i class="fas fa-times"></i> Cancel
                                 </button>
                               </form>
+                              <a href="/therapist/client-profile/<%= patient._id %>" class="btn btn-sm bg-success-light mr-2">
+														  View Profile
+														</a>
                             </div>
                           </td>
                         </tr>

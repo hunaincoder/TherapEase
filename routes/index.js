@@ -452,7 +452,6 @@ router.post("/reject-therapist/:id", isLoggedIn, async (req, res) => {
   }
 });
 
-// Add this route to index.js
 router.get("/therapy-reports", isLoggedIn, async function (req, res) {
   try {
     const admin = await AdminModel.findOne({ email: req.user.email });
@@ -461,7 +460,6 @@ router.get("/therapy-reports", isLoggedIn, async function (req, res) {
       .find()
       .toArray();
 
-    // Populate patient and therapist names
     const populatedReports = await Promise.all(
       reports.map(async (report) => {
         const appointment = await AppointmentModel.findById(report.sessionId)
@@ -527,6 +525,29 @@ router.get("/therapy-reports/:id", isLoggedIn, async function (req, res) {
     console.error("Error fetching therapy report:", error);
     req.flash("errorMessage", "Error fetching therapy report");
     res.redirect("/therapy-reports");
+  }
+});
+
+router.get("/client-profile/:id", isLoggedIn, async function (req, res) {
+  try {
+    const admin = await AdminModel.findOne({ email: req.user.email });
+    const patient = await PatientModel.findById(req.params.id);
+
+    if (!patient) {
+      req.flash("errorMessage", "Patient not found");
+      return res.redirect("/patient-list");
+    }
+
+    res.render("admin/patient-profile", {
+      admin,
+      patient: patient,
+      successMessage: req.flash("successMessage"),
+      errorMessage: req.flash("errorMessage"),
+    });
+  } catch (error) {
+    console.error("Error fetching patient profile:", error);
+    req.flash("errorMessage", "Error fetching patient profile");
+    res.redirect("/patient-list");
   }
 });
 
@@ -799,26 +820,6 @@ function isLoggedIn(req, res, next) {
   }
   req.flash("errorMessage", "Please log in to access this page");
   res.redirect("/login");
-}
-
-async function isAdmin(req, res, next) {
-  if (!req.isAuthenticated()) {
-    req.flash("errorMessage", "Please log in to access this page");
-    return res.redirect("/login");
-  }
-  try {
-    const admin = await AdminModel.findOne({ email: req.user.email });
-    if (!admin) {
-      req.flash("errorMessage", "Access denied: Admins only");
-      return res.redirect("/dashboard"); // Redirect to a user-appropriate page
-    }
-    req.user = admin; // Ensure req.user is the admin document
-    next();
-  } catch (error) {
-    console.error("Error in isAdmin middleware:", error);
-    req.flash("errorMessage", "Error verifying admin access");
-    res.redirect("/login");
-  }
 }
 
 module.exports = router;

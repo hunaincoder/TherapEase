@@ -50,7 +50,7 @@ const sessionOptions = {
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.MONGO_URI,
+    mongoUrl: process.env.MONGO_URI,  
   }),
   cookie: {
     secure: process.env.NODE_ENV === "production",

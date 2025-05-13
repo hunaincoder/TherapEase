@@ -1473,23 +1473,151 @@ router.get("/profile", isLoggedIn, async function (req, res) {
 router.post("/profile/update", isLoggedIn, async function (req, res) {
   try {
     const clientId = req.user._id;
+    const {
+      username,
+      name,
+      email,
+      mobile,
+      city,
+      country,
+      age,
+      sex,
+      occupation,
+      maritalStatus,
+      familyStructure,
+      headOfFamily,
+      headOfFamilyContact,
+      primaryConcern,
+      impact,
+      pastExperiences,
+      emotionalState,
+      behaviorPatterns,
+      therapyHistory,
+      supportSystem,
+      therapyGoals,
+      therapistPreferences,
+    } = req.body;
+
+    console.log("Received form data:", req.body);
+
+    const patient = await patientModel.findById(clientId);
+    if (!patient) {
+      req.flash("error", "Patient not found");
+      return res.redirect("/client/profile");
+    }
+
+    const requiredFields = [
+      "username",
+      "name",
+      "email",
+      "age",
+      "gender",
+      "occupation",
+      "maritalStatus",
+      "familyStructure",
+      "headOfFamily",
+      "headOfFamilyContact",
+    ];
+
     const updatedData = {
-      firstname: req.body.firstName,
-      lastname: req.body.lastName,
-      dob: req.body.dob,
-      email: req.body.email,
-      mobile: req.body.mobile,
-      city: req.body.city,
-      country: req.body.country,
       updatedAt: new Date(),
     };
 
-    await patientModel.findByIdAndUpdate(clientId, updatedData, { new: true });
+    const fieldMap = {
+      username: username,
+      name: name,
+      email: email,
+      mobile: mobile || "",
+      city: city,
+      country: country,
+      age: age ? parseInt(age) : undefined,
+      gender: sex,
+      occupation: occupation,
+      maritalStatus: maritalStatus,
+      familyStructure: familyStructure,
+      headOfFamily: headOfFamily,
+      headOfFamilyContact: headOfFamilyContact,
+    };
+
+    for (const [schemaField, value] of Object.entries(fieldMap)) {
+      if (value !== undefined) {
+        if (schemaField === "email" && value) {
+          const emailPattern =
+            /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+          if (!emailPattern.test(value)) {
+            req.flash("error", "Invalid email format");
+            return res.redirect("/client/profile");
+          }
+          const existingPatient = await patientModel.findOne({
+            email: value,
+            _id: { $ne: clientId },
+          });
+          if (existingPatient) {
+            req.flash("error", "Email already in use");
+            return res.redirect("/client/profile");
+          }
+        }
+        updatedData[schemaField] = value;
+      }
+    }
+
+    const missingRequiredFields = requiredFields.filter((field) => {
+      const currentValue = patient[field];
+      const submittedValue = fieldMap[field];
+      return (
+        (currentValue === undefined ||
+          currentValue === null ||
+          currentValue === "") &&
+        (submittedValue === undefined || submittedValue === "")
+      );
+    });
+
+    if (missingRequiredFields.length > 0) {
+      req.flash(
+        "error",
+        `Please fill the following required fields: ${missingRequiredFields.join(
+          ", "
+        )}`
+      );
+      return res.redirect("/client/profile");
+    }
+
+    const therapyProfile = {};
+    if (primaryConcern) therapyProfile.primary_concern = primaryConcern;
+    if (impact) therapyProfile.impact = impact;
+    if (pastExperiences) therapyProfile.past_experiences = pastExperiences;
+    if (emotionalState) therapyProfile.emotional_state = emotionalState;
+    if (behaviorPatterns) therapyProfile.behavior_patterns = behaviorPatterns;
+    if (therapyHistory) therapyProfile.therapy_history = therapyHistory;
+    if (supportSystem) therapyProfile.support_system = supportSystem;
+    if (therapyGoals) therapyProfile.therapy_goals = therapyGoals;
+    if (therapistPreferences)
+      therapyProfile.therapist_preferences = therapistPreferences;
+
+    if (Object.keys(therapyProfile).length > 0) {
+      updatedData.therapyProfile = {
+        ...patient.therapyProfile,
+        ...therapyProfile,
+      };
+    }
+
+    const updatedPatient = await patientModel.findByIdAndUpdate(
+      clientId,
+      { $set: updatedData },
+      { new: true }
+    );
+
+    if (!updatedPatient) {
+      req.flash("error", "Patient not found");
+      return res.redirect("/client/profile");
+    }
+
+    console.log("Updated patient profile:", updatedPatient);
 
     req.flash("success", "Profile updated successfully");
     res.redirect("/client/profile");
   } catch (err) {
-    console.error(err);
+    console.error("Error updating profile:", err);
     req.flash("error", "Error updating profile");
     res.redirect("/client/profile");
   }
