@@ -13,7 +13,7 @@ const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const flash = require("connect-flash");
 
-router.use(flash()); 
+router.use(flash());
 router.use(authRoutes);
 
 function getOrdinal(n) {
@@ -223,6 +223,17 @@ router.get("/appointment-list", isLoggedIn, async (req, res) => {
       .populate("patientId")
       .sort({ date: -1 });
 
+    const appointmentIds = appointments.map((appt) => appt._id.toString());
+    const reports = await mongoose.connection.db
+      .collection("after_therapy_reports")
+      .find({
+        sessionId: { $in: appointmentIds },
+      })
+      .toArray();
+    const reportMap = new Map(
+      reports.map((report) => [report.sessionId, true])
+    );
+
     const counts = {
       all: await AppointmentModel.countDocuments({ therapistId }),
       scheduled: await AppointmentModel.countDocuments({
@@ -263,7 +274,9 @@ router.get("/appointment-list", isLoggedIn, async (req, res) => {
         canJoinCall:
           now.isBetween(windowStart, windowEnd, null, "[]") &&
           appt.status === "Scheduled" &&
-          appt.sessionType === "video",
+          appt.sessionType === "video" &&
+          !reportMap.has(appt._id.toString()),
+        hasReport: reportMap.has(appt._id.toString()),
         windowStart,
         windowEnd,
       };
@@ -373,27 +386,35 @@ router.get("/therapy-reports", isLoggedIn, async (req, res) => {
   try {
     const therapistId = req.user._id;
     const appointments = await AppointmentModel.find({ therapistId });
-    
-    const reportIds = appointments.map(appt => appt._id.toString());
-    const reports = await mongoose.connection.db.collection("after_therapy_reports").find({
-      sessionId: { $in: reportIds }
-    }).toArray();
-    
-    const populatedReports = await Promise.all(reports.map(async report => {
-      const appointment = await AppointmentModel.findById(report.sessionId)
-        .populate("patientId", "firstname lastname");
-      
-      return {
-        ...report,
-        patientName: appointment?.patientId ? `${appointment.patientId.firstname} ${appointment.patientId.lastname}` : 'Unknown',
-        formattedDate: moment(report.timestamp).format("MMM D, YYYY")
-      };
-    }));
+
+    const reportIds = appointments.map((appt) => appt._id.toString());
+    const reports = await mongoose.connection.db
+      .collection("after_therapy_reports")
+      .find({
+        sessionId: { $in: reportIds },
+      })
+      .toArray();
+
+    const populatedReports = await Promise.all(
+      reports.map(async (report) => {
+        const appointment = await AppointmentModel.findById(
+          report.sessionId
+        ).populate("patientId", "firstname lastname");
+
+        return {
+          ...report,
+          patientName: appointment?.patientId
+            ? `${appointment.patientId.firstname} ${appointment.patientId.lastname}`
+            : "Unknown",
+          formattedDate: moment(report.timestamp).format("MMM D, YYYY"),
+        };
+      })
+    );
 
     res.render("therapist/therapy-reports", {
       therapist: req.user,
       reports: populatedReports,
-      messages: req.flash()
+      messages: req.flash(),
     });
   } catch (error) {
     console.error("Error fetching therapy reports:", error);
@@ -405,10 +426,12 @@ router.get("/therapy-reports", isLoggedIn, async (req, res) => {
 router.get("/therapy-reports/:id", isLoggedIn, async (req, res) => {
   try {
     const therapistId = req.user._id;
-    const report = await mongoose.connection.db.collection("after_therapy_reports").findOne({
-      _id: new mongoose.Types.ObjectId(req.params.id)
-    });
-    
+    const report = await mongoose.connection.db
+      .collection("after_therapy_reports")
+      .findOne({
+        _id: new mongoose.Types.ObjectId(req.params.id),
+      });
+
     if (!report) {
       req.flash("error", "Report not found");
       return res.redirect("/therapist/therapy-reports");
@@ -417,7 +440,7 @@ router.get("/therapy-reports/:id", isLoggedIn, async (req, res) => {
     // Verify this report belongs to the therapist
     const appointment = await AppointmentModel.findOne({
       _id: report.sessionId,
-      therapistId
+      therapistId,
     }).populate("patientId", "firstname lastname");
 
     if (!appointment) {
@@ -430,7 +453,7 @@ router.get("/therapy-reports/:id", isLoggedIn, async (req, res) => {
       report,
       patientName: `${appointment.patientId.firstname} ${appointment.patientId.lastname}`,
       formattedDate: moment(report.timestamp).format("MMMM D, YYYY"),
-      messages: req.flash()
+      messages: req.flash(),
     });
   } catch (error) {
     console.error("Error fetching therapy report:", error);

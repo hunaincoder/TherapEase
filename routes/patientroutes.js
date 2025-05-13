@@ -229,7 +229,7 @@ router.post(
       if (isTherapist === "true") {
         const filePath = encodeURIComponent(
           `/audio/recordings/${req.file.filename}`
-        );  
+        );
         return res.redirect(
           `http://localhost:8003/static/upload.html?appointmentId=${appointmentId}&file=${filePath}`
         );
@@ -722,9 +722,20 @@ router.get("/dashboard", isLoggedIn, async function (req, res) {
       .populate("therapistId")
       .sort({ date: 1 });
 
-    const appointmentIds = appointments.map((appt) => appt._id);
+    const appointmentIds = appointments.map((appt) => appt._id.toString());
+    const reports = await mongoose.connection.db
+      .collection("after_therapy_reports")
+      .find({
+        sessionId: { $in: appointmentIds },
+      })
+      .toArray();
+    const reportMap = new Map(
+      reports.map((report) => [report.sessionId, true])
+    );
+
+    const appointmentIdsWithTransactions = appointments.map((appt) => appt._id);
     const transactions = await TransactionModel.find({
-      appointment: { $in: appointmentIds },
+      appointment: { $in: appointmentIdsWithTransactions },
     });
 
     const formattedAppointments = appointments.map((appt) => {
@@ -751,7 +762,9 @@ router.get("/dashboard", isLoggedIn, async function (req, res) {
         canJoinCall:
           now.isBetween(windowStart, windowEnd, null, "[]") &&
           appt.status === "Scheduled" &&
-          appt.sessionType === "video",
+          appt.sessionType === "video" &&
+          !reportMap.has(appt._id.toString()),
+        hasReport: reportMap.has(appt._id.toString()),
         windowStart,
         windowEnd,
       };
