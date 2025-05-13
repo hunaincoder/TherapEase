@@ -189,8 +189,8 @@
 											<thead>
 												<tr>
 													<th>Patient Name</th>
-													
 													<th>Actions</th>
+													<th></th>
 													
 												</tr>
 											</thead>
@@ -199,14 +199,16 @@
 												<tr>
 													<td>
 														<h2 class="table-avatar">
-															<a href="/client-profile/<%= patient._id %>"><%= patient.username %> </a>
+															 	<a href="/client-profile/<%= patient._id %>"><%= patient.username %> </a>
 														</h2>
 													</td>
-													             
+													<td><a class="btn btn-success" href="/client-profile/<%= patient._id %>">view profile</a></td>
+													<td>
 														<form action="/delete-patient/<%= patient._id %>" method="POST">
 															<button type="submit" class="btn btn-danger">Delete</button>
 														  </form>
 													</td>
+													
 												</tr>
 												<% }); %>
 											</tbody>

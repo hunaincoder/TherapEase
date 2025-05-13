@@ -400,12 +400,12 @@ router.get("/therapy-reports", isLoggedIn, async (req, res) => {
       reports.map(async (report) => {
         const appointment = await AppointmentModel.findById(
           report.sessionId
-        ).populate("patientId", "firstname lastname");
+        ).populate("patientId", "username");
 
         return {
           ...report,
           patientName: appointment?.patientId
-            ? `${appointment.patientId.firstname} ${appointment.patientId.lastname}`
+            ? `${appointment.patientId.username}`
             : "Unknown",
           formattedDate: moment(report.timestamp).format("MMM D, YYYY"),
         };
@@ -461,11 +461,10 @@ router.get("/therapy-reports/:id", isLoggedIn, async (req, res) => {
       return res.redirect("/therapist/therapy-reports");
     }
 
-    // Verify this report belongs to the therapist
     const appointment = await AppointmentModel.findOne({
       _id: report.sessionId,
       therapistId,
-    }).populate("patientId", "firstname lastname");
+    }).populate("patientId", "username");
 
     if (!appointment) {
       req.flash("error", "Unauthorized access to report");
@@ -475,7 +474,7 @@ router.get("/therapy-reports/:id", isLoggedIn, async (req, res) => {
     res.render("therapist/therapy-report-view", {
       therapist: req.user,
       report,
-      patientName: `${appointment.patientId.firstname} ${appointment.patientId.lastname}`,
+      patientName: `${appointment.patientId.username}`,
       formattedDate: moment(report.timestamp).format("MMMM D, YYYY"),
       messages: req.flash(),
     });

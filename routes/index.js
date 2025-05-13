@@ -88,7 +88,7 @@ router.get("/dashboard", isLoggedIn, async function (req, res) {
       .select("username mobile updatedAt");
 
     const latestAppointments = await AppointmentModel.find()
-      .populate("patientId", "firstname lastname")
+      .populate("patientId", "username")
       .populate("therapistId", "username specialties profilePicture")
       .sort({ date: -1 })
       .limit(5);
@@ -198,7 +198,7 @@ router.get("/appointment-list", isLoggedIn, async function (req, res) {
   try {
     const admin = await AdminModel.findOne({ email: req.user.email });
     const appointments = await AppointmentModel.find()
-      .populate("patientId", "firstname lastname")
+      .populate("patientId", "username")
       .populate("therapistId", "username specialties fee profilePicture _id")
       .sort({ date: -1 });
 
@@ -463,13 +463,13 @@ router.get("/therapy-reports", isLoggedIn, async function (req, res) {
     const populatedReports = await Promise.all(
       reports.map(async (report) => {
         const appointment = await AppointmentModel.findById(report.sessionId)
-          .populate("patientId", "firstname lastname")
+          .populate("patientId", "username")
           .populate("therapistId", "firstName lastName");
 
         return {
           ...report,
           patientName: appointment?.patientId
-            ? `${appointment.patientId.firstname} ${appointment.patientId.lastname}`
+            ? `${appointment.patientId.username} `
             : "Unknown",
           therapistName: appointment?.therapistId
             ? `${appointment.therapistId.firstName} ${appointment.therapistId.lastName}`
@@ -506,14 +506,14 @@ router.get("/therapy-reports/:id", isLoggedIn, async function (req, res) {
     }
 
     const appointment = await AppointmentModel.findById(report.sessionId)
-      .populate("patientId", "firstname lastname")
+      .populate("patientId", "username")
       .populate("therapistId", "firstName lastName");
 
     res.render("admin/therapy-report-view", {
       admin,
       report,
       patientName: appointment?.patientId
-        ? `${appointment.patientId.firstname} ${appointment.patientId.lastname}`
+        ? `${appointment.patientId.username}`
         : "Unknown",
       therapistName: appointment?.therapistId
         ? `${appointment.therapistId.firstName} ${appointment.therapistId.lastName}`
