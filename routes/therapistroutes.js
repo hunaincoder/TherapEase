@@ -13,7 +13,7 @@ const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const flash = require("connect-flash");
 
-router.use(flash());
+router.use(flash()); 
 router.use(authRoutes);
 
 function getOrdinal(n) {
@@ -366,6 +366,76 @@ router.get("/video-call/:id", isLoggedIn, async (req, res) => {
     });
     req.flash("error", "Internal Server Error");
     res.redirect("/therapist/appointment-list");
+  }
+});
+
+router.get("/therapy-reports", isLoggedIn, async (req, res) => {
+  try {
+    const therapistId = req.user._id;
+    const appointments = await AppointmentModel.find({ therapistId });
+    
+    const reportIds = appointments.map(appt => appt._id.toString());
+    const reports = await mongoose.connection.db.collection("after_therapy_reports").find({
+      sessionId: { $in: reportIds }
+    }).toArray();
+    
+    const populatedReports = await Promise.all(reports.map(async report => {
+      const appointment = await AppointmentModel.findById(report.sessionId)
+        .populate("patientId", "firstname lastname");
+      
+      return {
+        ...report,
+        patientName: appointment?.patientId ? `${appointment.patientId.firstname} ${appointment.patientId.lastname}` : 'Unknown',
+        formattedDate: moment(report.timestamp).format("MMM D, YYYY")
+      };
+    }));
+
+    res.render("therapist/therapy-reports", {
+      therapist: req.user,
+      reports: populatedReports,
+      messages: req.flash()
+    });
+  } catch (error) {
+    console.error("Error fetching therapy reports:", error);
+    req.flash("error", "Error fetching therapy reports");
+    res.redirect("/therapist/dashboard");
+  }
+});
+
+router.get("/therapy-reports/:id", isLoggedIn, async (req, res) => {
+  try {
+    const therapistId = req.user._id;
+    const report = await mongoose.connection.db.collection("after_therapy_reports").findOne({
+      _id: new mongoose.Types.ObjectId(req.params.id)
+    });
+    
+    if (!report) {
+      req.flash("error", "Report not found");
+      return res.redirect("/therapist/therapy-reports");
+    }
+
+    // Verify this report belongs to the therapist
+    const appointment = await AppointmentModel.findOne({
+      _id: report.sessionId,
+      therapistId
+    }).populate("patientId", "firstname lastname");
+
+    if (!appointment) {
+      req.flash("error", "Unauthorized access to report");
+      return res.redirect("/therapist/therapy-reports");
+    }
+
+    res.render("therapist/therapy-report-view", {
+      therapist: req.user,
+      report,
+      patientName: `${appointment.patientId.firstname} ${appointment.patientId.lastname}`,
+      formattedDate: moment(report.timestamp).format("MMMM D, YYYY"),
+      messages: req.flash()
+    });
+  } catch (error) {
+    console.error("Error fetching therapy report:", error);
+    req.flash("error", "Error fetching therapy report");
+    res.redirect("/therapist/therapy-reports");
   }
 });
 

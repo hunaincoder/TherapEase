@@ -452,6 +452,84 @@ router.post("/reject-therapist/:id", isLoggedIn, async (req, res) => {
   }
 });
 
+// Add this route to index.js
+router.get("/therapy-reports", isLoggedIn, async function (req, res) {
+  try {
+    const admin = await AdminModel.findOne({ email: req.user.email });
+    const reports = await mongoose.connection.db
+      .collection("after_therapy_reports")
+      .find()
+      .toArray();
+
+    // Populate patient and therapist names
+    const populatedReports = await Promise.all(
+      reports.map(async (report) => {
+        const appointment = await AppointmentModel.findById(report.sessionId)
+          .populate("patientId", "firstname lastname")
+          .populate("therapistId", "firstName lastName");
+
+        return {
+          ...report,
+          patientName: appointment?.patientId
+            ? `${appointment.patientId.firstname} ${appointment.patientId.lastname}`
+            : "Unknown",
+          therapistName: appointment?.therapistId
+            ? `${appointment.therapistId.firstName} ${appointment.therapistId.lastName}`
+            : "Unknown",
+        };
+      })
+    );
+
+    res.render("admin/therapy-reports", {
+      admin,
+      reports: populatedReports,
+      successMessage: req.flash("successMessage"),
+      errorMessage: req.flash("errorMessage"),
+    });
+  } catch (error) {
+    console.error("Error fetching therapy reports:", error);
+    req.flash("errorMessage", "Error fetching therapy reports");
+    res.redirect("/dashboard");
+  }
+});
+
+router.get("/therapy-reports/:id", isLoggedIn, async function (req, res) {
+  try {
+    const admin = await AdminModel.findOne({ email: req.user.email });
+    const report = await mongoose.connection.db
+      .collection("after_therapy_reports")
+      .findOne({
+        _id: new mongoose.Types.ObjectId(req.params.id),
+      });
+
+    if (!report) {
+      req.flash("errorMessage", "Report not found");
+      return res.redirect("/therapy-reports");
+    }
+
+    const appointment = await AppointmentModel.findById(report.sessionId)
+      .populate("patientId", "firstname lastname")
+      .populate("therapistId", "firstName lastName");
+
+    res.render("admin/therapy-report-view", {
+      admin,
+      report,
+      patientName: appointment?.patientId
+        ? `${appointment.patientId.firstname} ${appointment.patientId.lastname}`
+        : "Unknown",
+      therapistName: appointment?.therapistId
+        ? `${appointment.therapistId.firstName} ${appointment.therapistId.lastName}`
+        : "Unknown",
+      successMessage: req.flash("successMessage"),
+      errorMessage: req.flash("errorMessage"),
+    });
+  } catch (error) {
+    console.error("Error fetching therapy report:", error);
+    req.flash("errorMessage", "Error fetching therapy report");
+    res.redirect("/therapy-reports");
+  }
+});
+
 router.get("/payment-approval", isLoggedIn, async function (req, res) {
   try {
     const admin = await AdminModel.findOne({ email: req.user.email });

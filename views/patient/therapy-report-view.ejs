@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=0"
+    />
+    <title>TherapEase - Therapy Report</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png" />
+    <link rel="stylesheet" href="/css/feathericon.min.css" />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+
+    <!-- Fontawesome CSS -->
+    <link
+      rel="stylesheet"
+      href="/plugins/fontawesome/css/fontawesome.min.css"
+    />
+    <link rel="stylesheet" href="/plugins/fontawesome/css/all.min.css" />
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="main-wrapper">
+      <!-- Header -->
+      <div class="header">
+        <!-- Logo -->
+        <div class="header-left">
+          <a href="/client/dashboard" class="logo">
+            <img src="/img/logo.png" alt="Logo" width="140" height="50" />
+          </a>
+          <a href="/client/dashboard" class="logo logo-small">
+            <img src="/img/logo-small.png" alt="Logo" width="100" height="70" />
+          </a>
+        </div>
+        <!-- /Logo -->
+
+        <a href="javascript:void(0);" id="toggle_btn">
+          <i class="fe fe-text-align-left"></i>
+        </a>
+
+        <!-- Mobile Menu Toggle -->
+        <a class="mobile_btn" id="mobile_btn">
+          <i class="fa fa-bars"></i>
+        </a>
+        <!-- /Mobile Menu Toggle -->
+
+        <!-- Header Right Menu -->
+        <ul class="nav user-menu">
+          <!-- User Menu -->
+          <li class="nav-item dropdown has-arrow">
+            <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+            </a>
+            <div class="dropdown-menu">
+              <div class="user-header">
+                <div class="avatar avatar-sm">
+                  <img
+                    src="/img/profiles/avatar-01.jpg"
+                    alt="User Image"
+                    class="avatar-img rounded-circle"
+                  />
+                </div>
+                <div class="user-text">
+                  <h6>Name</h6>
+                </div>
+              </div>
+              <a class="dropdown-item" href="/client/profile">My Profile</a>
+              <a class="dropdown-item" href="/client/logout">Logout</a>
+            </div>
+          </li>
+          <!-- /User Menu -->
+        </ul>
+        <!-- /Header Right Menu -->
+      </div>
+      <!-- /Header -->
+
+      <!-- Sidebar -->
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-inner slimscroll">
+          <div id="sidebar-menu" class="sidebar-menu">
+            <ul>
+              <li>
+                <a href="/client/dashboard"
+                  ><i class="fe fe-home"></i> <span>Appointments</span></a
+                >
+              </li>
+              <li>
+                <a href="/client/profile"
+                  ><i class="fe fe-user"></i> <span>Profile</span></a
+                >
+              </li>
+              <li>
+                <a href="/client/therapist-search"
+                  ><i class="fe fe-user"></i> <span>Therapists</span></a
+                >
+              </li>
+              <li class="active" >
+                <a href="/client/therapy-reports"
+                  ><i class="fe fe-file"></i> <span>Therapy Reports</span></a
+                >
+              </li>
+              <li>
+                <a href="/client/accounts"
+                  ><i class="fe fe-credit-card"></i> <span>Accounts</span></a
+                >
+              </li>
+              <li>
+                <a href="/client/invoices"
+                  ><i class="fe fe-file"></i> <span>Invoices</span></a
+                >
+              </li>
+              <li>
+                <a href="/client/pass-change"
+                  ><i class="fe fe-lock"></i> <span>Change password</span></a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- /Sidebar -->
+
+      <div class="page-wrapper">
+        <div class="content container-fluid">
+          <% if (messages.error && messages.error.length > 0) { %>
+          <div
+            class="alert alert-danger alert-dismissible fade show"
+            role="alert"
+          >
+            <%= messages.error %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          <% } %> <% if (messages.success && messages.success.length > 0) { %>
+          <div
+            class="alert alert-success alert-dismissible fade show"
+            role="alert"
+          >
+            <%= messages.success %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          <% } %>
+
+          <div class="page-header">
+            <div class="row">
+              <div class="col-sm-12">
+                <h3 class="page-title">Therapy Report</h3>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title">Session Details</h4>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <h2 class="table-avatar">
+                        <a href="#" class="avatar avatar-sm mr-2">
+                          <img
+                            class="avatar-img rounded-circle"
+                            src="<%= therapistProfilePicture %>"
+                            alt="Therapist Image"
+                          />
+                        </a>
+                        <a href="#">
+                          <span>Therapist: <%= therapistName %></span>
+                        </a>
+                      </h2>
+                    </div>
+                    <div class="col-md-6">
+                      <p><strong>Report Date:</strong> <%= formattedDate %></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title">Session Summary</h4>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <p><%= report.reportContent.summary %></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title">Key Discussion Themes</h4>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <% if (report.reportContent.key_discussion_themes) { %>
+                        <% const themes = report.reportContent.key_discussion_themes.split('\n-').filter(t => t.trim()); %>
+                        <ul>
+                          <% themes.forEach(theme => { %>
+                            <li><%= theme.replace(/^-/, '').trim() %></li>
+                          <% }); %>
+                        </ul>
+                      <% } else { %>
+                        <p>No key discussion themes recorded.</p>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title">Recommendations and Next Steps</h4>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <% if (report.reportContent.recommendations_and_next_steps) { %>
+                        <% const recommendations = report.reportContent.recommendations_and_next_steps.split('\n-').filter(r => r.trim()); %>
+                        <ul>
+                          <% recommendations.forEach(rec => { %>
+                            <li><%= rec.replace(/^-/, '').trim() %></li>
+                          <% }); %>
+                        </ul>
+                      <% } else { %>
+                        <p>No recommendations recorded.</p>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title">Session Mood Progression</h4>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <p><%= report.reportContent.session_mood_progression || 'No mood progression recorded.' %></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title">Key Quotes or Phrases</h4>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <% if (report.reportContent.key_quotes_or_phrases) { %>
+                        <% const quotes = report.reportContent.key_quotes_or_phrases.split('\n-').filter(q => q.trim()); %>
+                        <ul>
+                          <% quotes.forEach(quote => { %>
+                            <li><%= quote.replace(/^-/, '').trim() %></li>
+                          <% }); %>
+                        </ul>
+                      <% } else { %>
+                        <p>No key quotes recorded.</p>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title">Coping Mechanisms Discussed</h4>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <% if (report.reportContent.coping_mechanisms_discussed) { %>
+                        <% const mechanisms = report.reportContent.coping_mechanisms_discussed.split('\n-').filter(m => m.trim()); %>
+                        <ul>
+                          <% mechanisms.forEach(mechanism => { %>
+                            <li><%= mechanism.replace(/^-/, '').trim() %></li>
+                          <% }); %>
+                        </ul>
+                      <% } else { %>
+                        <p>No coping mechanisms discussed.</p>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title">Patient Goals</h4>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <p><%= report.reportContent.patient_goals || 'No patient goals recorded.' %></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title">Follow-up Questions for Next Session</h4>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <% if (report.reportContent.followup_questions_for_next_session) { %>
+                        <% const questions = report.reportContent.followup_questions_for_next_session.split('\n-').filter(q => q.trim()); %>
+                        <ul>
+                          <% questions.forEach(question => { %>
+                            <li><%= question.replace(/^-/, '').trim() %></li>
+                          <% }); %>
+                        </ul>
+                      <% } else { %>
+                        <p>No follow-up questions recorded.</p>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title">Triggers Mentioned</h4>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <p><%= report.reportContent.triggers_mentioned || 'No triggers mentioned.' %></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title">Relationship Dynamics</h4>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <p><%= report.reportContent.relationship_dynamics || 'No relationship dynamics recorded.' %></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="text-center mt-3">
+                <a href="/client/therapy-reports" class="btn btn-primary">
+                  <i class="fas fa-arrow-left"></i> Back to Reports
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="/js/jquery-3.2.1.min.js"></script>
+
+    <!-- Bootstrap Core JS -->
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="/js/script.js"></script>
+  </body>
+</html>

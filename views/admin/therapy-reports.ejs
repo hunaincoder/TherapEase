@@ -6,19 +6,10 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=0"
     />
-    <title>TherapEase - Therapist List Page</title>
+    <title>TherapEase</title>
 
     <!-- Favicon -->
-    <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png" />
-
-    <!-- Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-
-    <!-- Bootstrap JS Bundle (includes Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="shortcut icon" type="image/x-icon" href="/img/Logo.png" />
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css" />
@@ -29,11 +20,22 @@
     <!-- Feathericon CSS -->
     <link rel="stylesheet" href="/css/feathericon.min.css" />
 
-    <!-- Datatables CSS -->
-    <link rel="stylesheet" href="/plugins/datatables/datatables.min.css" />
-
     <!-- Main CSS -->
     <link rel="stylesheet" href="/css/style.css" />
+
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" href="/plugins/select2/css/select2.min.css" />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="/plugins/bootstrap-tagsinput/css/bootstrap-tagsinput.css"
+    />
+
+    <link rel="stylesheet" href="/plugins/dropzone/dropzone.min.css" />
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/patient-style.css" />
 
     <!--[if lt IE 9]>
       <script src="assets/js/html5shiv.min.js"></script>
@@ -58,15 +60,6 @@
         <a href="javascript:void(0);" id="toggle_btn">
           <i class="fe fe-text-align-left"></i>
         </a>
-
-        <div class="top-nav-search">
-          <form>
-            <input type="text" class="form-control" placeholder="Search here" />
-            <button class="btn" type="submit">
-              <i class="fa fa-search"></i>
-            </button>
-          </form>
-        </div>
 
         <!-- Mobile Menu Toggle -->
         <a class="mobile_btn" id="mobile_btn">
@@ -132,7 +125,7 @@
                   ><i class="fe fe-layout"></i> <span>Appointments</span></a
                 >
               </li>
-              <li class="active">
+              <li >
                 <a href="/therapist-list"
                   ><i class="fe fe-user"></i> <span>Therapists</span></a
                 >
@@ -142,7 +135,7 @@
                   ><i class="fe fe-user"></i> <span>Patients</span></a
                 >
               </li>
-              <li>
+                            <li class="active">
   <a href="/therapy-reports"><i class="fe fe-file"></i> <span>Therapy Reports</span></a>
 </li>
               <li>
@@ -161,7 +154,7 @@
                   ><i class="fe fe-file"></i> <span>Payment Approval</span></a
                 >
               </li>
-              <li >
+              <li>
                 <a href="/refunds-approval"
                   ><i class="fe fe-file"></i> <span>refund Approval</span></a
                 >
@@ -172,57 +165,46 @@
       </div>
       <!-- /Sidebar -->
 
-      <!-- Page Wrapper -->
       <div class="page-wrapper">
         <div class="content container-fluid">
-          <!-- Page Header -->
+          <% if (successMessage && successMessage.length > 0) { %>
+          <div
+            class="alert alert-success alert-dismissible fade show"
+            role="alert"
+          >
+            <%= successMessage %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          <% } %> <% if (errorMessage && errorMessage.length > 0) { %>
+          <div
+            class="alert alert-danger alert-dismissible fade show"
+            role="alert"
+          >
+            <%= errorMessage %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          <% } %>
+
           <div class="page-header">
             <div class="row">
               <div class="col-sm-12">
-                <h3 class="page-title">List of Therapists</h3>
-                <ul class="breadcrumb">
-                  <li class="breadcrumb-item">
-                    <a href="/dashboard">Dashboard</a>
-                  </li>
-
-                  <li class="breadcrumb-item active">Therapists</li>
-                </ul>
+                <h3 class="page-title">Therapy Reports</h3>
               </div>
             </div>
           </div>
-          <!-- /Page Header -->
 
-          <div class="container mt-3">
-            <% if (successMessage && successMessage.length > 0) { %>
-            <div
-              class="alert alert-success alert-dismissible fade show"
-              role="alert"
-            >
-              <%= successMessage %>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close"
-              ></button>
-            </div>
-            <% } %> <% if (errorMessage && errorMessage.length > 0) { %>
-            <div
-              class="alert alert-danger alert-dismissible fade show"
-              role="alert"
-            >
-              <%= errorMessage %>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close"
-              ></button>
-            </div>
-            <% } %>
-          </div>
           <div class="row">
-            <div class="col-sm-12">
+            <div class="col-md-12">
               <div class="card">
                 <div class="card-body">
                   <div class="table-responsive">
@@ -231,59 +213,42 @@
                     >
                       <thead>
                         <tr>
-                          <th>Doctor Name</th>
-                          <th>Speciality</th>
-                          <th>Member Since</th>
-                          <th>Earned</th>
-                          <th>Badge</th>
-                          <th>Action</th>
+                          <th>Patient</th>
+                          <th>Therapist</th>
+                          <th>Session Date</th>
+                          <th>Report Date</th>
+                          <th>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
+                        <% if (reports.length === 0) { %>
                         <tr>
-                          <% therapists.forEach(therapist => { %>
-                          <td>
-                            <h2 class="table-avatar">
-                              <a
-                                href="/therapist-profile/<%= therapist._id %>"
-                                class="avatar avatar-sm mr-2"
-                                ><img
-                                  class="avatar-img rounded-circle"
-                                  src="<%= therapist.profilePicture %>"
-                                  alt=""
-                              /></a>
-                              <a href="/therapist-profile/<%= therapist._id %>"
-                                ><%= therapist.username %></a
-                              >
-                            </h2>
-                          </td>
-                          <td>
-                            <% if (therapist.specialties &&
-                            therapist.specialties.length > 0) { %> <%=
-                            therapist.specialties.join(', ') %> <% } else { %>
-                            N/A <% } %>
-                          </td>
-
-                          <td><%= therapist.formattedDate %></td>
-
-                          <td>PKR 3100.00</td>
-                          <td>
-                            <i class="fe fe-star text-warning"></i>
-                            <i class="fe fe-star text-warning"></i>
-                            <i class="fe fe-star text-warning"></i>
-                          </td>
-                          <td>
-                            <form
-                              action="/delete-therapist/<%= therapist._id %>"
-                              method="POST"
-                            >
-                              <button type="submit" class="btn btn-danger">
-                                Delete
-                              </button>
-                            </form>
+                          <td colspan="5" class="text-center">
+                            No reports found
                           </td>
                         </tr>
-                        <% });%>
+                        <% } else { %> <% reports.forEach(report => { %>
+                        <tr>
+                          <td><%= report.patientName %></td>
+                          <td><%= report.therapistName %></td>
+                          <td>
+                            <% const sessionDate = new Date(report.timestamp) %>
+                            <%= sessionDate.toLocaleDateString() %>
+                          </td>
+                          <td>
+                            <% const reportDate = new Date(report.timestamp) %>
+                            <%= reportDate.toLocaleDateString() %>
+                          </td>
+                          <td>
+                            <a
+                              href="/therapy-reports/<%= report._id %>"
+                              class="btn btn-sm bg-info-light"
+                            >
+                              <i class="far fa-eye"></i> View
+                            </a>
+                          </td>
+                        </tr>
+                        <% }) %> <% } %>
                       </tbody>
                     </table>
                   </div>
@@ -293,9 +258,7 @@
           </div>
         </div>
       </div>
-      <!-- /Page Wrapper -->
     </div>
-    <!-- /Main Wrapper -->
 
     <!-- jQuery -->
     <script src="/js/jquery-3.2.1.min.js"></script>
@@ -303,9 +266,6 @@
     <!-- Bootstrap Core JS -->
     <script src="/js/popper.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
-
-    <!-- Slimscroll JS -->
-    <script src="/plugins/slimscroll/jquery.slimscroll.min.js"></script>
 
     <!-- Datatables JS -->
     <script src="/plugins/datatables/jquery.dataTables.min.js"></script>

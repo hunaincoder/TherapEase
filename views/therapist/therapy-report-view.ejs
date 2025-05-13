@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=0"
+    />
+    <title>TherapEase - Therapy Report</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png" />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+
+    <!-- Fontawesome CSS -->
+    <link
+      rel="stylesheet"
+      href="/plugins/fontawesome/css/fontawesome.min.css"
+    />
+    <link rel="stylesheet" href="/plugins/fontawesome/css/all.min.css" />
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="main-wrapper">
+<!-- Header -->
+		<div class="header">
+			
+			<!-- Logo -->
+			<div class="header-left">
+				<a href="/therapist/dashboard" class="logo">
+					<img src="/img/logo.png" alt="Logo" width="140" height="50">
+				</a>
+				<a href="/therapist/dashboard" class="logo logo-small">
+					<img src="/img/logo-small.png" alt="Logo" width="100" height="70">
+				</a>
+			</div>
+			<!-- /Logo -->
+			
+			<a href="javascript:void(0);" id="toggle_btn">
+				<i class="fe fe-text-align-left"></i>
+			</a>
+			
+			
+			
+			<!-- Mobile Menu Toggle -->
+			<a class="mobile_btn" id="mobile_btn">
+				<i class="fa fa-bars"></i>
+			</a>
+			<!-- /Mobile Menu Toggle -->
+			
+			<!-- Header Right Menu -->
+			<ul class="nav user-menu">
+
+				<!-- Notifications -->
+				<li class="nav-item dropdown noti-dropdown">
+					<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+						<i class="fe fe-bell"></i> <span class="badge badge-pill">3</span>
+					</a>
+					<div class="dropdown-menu notifications">
+						<div class="topnav-dropdown-header">
+							<span class="notification-title">Notifications</span>
+							<a href="javascript:void(0)" class="clear-noti"> Clear All </a>
+						</div>
+						<div class="noti-content">
+							<ul class="notification-list">
+								<li class="notification-message">
+									
+								</li>
+								<li class="notification-message">
+									
+								</li>
+								<li class="notification-message">
+									
+								</li>
+								<li class="notification-message">
+									
+								</li>
+							</ul>
+						</div>
+						<div class="topnav-dropdown-footer">
+							<a href="#">View all Notifications</a>
+						</div>
+					</div>
+				</li>
+				<!-- /Notifications -->
+				
+				<!-- User Menu -->
+				<li class="nav-item dropdown has-arrow">
+					<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+						<span class="user-img"><img class="rounded-circle" src="/img/logo-small.png" width="31" alt=""></span>
+					</a>
+					<div class="dropdown-menu">
+						<div class="user-header">
+							<div class="user-text">
+								<h6>Therapist Name</h6>
+								<p class="text-muted mb-0">Logged in</p>
+							</div>
+						</div>
+						<a class="dropdown-item" href="/therapist/profile">My Profile</a>
+						<a class="dropdown-item" href="/therapist/logout">Logout</a>
+					</div>
+				</li>
+				<!-- /User Menu -->
+				
+			</ul>
+			<!-- /Header Right Menu -->
+			
+		</div>
+		<!-- /Header -->
+		
+		<!-- Sidebar -->
+		<div class="sidebar" id="sidebar">
+			<div class="sidebar-inner slimscroll">
+				<div id="sidebar-menu" class="sidebar-menu">
+					<ul>
+						<li> 
+							<a href="/therapist/dashboard"><i class="fe fe-home"></i> <span>Dashboard</span></a>
+						</li>
+						<li >
+							<a href="/therapist/appointment-confirmation"><i class="fe fe-layout"></i> <span> Appointments</span></a>
+						</li>
+						<li>
+							<a href="/therapist/appointment-list"><i class="fe fe-layout"></i> <span> Appointments list</span></a>
+						</li>
+						
+						<li> 
+							<a href="/therapist/invoices"><i class="fe fe-document"></i> <span>Invoice</span></a>
+						</li>
+						
+						<li > 
+							<a href="/therapist/profile"><i class="fe fe-user"></i> <span>Profile</span></a>
+						</li>
+						<li class="active">
+  <a href="/therapist/therapy-reports"><i class="fe fe-file"></i> <span>Therapy Reports</span></a>
+</li>
+						<li> 
+							<a href="/therapist/payout"><i class="fe fe-activity"></i> <span>Payout</span></a>
+						</li>
+						<li> 
+							<a href="/therapist/change-pass"><i class="fe fe-vector"></i> <span>Change Password</span></a>
+						</li>
+						
+						
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<!-- /Sidebar -->  
+      <div class="page-wrapper">
+        <div class="content container-fluid">
+          <% if (messages.error && messages.error.length > 0) { %>
+          <div
+            class="alert alert-danger alert-dismissible fade show"
+            role="alert"
+          >
+            <%= messages.error %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          <% } %> <% if (messages.success && messages.success.length > 0) { %>
+          <div
+            class="alert alert-success alert-dismissible fade show"
+            role="alert"
+          >
+            <%= messages.success %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          <% } %>
+
+          <div class="page-header">
+            <div class="row">
+              <div class="col-sm-12">
+                <h3 class="page-title">Therapy Report</h3>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+                      <div class="card">
+                        <div class="card-header">
+                          <h4 class="card-title">Session Details</h4>
+                        </div>
+                        <div class="card-body">
+                          <div class="row">
+                            <div class="col-md-6">
+                              <p>
+                                <strong>Patient:</strong> <%= patientName %>
+                              </p>
+                              
+                            </div>
+                            <div class="col-md-6">
+                              <p>
+                                <strong>Report Date:</strong> <%= new
+                                Date(report.timestamp).toLocaleDateString() %>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="card">
+                        <div class="card-header">
+                          <h4 class="card-title">Report Content</h4>
+                        </div>
+                        <div class="card-body">
+                          <div class="row">
+                            <div class="col-md-12">
+                              <h5>Summary</h5>
+                              <p><%= report.reportContent.summary %></p>
+
+                              <h5 class="mt-4">Key Discussion Themes</h5>
+                              <p>
+                                <%= report.reportContent.key_discussion_themes
+                                %>
+                              </p>
+
+                              <h5 class="mt-4">
+                                Recommendations and Next Steps
+                              </h5>
+                              <p>
+                                <%=
+                                report.reportContent.recommendations_and_next_steps
+                                %>
+                              </p>
+
+                              <h5 class="mt-4">Session Mood Progression</h5>
+                              <p>
+                                <%=
+                                report.reportContent.session_mood_progression %>
+                              </p>
+
+                              <h5 class="mt-4">Key Quotes or Phrases</h5>
+                              <p>
+                                <%= report.reportContent.key_quotes_or_phrases
+                                %>
+                              </p>
+
+                              <h5 class="mt-4">Coping Mechanisms Discussed</h5>
+                              <p>
+                                <%=
+                                report.reportContent.coping_mechanisms_discussed
+                                %>
+                              </p>
+
+                              <h5 class="mt-4">Patient Goals</h5>
+                              <p><%= report.reportContent.patient_goals %></p>
+
+                              <h5 class="mt-4">
+                                Follow-up Questions for Next Session
+                              </h5>
+                              <p>
+                                <%=
+                                report.reportContent.followup_questions_for_next_session
+                                %>
+                              </p>
+
+                              <h5 class="mt-4">Triggers Mentioned</h5>
+                              <p>
+                                <%= report.reportContent.triggers_mentioned %>
+                              </p>
+
+                              <h5 class="mt-4">Relationship Dynamics</h5>
+                              <p>
+                                <%= report.reportContent.relationship_dynamics
+                                %>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="text-center mt-3">
+                        <a href="/therapy-reports" class="btn btn-primary"
+                          >Back to Reports</a
+                        >
+                      </div>
+                    </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="/js/jquery-3.2.1.min.js"></script>
+
+    <!-- Bootstrap Core JS -->
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="/js/script.js"></script>
+  </body>
+</html>

@@ -112,6 +112,12 @@
                 >
               </li>
               <li>
+                <a href="/client/therapy-reports"
+                  ><i class="fe fe-file-text"></i>
+                  <span>Therapy Reports</span></a
+                >
+              </li>
+              <li>
                 <a href="/client/accounts"
                   ><i class="fe fe-user"></i> <span>Accounts</span></a
                 >
@@ -136,32 +142,32 @@
       <div class="page-wrapper">
         <div class="content container-fluid">
           <% if (successMessage && successMessage.length > 0) { %>
-            <div
-              class="alert alert-success alert-dismissible fade show"
-              role="alert"
-            >
-              <%= successMessage %>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close"
-              ></button>
-            </div>
-            <% } %> <% if (errorMessage && errorMessage.length > 0) { %>
-            <div
-              class="alert alert-danger alert-dismissible fade show"
-              role="alert"
-            >
-              <%= errorMessage %>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close"
-              ></button>
-            </div>
-            <% } %>
+          <div
+            class="alert alert-success alert-dismissible fade show"
+            role="alert"
+          >
+            <%= successMessage %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          <% } %> <% if (errorMessage && errorMessage.length > 0) { %>
+          <div
+            class="alert alert-danger alert-dismissible fade show"
+            role="alert"
+          >
+            <%= errorMessage %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          <% } %>
           <!-- Invoice Container -->
           <div class="invoice-container">
             <div class="row">
@@ -235,7 +241,7 @@
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th>Therapist Name </th>
+                    <th>Therapist Name</th>
                     <th class="d-none d-sm-table-cell">Appointment Type</th>
                     <th>TOTAL</th>
                   </tr>

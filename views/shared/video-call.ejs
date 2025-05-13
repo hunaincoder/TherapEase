@@ -8,7 +8,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
-    <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.0/lame.min.js"></script>
     <style>
       body {
         margin: 0;
@@ -195,592 +195,526 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-                  const appointmentId = '<%= appointment && appointment._id ? appointment._id : "" %>';
-                  const userId = '<%= user && user._id ? user._id : "anonymous" %>';
-                  const isTherapist = <%= typeof isTherapist !== 'undefined' && isTherapist ? true : false %>;
-                  const stunServers = '<%= process.env.STUN_SERVERS || "stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302" %>'.split(',');
+      const appointmentId = '<%= appointment && appointment._id ? appointment._id : "" %>';
+      const userId = '<%= user && user._id ? user._id : "anonymous" %>';
+      const isTherapist = <%= typeof isTherapist !== 'undefined' && isTherapist ? true : false %>;
+      const stunServers = '<%= process.env.STUN_SERVERS || "stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302" %>'.split(',');
 
-                  // Existing variables and functions (connectionStatus, configuration, etc.)
-                  const connectionStatus = document.getElementById('connectionStatus');
-                  const showStatus = (message, type) => {
-                    connectionStatus.textContent = message;
-                    connectionStatus.className = 'connection-status';
-                    connectionStatus.classList.add(`status-${type}`);
-                    setTimeout(() => {
-                      if (type !== 'error') {
-                        connectionStatus.style.opacity = '0';
-                      }
-                    }, 3000);
-                  };
+      const connectionStatus = document.getElementById('connectionStatus');
+      const showStatus = (message, type) => {
+        connectionStatus.textContent = message;
+        connectionStatus.className = 'connection-status';
+        connectionStatus.classList.add(`status-${type}`);
+        setTimeout(() => {
+          if (type !== 'error') {
+            connectionStatus.style.opacity = '0';
+          }
+        }, 3000);
+      };
 
-                  const configuration = {
-                    iceServers: stunServers.map(server => ({ urls: server.trim() }))
-                  };
+      const configuration = {
+        iceServers: stunServers.map(server => ({ urls: server.trim() }))
+      };
 
-                  let socket = null;
-                  let pc = null;
-                  let localStream = null;
-                  let remoteStream = new MediaStream();
-                  let isReconnecting = false;
-                  let hasInitiatedOffer = false;
-                  let hasReceivedOffer = false;
-                  let otherUserJoined = false;
-                  let mediaRecorder = null;
-                  let recordedChunks = [];
-                  let isRecording = false;
+      let socket = null;
+      let pc = null;
+      let localStream = null;
+      let remoteStream = new MediaStream();
+      let isReconnecting = false;
+      let hasInitiatedOffer = false;
+      let hasReceivedOffer = false;
+      let otherUserJoined = false;
+      let mediaRecorder = null;
+      let recordedChunks = [];
+      let isRecording = false;
 
-                  const localVideo = document.getElementById('local-video');
-                  const remoteVideo = document.getElementById('remote-video');
-                  const endCallBtn = document.getElementById('endCallBtn');
-                  const timerElement = document.getElementById('sessionTimer');
-                  const toggleMicBtn = document.getElementById('toggleMicBtn');
-                  const toggleVideoBtn = document.getElementById('toggleVideoBtn');
+      const localVideo = document.getElementById('local-video');
+      const remoteVideo = document.getElementById('remote-video');
+      const endCallBtn = document.getElementById('endCallBtn');
+      const timerElement = document.getElementById('sessionTimer');
+      const toggleMicBtn = document.getElementById('toggleMicBtn');
+      const toggleVideoBtn = document.getElementById('toggleVideoBtn');
 
-                  function isValidObjectId(id) {
-                    return /^[0-9a-fA-F]{24}$/.test(id);
-                  }
+      function isValidObjectId(id) {
+        return /^[0-9a-fA-F]{24}$/.test(id);
+      }
 
-                  let timeRemaining = 30 * 60;
-                  const updateTimer = () => {
-                    const minutes = Math.floor(timeRemaining / 60);
-                    const seconds = timeRemaining % 60;
-                    timerElement.innerHTML = `<i class="fas fa-clock"></i> ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                    if (timeRemaining <= 0) {
-                      clearInterval(timerInterval);
-                      endCall();
-                    } else {
-                      timeRemaining--;
-                    }
-                  };
-                  const timerInterval = setInterval(updateTimer, 1000);
+      let timeRemaining = 30 * 60;
+      const updateTimer = () => {
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        timerElement.innerHTML = `<i class="fas fa-clock"></i> ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          endCall();
+        } else {
+          timeRemaining--;
+        }
+      };
+      const timerInterval = setInterval(updateTimer, 1000);
 
-                  async function convertToMP3(blob) {
-                    return new Promise((resolve, reject) => {
-                      const reader = new FileReader();
-                      reader.onload = async () => {
-                        try {
-                          const arrayBuffer = reader.result;
-                          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-                          const channelData = audioBuffer.getChannelData(0);
-                          const sampleRate = audioBuffer.sampleRate;
+  function convertToMp3(audioBuffer) {
+    const left = audioBuffer.getChannelData(0);
+    const right = audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : left;
 
-                          const samples = new Int16Array(channelData.length);
-                          for (let i = 0; i < channelData.length; i++) {
-                            samples[i] = Math.max(-1, Math.min(1, channelData[i])) * 32767;
-                          }
+    const leftPCM = new Int16Array(left.length);
+    const rightPCM = new Int16Array(right.length);
+    for (let i = 0; i < left.length; i++) {
+      leftPCM[i] = Math.max(-32768, Math.min(32767, left[i] * 32768));
+      rightPCM[i] = Math.max(-32768, Math.min(32767, right[i] * 32768));
+    }
 
-                          const mp3encoder = new lamejs.Mp3Encoder(1, sampleRate, 128);
-                          const mp3Data = [];
+    const channels = audioBuffer.numberOfChannels;
+    const mp3encoder = new lamejs.Mp3Encoder(channels, audioBuffer.sampleRate, 128);
+    const sampleBlockSize = 1152;
+    const mp3Data = [];
 
-                          const bufferSize = 1152;
-                          for (let i = 0; i < samples.length; i += bufferSize) {
-                            const sampleChunk = samples.subarray(i, i + bufferSize);
-                            const mp3buf = mp3encoder.encodeBuffer(sampleChunk);
-                            if (mp3buf.length > 0) {
-                              mp3Data.push(mp3buf);
-                            }
-                          }
+    for (let i = 0; i < leftPCM.length; i += sampleBlockSize) {
+      const leftChunk = leftPCM.subarray(i, Math.min(i + sampleBlockSize, leftPCM.length));
+      const rightChunk = rightPCM.subarray(i, Math.min(i + sampleBlockSize, rightPCM.length));
+      const mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk);
+      if (mp3buf.length > 0) mp3Data.push(mp3buf);
+    }
 
-                          const mp3buf = mp3encoder.flush();
-                          if (mp3buf.length > 0) {
-                            mp3Data.push(mp3buf);
-                          }
+    const mp3buf = mp3encoder.flush();
+    if (mp3buf.length > 0) mp3Data.push(mp3buf);
 
-                          const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
-                          resolve(mp3Blob);
-                        } catch (err) {
-                          reject(err);
-                        }
-                      };
-                      reader.onerror = reject;
-                      reader.readAsArrayBuffer(blob);
-                    });
-                  }
+    return new Blob(mp3Data, { type: 'audio/mp3' });
+  }
 
-// Add a flag to prevent multiple endCall invocations
-let isEnding = false;
+
+
 
 async function saveRecording() {
-  if (recordedChunks.length === 0) return false;
+  if (recordedChunks.length === 0) return;
 
   const webmBlob = new Blob(recordedChunks, { type: 'audio/webm' });
 
   try {
-    showStatus('Converting audio to MP3...', 'connecting');
-    const mp3Blob = await convertToMP3(webmBlob);
+    // Step 1: Convert to ArrayBuffer
+    const arrayBuffer = await webmBlob.arrayBuffer();
 
+    // Step 2: Decode audio
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+    // Optional: Check for silence
+    const leftChannel = audioBuffer.getChannelData(0);
+    const isSilent = leftChannel.every(sample => Math.abs(sample) < 0.0001);
+    if (isSilent) {
+      showStatus('Audio is silent. Not uploading.', 'error');
+      return;
+    }
+
+    // Step 3: Convert to MP3
+    const mp3Blob = convertToMp3(audioBuffer); // This is your existing function
+
+    // Step 4: Upload MP3 blob
     const formData = new FormData();
-    formData.append('file', mp3Blob, `session-${appointmentId}-${Date.now()}.mp3`);
+    formData.append('audio', mp3Blob, `session-${appointmentId}-${Date.now()}.mp3`);
+    formData.append('appointmentId', appointmentId);
+    formData.append('userId', userId);
+    formData.append('isTherapist', isTherapist);
 
-    showStatus('Sending MP3 audio to server...', 'connecting');
-    const diarizeResponse = await fetch('http://localhost:8003/diarize', {
+    const response = await fetch('/client/save-recording', {
       method: 'POST',
       body: formData
     });
-    const diarizeResult = await diarizeResponse.json();
-    if (!diarizeResponse.ok) {
-      showStatus('Failed to process audio: ' + diarizeResult.detail, 'error');
-      return false;
-    }
 
-    sessionStorage.setItem('diarizationResult', JSON.stringify(diarizeResult));
-    console.log('Diarization result stored:', sessionStorage.getItem('diarizationResult')); // Debug
-    showStatus('Audio processed successfully', 'connected');
-
-    showStatus('Generating therapy report...', 'connecting');
-    const reportResponse = await fetch('http://localhost:8003/generate_report', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ diarization_result: diarizeResult.result })
-    });
-    const reportData = await reportResponse.json();
-    if (!reportResponse.ok) {
-      showStatus('Failed to generate report: ' + reportData.detail, 'error');
-      return false;
-    }
-
-    sessionStorage.setItem('finalReport', reportData.report);
-    console.log('Final report stored in sessionStorage:', sessionStorage.getItem('finalReport')); // Debug
-    showStatus('Report generated successfully', 'connected');
-    return true;
-  } catch (err) {
-    console.error('Error processing audio or generating report:', err);
-    showStatus('Error: ' + err.message, 'error');
-    return false;
-  } finally {
-    recordedChunks = [];
-  }
-}
-
-async function endCall() {
-  if (isEnding) {
-    console.log('endCall already in progress, ignoring additional call');
-    return;
-  }
-  isEnding = true;
-
-  try {
-    let audioProcessed = false;
-    if (isRecording && mediaRecorder) {
-      mediaRecorder.stop();
-      isRecording = false;
-      audioProcessed = await new Promise(resolve => {
-        mediaRecorder.onstop = async () => {
-          const result = await saveRecording();
-          resolve(result);
-        };
-      });
-    }
-
-    if (pc) {
-      pc.close();
-      pc = null;
-    }
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-    }
-    if (socket && socket.connected) {
-      socket.disconnect();
-    }
-    clearInterval(timerInterval);
-
-    if (audioProcessed || !isRecording) {
-      if (isTherapist) {
-        // Save the report data to localStorage for cross-origin persistence
-        if (sessionStorage.getItem('finalReport')) {
-          localStorage.setItem('finalReport', sessionStorage.getItem('finalReport'));
-          console.log('Saved to localStorage:', localStorage.getItem('finalReport')); // Debug
-          // Ensure localStorage is written before navigating
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        window.location.href = 'http://localhost:8003/static/report.html';
-      } else {
-        window.location.href = '/client/dashboard';
-      }
+    const result = await response.json();
+    if (result.success) {
+      showStatus('Recording saved successfully', 'connected');
+      recordedChunks = [];
     } else {
-      window.location.href = 'http://localhost:8003';
+      showStatus('Failed to save recording: ' + result.message, 'error');
     }
+
   } catch (err) {
-    console.error('Error in endCall:', err);
-    showStatus('Error ending call: ' + err.message, 'error');
-    window.location.href = 'http://localhost:8003';
-  } finally {
-    isEnding = false;
+    console.error('Error during conversion/upload:', err);
+    showStatus('Error saving recording', 'error');
   }
 }
 
-endCallBtn.addEventListener('click', () => {
-  if (isEnding) {
-    console.log('Button clicked while endCall is in progress, ignoring');
-    return;
-  }
-  if (confirm('End this therapy session?')) {
-    endCall();
-  }
-});
+      function endCall() {
+        if (isRecording && mediaRecorder) {
+          mediaRecorder.stop();
+          isRecording = false;
+        }
+        if (pc) {
+          pc.close();
+          pc = null;
+        }
+        if (localStream) {
+          localStream.getTracks().forEach(track => track.stop());
+        }
+        if (socket && socket.connected) {
+          socket.disconnect();
+        }
+        clearInterval(timerInterval);
+        window.location.href = isTherapist ? '/therapist/appointment-list' : '/client/dashboard';
+      }
 
+      endCallBtn.addEventListener('click', () => {
+        if (confirm('End this therapy session?')) {
+          endCall();
+        }
+      });
 
-                  endCallBtn.addEventListener('click', () => {
-                    if (confirm('End this therapy session?')) {
-                      endCall();
-                    }
-                  });
+      toggleMicBtn.addEventListener('click', () => {
+        if (localStream) {
+          const audioTrack = localStream.getAudioTracks()[0];
+          if (audioTrack) {
+            audioTrack.enabled = !audioTrack.enabled;
+            toggleMicBtn.innerHTML = audioTrack.enabled ?
+              '<i class="fas fa-microphone"></i>' :
+              '<i class="fas fa-microphone-slash"></i>';
+            toggleMicBtn.classList.toggle('muted', !audioTrack.enabled);
+          }
+        }
+      });
 
-                  toggleMicBtn.addEventListener('click', () => {
-                    if (localStream) {
-                      const audioTrack = localStream.getAudioTracks()[0];
-                      if (audioTrack) {
-                        audioTrack.enabled = !audioTrack.enabled;
-                        toggleMicBtn.innerHTML = audioTrack.enabled ?
-                          '<i class="fas fa-microphone"></i>' :
-                          '<i class="fas fa-microphone-slash"></i>';
-                        toggleMicBtn.classList.toggle('muted', !audioTrack.enabled);
-                      }
-                    }
-                  });
+      toggleVideoBtn.addEventListener('click', () => {
+        if (localStream) {
+          const videoTrack = localStream.getVideoTracks()[0];
+          if (videoTrack) {
+            videoTrack.enabled = !videoTrack.enabled;
+            toggleVideoBtn.innerHTML = videoTrack.enabled ?
+              '<i class="fas fa-video"></i>' :
+              '<i class="fas fa-video-slash"></i>';
+            toggleVideoBtn.classList.toggle('muted', !videoTrack.enabled);
+          }
+        }
+      });
 
-                  toggleVideoBtn.addEventListener('click', () => {
-                    if (localStream) {
-                      const videoTrack = localStream.getVideoTracks()[0];
-                      if (videoTrack) {
-                        videoTrack.enabled = !videoTrack.enabled;
-                        toggleVideoBtn.innerHTML = videoTrack.enabled ?
-                          '<i class="fas fa-video"></i>' :
-                          '<i class="fas fa-video-slash"></i>';
-                        toggleVideoBtn.classList.toggle('muted', !videoTrack.enabled);
-                      }
-                    }
-                  });
+      setTimeout(endCall, 30 * 60 * 1000);
 
-                  setTimeout(endCall, 30 * 60 * 1000);
+      async function setupPeerConnection() {
+        if (pc) {
+          pc.close();
+        }
 
-                  async function setupPeerConnection() {
-                    if (pc) {
-                      pc.close();
-                    }
+        pc = new RTCPeerConnection(configuration);
 
-                    pc = new RTCPeerConnection(configuration);
+        if (localStream) {
+          localStream.getTracks().forEach(track => {
+            pc.addTrack(track, localStream);
+          });
+        }
 
-                    if (localStream) {
-                      localStream.getTracks().forEach(track => {
-                        pc.addTrack(track, localStream);
-                      });
-                    }
+        pc.onicecandidate = (event) => {
+          if (event.candidate && socket.connected) {
+            console.log(`Sending ICE candidate from ${userId}`);
+            socket.emit('iceCandidate', {
+              candidate: event.candidate,
+              roomId: appointmentId,
+              userId: userId
+            });
+          }
+        };
 
-                    pc.onicecandidate = (event) => {
-                      if (event.candidate && socket.connected) {
-                        console.log(`Sending ICE candidate from ${userId}`);
-                        socket.emit('iceCandidate', {
-                          candidate: event.candidate,
-                          roomId: appointmentId,
-                          userId: userId
-                        });
-                      }
-                    };
+        pc.oniceconnectionstatechange = () => {
+          console.log('ICE connection state:', pc.iceConnectionState);
+          if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+            showStatus('Media connection issue. Trying to reconnect...', 'error');
+            if (!isReconnecting) {
+              isReconnecting = true;
+              setTimeout(() => {
+                isReconnecting = false;
+                resetAndReconnect();
+              }, 2000);
+            }
+          } else if (pc.iceConnectionState === 'connected') {
+            showStatus('Media connection established!', 'connected');
+          }
+        };
 
-                    pc.oniceconnectionstatechange = () => {
-                      console.log('ICE connection state:', pc.iceConnectionState);
-                      if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
-                        showStatus('Media connection issue. Trying to reconnect...', 'error');
-                        if (!isReconnecting) {
-                          isReconnecting = true;
-                          setTimeout(() => {
-                            isReconnecting = false;
-                            resetAndReconnect();
-                          }, 2000);
-                        }
-                      } else if (pc.iceConnectionState === 'connected') {
-                        showStatus('Media connection established!', 'connected');
-                      }
-                    };
+        pc.ontrack = (event) => {
+          event.streams[0].getTracks().forEach(track => {
+            remoteStream.addTrack(track);
+          });
+          remoteVideo.srcObject = remoteStream;
+          console.log('Remote stream received');
+          showStatus('Remote participant connected!', 'connected');
+        };
 
-                    pc.ontrack = (event) => {
-                      event.streams[0].getTracks().forEach(track => {
-                        remoteStream.addTrack(track);
-                      });
-                      remoteVideo.srcObject = remoteStream;
-                      console.log('Remote stream received');
-                      showStatus('Remote participant connected!', 'connected');
-                    };
+        return pc;
+      }
 
-                    return pc;
-                  }
+      async function getMedia() {
+        try {
+          localStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 720 }, height: { ideal: 720 } },
+            audio: true
+          });
+          localVideo.srcObject = localStream;
+          console.log('Local media accessed successfully');
 
-                  async function getMedia() {
-                    try {
-                      localStream = await navigator.mediaDevices.getUserMedia({
-                        video: { width: { ideal: 720 }, height: { ideal: 720 } },
-                        audio: true
-                      });
-                      localVideo.srcObject = localStream;
-                      console.log('Local media accessed successfully');
+          // Start recording automatically
+          const audioStream = new MediaStream(localStream.getAudioTracks());
+          mediaRecorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
 
-                      const audioStream = new MediaStream(localStream.getAudioTracks());
-                      mediaRecorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              recordedChunks.push(event.data);
+            }
+          };
 
-                      mediaRecorder.ondataavailable = (event) => {
-                        if (event.data.size > 0) {
-                          recordedChunks.push(event.data);
-                        }
-                      };
+          mediaRecorder.onstop = async () => {
+            await saveRecording();
+            isRecording = false;
+          };
 
-                      mediaRecorder.onstop = async () => {
-                        await saveRecording();
-                        isRecording = false;
-                      };
+          mediaRecorder.start(1000); // Record in 1-second chunks
+          isRecording = true;
+          showStatus('Recording started automatically', 'connected');
 
-                      mediaRecorder.start(1000);
-                      isRecording = true;
-                      showStatus('Recording started automatically', 'connected');
+          return localStream;
+        } catch (err) {
+          console.error('Media access error:', err);
+          showStatus('Camera or microphone access failed. Please check permissions.', 'error');
+          alert('Please allow camera and microphone access to join the session.');
+          return null;
+        }
+      }
 
-                      return localStream;
-                    } catch (err) {
-                      console.error('Media access error:', err);
-                      showStatus('Camera or microphone access failed. Please check permissions.', 'error');
-                      alert('Please allow camera and microphone access to join the session.');
-                      return null;
-                    }
-                  }
+      async function initiateOffer() {
+        if (hasInitiatedOffer) {
+          console.log(`${userId} Offer already initiated, skipping`);
+          return;
+        }
+        hasInitiatedOffer = true;
+        try {
+          console.log(`${userId} initiating offer`);
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          console.log(`${userId} sending offer to room ${appointmentId}`);
+          socket.emit('offer', {
+            offer,
+            roomId: appointmentId,
+            userId: userId
+          });
+        } catch (err) {
+          console.error('Error creating offer:', err);
+          showStatus('Error initiating call: ' + err.message, 'error');
+          hasInitiatedOffer = false;
+        }
+      }
 
-                  async function initiateOffer() {
-                    if (hasInitiatedOffer) {
-                      console.log(`${userId} Offer already initiated, skipping`);
-                      return;
-                    }
-                    hasInitiatedOffer = true;
-                    try {
-                      console.log(`${userId} initiating offer`);
-                      const offer = await pc.createOffer();
-                      await pc.setLocalDescription(offer);
-                      console.log(`${userId} sending offer to room ${appointmentId}`);
-                      socket.emit('offer', {
-                        offer,
-                        roomId: appointmentId,
-                        userId: userId
-                      });
-                    } catch (err) {
-                      console.error('Error creating offer:', err);
-                      showStatus('Error initiating call: ' + err.message, 'error');
-                      hasInitiatedOffer = false;
-                    }
-                  }
+      function setupSocket() {
+        socket = io({
+          path: '/socket.io/',
+          reconnection: true,
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+          timeout: 20000,
+          transports: ["websocket", "polling"],
+          query: {
+            roomId: appointmentId,
+            userId: userId,
+            isTherapist: isTherapist
+          }
+        });
 
-                  function setupSocket() {
-                    socket = io({
-                      path: '/socket.io/',
-                      reconnection: true,
-                      reconnectionAttempts: 5,
-                      reconnectionDelay: 1000,
-                      timeout: 20000,
-                      transports: ["websocket", "polling"],
-                      query: {
-                        roomId: appointmentId,
-                        userId: userId,
-                        isTherapist: isTherapist
-                      }
-                    });
+        socket.on('connect', () => {
+          console.log(`${appointmentId}:${userId} Socket.IO connected: ${socket.id}, transport: ${socket.io.engine.transport.name}`);
+          showStatus('Signaling connection established', 'connected');
+          socket.emit('join', {
+            roomId: appointmentId,
+            userId: userId,
+            isTherapist: isTherapist
+          });
+        });
 
-                    socket.on('connect', () => {
-                      console.log(`${appointmentId}:${userId} Socket.IO connected: ${socket.id}, transport: ${socket.io.engine.transport.name}`);
-                      showStatus('Signaling connection established', 'connected');
-                      socket.emit('join', {
-                        roomId: appointmentId,
-                        userId: userId,
-                        isTherapist: isTherapist
-                      });
-                    });
+        socket.on('joinConfirmed', ({ roomId, userId }) => {
+          console.log(`${roomId}:${userId} Join confirmed for room ${roomId}, user ${userId}`);
+          showStatus(`Joined session ${roomId}`, 'connected');
+          if (!isTherapist) {
+            setTimeout(() => {
+              if (!hasReceivedOffer && !otherUserJoined) {
+                console.log(`${appointmentId}:${userId} No offer or other user joined after waiting, retrying join`);
+                socket.emit('join', {
+                  roomId: appointmentId,
+                  userId: userId,
+                  isTherapist: isTherapist
+                });
+              }
+            }, 10000);
+          }
+        });
 
-                    socket.on('joinConfirmed', ({ roomId, userId }) => {
-                      console.log(`${roomId}:${userId} Join confirmed for room ${roomId}, user ${userId}`);
-                      showStatus(`Joined session ${roomId}`, 'connected');
-                      if (!isTherapist) {
-                        setTimeout(() => {
-                          if (!hasReceivedOffer && !otherUserJoined) {
-                            console.log(`${appointmentId}:${userId} No offer or other user joined after waiting, retrying join`);
-                            socket.emit('join', {
-                              roomId: appointmentId,
-                              userId: userId,
-                              isTherapist: isTherapist
-                            });
-                          }
-                        }, 10000);
-                      }
-                    });
+        socket.on('userJoined', async ({ userId: joinedUserId, isTherapist: joinedIsTherapist }) => {
+          console.log(`${appointmentId}:${userId} User joined: ${joinedUserId}, isTherapist: ${joinedIsTherapist}`);
+          showStatus('Other participant joined. Setting up call...', 'connecting');
+          otherUserJoined = true;
+          if (isTherapist && !joinedIsTherapist) {
+            initiateOffer();
+          }
+        });
 
-                    socket.on('userJoined', async ({ userId: joinedUserId, isTherapist: joinedIsTherapist }) => {
-                      console.log(`${appointmentId}:${userId} User joined: ${joinedUserId}, isTherapist: ${joinedIsTherapist}`);
-                      showStatus('Other participant joined. Setting up call...', 'connecting');
-                      otherUserJoined = true;
-                      if (isTherapist && !joinedIsTherapist) {
-                        initiateOffer();
-                      }
-                    });
+        socket.on('offer', async ({ offer, userId: senderId }) => {
+          console.log(`${appointmentId}:${userId} Received offer from ${senderId}`);
+          hasReceivedOffer = true;
+          try {
+            if (pc.signalingState !== 'stable' && pc.signalingState !== 'have-local-offer') {
+              console.warn(`${appointmentId}:${userId} Ignoring offer due to signaling state: ${pc.signalingState}`);
+              return;
+            }
+            if (pc.signalingState === 'have-local-offer') {
+              console.log(`${appointmentId}:${userId} Resetting local offer due to received offer from ${senderId}`);
+              pc.setLocalDescription({ type: 'rollback' });
+            }
+            await pc.setRemoteDescription(new RTCSessionDescription(offer));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            console.log(`${appointmentId}:${userId} Sent answer to ${senderId}`);
+            socket.emit('answer', {
+              answer,
+              roomId: appointmentId,
+              userId: userId
+            });
+          } catch (err) {
+            console.error(`${appointmentId}:${userId} Error handling offer:`, err);
+            showStatus('Error during call setup: ' + err.message, 'error');
+          }
+        });
 
-                    socket.on('offer', async ({ offer, userId: senderId }) => {
-                      console.log(`${appointmentId}:${userId} Received offer from ${senderId}`);
-                      hasReceivedOffer = true;
-                      try {
-                        if (pc.signalingState !== 'stable' && pc.signalingState !== 'have-local-offer') {
-                          console.warn(`${appointmentId}:${userId} Ignoring offer due to signaling state: ${pc.signalingState}`);
-                          return;
-                        }
-                        if (pc.signalingState === 'have-local-offer') {
-                          console.log(`${appointmentId}:${userId} Resetting local offer due to received offer from ${senderId}`);
-                          pc.setLocalDescription({ type: 'rollback' });
-                        }
-                        await pc.setRemoteDescription(new RTCSessionDescription(offer));
-                        const answer = await pc.createAnswer();
-                        await pc.setLocalDescription(answer);
-                        console.log(`${appointmentId}:${userId} Sent answer to ${senderId}`);
-                        socket.emit('answer', {
-                          answer,
-                          roomId: appointmentId,
-                          userId: userId
-                        });
-                      } catch (err) {
-                        console.error(`${appointmentId}:${userId} Error handling offer:`, err);
-                        showStatus('Error during call setup: ' + err.message, 'error');
-                      }
-                    });
+        socket.on('answer', async ({ answer, userId: senderId }) => {
+          console.log(`${appointmentId}:${userId} Received answer from ${senderId}`);
+          try {
+            if (pc.signalingState !== 'have-local-offer') {
+              console.warn(`${appointmentId}:${userId} Ignoring answer due to signaling state: ${pc.signalingState}`);
+              return;
+            }
+            await pc.setRemoteDescription(new RTCSessionDescription(answer));
+            showStatus('Call connected!', 'connected');
+          } catch (err) {
+            console.error(`${appointmentId}:${userId} Error handling answer:`, err);
+            showStatus('Error during call setup: ' + err.message, 'error');
+          }
+        });
 
-                    socket.on('answer', async ({ answer, userId: senderId }) => {
-                      console.log(`${appointmentId}:${userId} Received answer from ${senderId}`);
-                      try {
-                        if (pc.signalingState !== 'have-local-offer') {
-                          console.warn(`${appointmentId}:${userId} Ignoring answer due to signaling state: ${pc.signalingState}`);
-                          return;
-                        }
-                        await pc.setRemoteDescription(new RTCSessionDescription(answer));
-                        showStatus('Call connected!', 'connected');
-                      } catch (err) {
-                        console.error(`${appointmentId}:${userId} Error handling answer:`, err);
-                        showStatus('Error during call setup: ' + err.message, 'error');
-                      }
-                    });
+        socket.on('iceCandidate', async ({ candidate, userId: senderId }) => {
+          console.log(`${appointmentId}:${userId} Received ICE candidate from ${senderId}`);
+          try {
+            if (!pc.remoteDescription) {
+              console.warn(`${appointmentId}:${userId} Delaying ICE candidate processing until remote description is set`);
+              setTimeout(() => {
+                if (pc.remoteDescription) {
+                  pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(err => console.error(`${appointmentId}:${userId} Delayed ICE candidate error:`, err));
+                } else {
+                  console.error(`${appointmentId}:${userId} Still no remote description, discarding ICE candidate`);
+                }
+              }, 1000);
+            } else {
+              await pc.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+          } catch (err) {
+            console.error(`${appointmentId}:${userId} Error adding ICE candidate:`, err);
+          }
+        });
 
-                    socket.on('iceCandidate', async ({ candidate, userId: senderId }) => {
-                      console.log(`${appointmentId}:${userId} Received ICE candidate from ${senderId}`);
-                      try {
-                        if (!pc.remoteDescription) {
-                          console.warn(`${appointmentId}:${userId} Delaying ICE candidate processing until remote description is set`);
-                          setTimeout(() => {
-                            if (pc.remoteDescription) {
-                              pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(err => console.error(`${appointmentId}:${userId} Delayed ICE candidate error:`, err));
-                            } else {
-                              console.error(`${appointmentId}:${userId} Still no remote description, discarding ICE candidate`);
-                            }
-                          }, 1000);
-                        } else {
-                          await pc.addIceCandidate(new RTCIceCandidate(candidate));
-                        }
-                      } catch (err) {
-                        console.error(`${appointmentId}:${userId} Error adding ICE candidate:`, err);
-                      }
-                    });
+        socket.on('userLeft', ({ userId: leftUserId }) => {
+          console.log(`${appointmentId}:${userId} User left: ${leftUserId}`);
+          showStatus('Other participant left the session', 'error');
+          endCall();
+        });
 
-                    socket.on('userLeft', ({ userId: leftUserId }) => {
-                      console.log(`${appointmentId}:${userId} User left: ${leftUserId}`);
-                      showStatus('Other participant left the session', 'error');
-                      endCall();
-                    });
+        socket.on('error', ({ message }) => {
+          console.error(`${appointmentId}:${userId} Socket.IO server error:`, message);
+          showStatus(`Server error: ${message}`, 'error');
+          if (message.includes('Room ID') || message.includes('Appointment not found')) {
+            alert('Invalid session ID. Please return to dashboard.');
+            endCall();
+          }
+        });
 
-                    socket.on('error', ({ message }) => {
-                      console.error(`${appointmentId}:${userId} Socket.IO server error:`, message);
-                      showStatus(`Server error: ${message}`, 'error');
-                      if (message.includes('Room ID') || message.includes('Appointment not found')) {
-                        alert('Invalid session ID. Please return to dashboard.');
-                        endCall();
-                      }
-                    });
+        socket.on('connect_error', (err) => {
+          console.error(`${appointmentId}:${userId} Socket.IO connection error: ${err.message}, type: ${err.type}, transport: ${socket.io.engine.transport.name}`);
+          let userMessage = `Connection failed: ${err.message}. Retrying...`;
+          if (err.message.includes('websocket error')) {
+            userMessage = 'Unable to connect to session. Please check your network or firewall settings.';
+          } else if (err.message.includes('timeout')) {
+            userMessage = 'Connection timed out. Retrying...';
+          }
+          showStatus(userMessage, 'error');
+        });
 
-                    socket.on('connect_error', (err) => {
-                      console.error(`${appointmentId}:${userId} Socket.IO connection error: ${err.message}, type: ${err.type}, transport: ${socket.io.engine.transport.name}`);
-                      let userMessage = `Connection failed: ${err.message}. Retrying...`;
-                      if (err.message.includes('websocket error')) {
-                        userMessage = 'Unable to connect to session. Please check your network or firewall settings.';
-                      } else if (err.message.includes('timeout')) {
-                        userMessage = 'Connection timed out. Retrying...';
-                      }
-                      showStatus(userMessage, 'error');
-                    });
+        socket.on('reconnect', (attempt) => {
+          console.log(`${appointmentId}:${userId} Socket.IO reconnected after ${attempt} attempts`);
+          showStatus('Reconnected to session!', 'connected');
+          resetAndReconnect();
+        });
 
-                    socket.on('reconnect', (attempt) => {
-                      console.log(`${appointmentId}:${userId} Socket.IO reconnected after ${attempt} attempts`);
-                      showStatus('Reconnected to session!', 'connected');
-                      resetAndReconnect();
-                    });
+        socket.on('reconnect_failed', () => {
+          console.error(`${appointmentId}:${userId} Socket.IO reconnection failed`);
+          showStatus('Failed to reconnect. Please refresh the page or check your network.', 'error');
+          alert('Unable to reconnect to the session. Please refresh the page or contact support.');
+        });
 
-                    socket.on('reconnect_failed', () => {
-                      console.error(`${appointmentId}:${userId} Socket.IO reconnection failed`);
-                      showStatus('Failed to reconnect. Please refresh the page or check your network.', 'error');
-                      alert('Unable to reconnect to the session. Please refresh the page or contact support.');
-                    });
+        socket.io.on('transport', (transport) => {
+          console.log(`${appointmentId}:${userId} Socket.IO transport changed: ${transport.name}`);
+        });
+      }
 
-                    socket.io.on('transport', (transport) => {
-                      console.log(`${appointmentId}:${userId} Socket.IO transport changed: ${transport.name}`);
-                    });
-                  }
+      function resetAndReconnect() {
+        hasInitiatedOffer = false;
+        hasReceivedOffer = false;
+        otherUserJoined = false;
+        setupPeerConnection()
+          .then(() => {
+            if (socket.connected) {
+              socket.emit('join', {
+                roomId: appointmentId,
+                userId: userId,
+                isTherapist: isTherapist
+              });
+            }
+          })
+          .catch(err => {
+            console.error(`${appointmentId}:${userId} Error during reconnection:`, err);
+            showStatus('Failed to reconnect: ' + err.message, 'error');
+          });
+      }
 
-                  function resetAndReconnect() {
-                    hasInitiatedOffer = false;
-                    hasReceivedOffer = false;
-                    otherUserJoined = false;
-                    setupPeerConnection()
-                      .then(() => {
-                        if (socket.connected) {
-                          socket.emit('join', {
-                            roomId: appointmentId,
-                            userId: userId,
-                            isTherapist: isTherapist
-                          });
-                        }
-                      })
-                      .catch(err => {
-                        console.error(`${appointmentId}:${userId} Error during reconnection:`, err);
-                        showStatus('Failed to reconnect: ' + err.message, 'error');
-                      });
-                  }
+      async function init() {
+        showStatus('Setting up video session...', 'connecting');
 
-                  async function init() {
-                    showStatus('Setting up video session...', 'connecting');
+        try {
+          if (!appointmentId || !isValidObjectId(appointmentId)) {
+            showStatus('Invalid session ID. Cannot start call.', 'error');
+            alert('Invalid session ID. Please return to dashboard.');
+            window.location.href = isTherapist ? '/therapist/appointment-list' : '/client/dashboard';
+            return;
+          }
 
-                    try {
-                      if (!appointmentId || !isValidObjectId(appointmentId)) {
-                        showStatus('Invalid session ID. Cannot start call.', 'error');
-                        alert('Invalid session ID. Please return to dashboard.');
-                        window.location.href = isTherapist ? '/therapist/appointment-list' : '/client/dashboard';
-                        return;
-                      }
+          const stream = await getMedia();
+          if (!stream) {
+            showStatus('Failed to access camera/microphone', 'error');
+            return;
+          }
 
-                      const stream = await getMedia();
-                      if (!stream) {
-                        showStatus('Failed to access camera/microphone', 'error');
-                        return;
-                      }
+          await setupPeerConnection();
+          setupSocket();
 
-                      await setupPeerConnection();
-                      setupSocket();
+        } catch (err) {
+          console.error(`${appointmentId}:${userId} Initialization error:`, err);
+          showStatus('Failed to initialize session: ' + err.message, 'error');
+        }
+      }
 
-                    } catch (err) {
-                      console.error(`${appointmentId}:${userId} Initialization error:`, err);
-                      showStatus('Failed to initialize session: ' + err.message, 'error');
-                    }
-                  }
+      window.addEventListener('load', init);
 
-                  window.addEventListener('load', init);
-
-                  document.addEventListener('visibilitychange', () => {
-                    if (document.visibilityState === 'visible' && (!socket || !socket.connected)) {
-                      console.log(`${appointmentId}:${userId} Page became visible. Attempting to reconnect...`);
-                      if (socket) {
-                        socket.connect();
-                      } else if (isValidObjectId(appointmentId)) {
-                        setupSocket();
-                      }
-                    }
-                  });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && (!socket || !socket.connected)) {
+          console.log(`${appointmentId}:${userId} Page became visible. Attempting to reconnect...`);
+          if (socket) {
+            socket.connect();
+          } else if (isValidObjectId(appointmentId)) {
+            setupSocket();
+          }
+        }
+      });
     </script>
   </body>
 </html>

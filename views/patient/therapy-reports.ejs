@@ -1,3 +1,4 @@
+<!-- Similar to admin view but with patient-specific styling and navigation -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -6,19 +7,11 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=0"
     />
-    <title>TherapEase - Therapist search Page</title>
+    <title>TherapEase - My Therapy Reports</title>
 
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png" />
-
-    <!-- Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-
-    <!-- Bootstrap JS Bundle (includes Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="/css/feathericon.min.css" />
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css" />
@@ -30,33 +23,13 @@
     />
     <link rel="stylesheet" href="/plugins/fontawesome/css/all.min.css" />
 
-    <!-- Datetimepicker CSS -->
-    <link rel="stylesheet" href="/css/bootstrap-datetimepicker.min.css" />
-
-    <!-- Select2 CSS -->
-    <link rel="stylesheet" href="/plugins/select2/css/select2.min.css" />
-
-    <!-- Fancybox CSS -->
-    <link
-      rel="stylesheet"
-      href="assets/plugins/fancybox/jquery.fancybox.min.css"
-    />
-
     <!-- Datatables CSS -->
     <link rel="stylesheet" href="/plugins/datatables/datatables.min.css" />
 
     <!-- Main CSS -->
-    <link rel="stylesheet" href="/css/patient-style.css" />
-    <!-- Main CSS -->
     <link rel="stylesheet" href="/css/style.css" />
-
-    <!--[if lt IE 9]>
-      <script src="assets/js/html5shiv.min.js"></script>
-      <script src="assets/js/respond.min.js"></script>
-    <![endif]-->
   </head>
   <body>
-    <!-- Main Wrapper -->
     <div class="main-wrapper">
       <!-- Header -->
       <div class="header">
@@ -89,10 +62,15 @@
             </a>
             <div class="dropdown-menu">
               <div class="user-header">
-                <div class="avatar avatar-sm"></div>
+                <div class="avatar avatar-sm">
+                  <img
+                    src="/img/profiles/avatar-01.jpg"
+                    alt="User Image"
+                    class="avatar-img rounded-circle"
+                  />
+                </div>
                 <div class="user-text">
-                  <h6>name</h6>
-                  <p class="text-muted mb-0">Client</p>
+                  <h6>Name</h6>
                 </div>
               </div>
               <a class="dropdown-item" href="/client/profile">My Profile</a>
@@ -110,7 +88,7 @@
         <div class="sidebar-inner slimscroll">
           <div id="sidebar-menu" class="sidebar-menu">
             <ul>
-              <li>
+              <li >
                 <a href="/client/dashboard"
                   ><i class="fe fe-home"></i> <span>Appointments</span></a
                 >
@@ -125,9 +103,9 @@
                   ><i class="fe fe-user"></i> <span>Therapists</span></a
                 >
               </li>
-              <li>
+              <li class="active">
                 <a href="/client/therapy-reports"
-                  ><i class="fe fe-file-text"></i>
+                  ><i class="fe fe-user"></i>
                   <span>Therapy Reports</span></a
                 >
               </li>
@@ -142,7 +120,7 @@
                 >
               </li>
 
-              <li class="active">
+              <li>
                 <a href="/client/pass-change"
                   ><i class="fe fe-user"></i> <span>Change password</span></a
                 >
@@ -152,16 +130,14 @@
         </div>
       </div>
       <!-- /Sidebar -->
-
-      <!-- Page Wrapper -->
       <div class="page-wrapper">
         <div class="content container-fluid">
-          <% if (successMessage && successMessage.length > 0) { %>
+          <% if (messages.error && messages.error.length > 0) { %>
           <div
-            class="alert alert-success alert-dismissible fade show"
+            class="alert alert-danger alert-dismissible fade show"
             role="alert"
           >
-            <%= successMessage %>
+            <%= messages.error %>
             <button
               type="button"
               class="btn-close"
@@ -169,12 +145,12 @@
               aria-label="Close"
             ></button>
           </div>
-          <% } %> <% if (errorMessage && errorMessage.length > 0) { %>
+          <% } %> <% if (messages.success && messages.success.length > 0) { %>
           <div
-            class="alert alert-danger alert-dismissible fade show"
+            class="alert alert-success alert-dismissible fade show"
             role="alert"
           >
-            <%= errorMessage %>
+            <%= messages.success %>
             <button
               type="button"
               class="btn-close"
@@ -183,64 +159,73 @@
             ></button>
           </div>
           <% } %>
-          <!-- Page Header -->
+
           <div class="page-header">
             <div class="row">
               <div class="col-sm-12">
-                <h3 class="page-title">change password</h3>
-                <ul class="breadcrumb">
-                  <li class="breadcrumb-item">
-                    <a href="/client/dashboard">Dashboard</a>
-                  </li>
-
-                  <li class="breadcrumb-item active">Change Password</li>
-                </ul>
+                <h3 class="page-title">My Therapy Reports</h3>
               </div>
             </div>
           </div>
-          <!-- /Page Header -->
 
-          <!-- Page Content -->
-          <div class="col-md-7 col-lg-8 col-xl-9">
-            <div class="card">
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-12 col-lg-6">
-                    <!-- Change Password Form -->
-                    <form>
-                      <div class="form-group">
-                        <label>Old Password</label>
-                        <input type="password" class="form-control" />
-                      </div>
-                      <div class="form-group">
-                        <label>New Password</label>
-                        <input type="password" class="form-control" />
-                      </div>
-                      <div class="form-group">
-                        <label>Confirm Password</label>
-                        <input type="password" class="form-control" />
-                      </div>
-                      <div class="submit-section">
-                        <button
-                          type="submit"
-                          class="btn btn-primary submit-btn"
-                        >
-                          Save Changes
-                        </button>
-                      </div>
-                    </form>
-                    <!-- /Change Password Form -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table
+                      class="datatable table table-hover table-center mb-0"
+                    >
+                      <thead>
+                        <tr>
+                          <th>Therapist</th>
+                          <th>Session Date</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <% if (reports.length === 0) { %>
+                        <tr>
+                          <td colspan="4" class="text-center">
+                            No reports found
+                          </td>
+                        </tr>
+                        <% } else { %> <% reports.forEach(report => { %>
+                        <tr>
+                          <td>
+                            <h2 class="table-avatar">
+                              <a href="#" class="avatar avatar-sm mr-2">
+                                <img
+                                  class="avatar-img rounded-circle"
+                                  src="<%= report.therapistProfilePicture %>"
+                                  alt="User Image"
+                                />
+                              </a>
+                              <a href="#"><%= report.therapistName %></a>
+                            </h2>
+                          </td>
+                          <td><%= report.formattedDate %></td>
+                         
+                          <td>
+                            <a
+                              href="/client/therapy-reports/<%= report._id %>"
+                              class="btn btn-sm bg-info-light"
+                            >
+                              <i class="far fa-eye"></i> View
+                            </a>
+                          </td>
+                        </tr>
+                        <% }) %> <% } %>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <!-- /Page Content -->
         </div>
       </div>
-      <!-- /Page Wrapper -->
     </div>
-    <!-- /Main Wrapper -->
 
     <!-- jQuery -->
     <script src="/js/jquery-3.2.1.min.js"></script>
@@ -248,19 +233,6 @@
     <!-- Bootstrap Core JS -->
     <script src="/js/popper.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
-
-    <!-- Select2 JS -->
-    <script src="/plugins/select2/js/select2.min.js"></script>
-
-    <!-- Datetimepicker JS -->
-    <script src="/js/moment.min.js"></script>
-    <script src="/js/bootstrap-datetimepicker.min.js"></script>
-
-    <!-- Fancybox JS -->
-    <script src="/plugins/fancybox/jquery.fancybox.min.js"></script>
-
-    <!-- Slimscroll JS -->
-    <script src="/plugins/slimscroll/jquery.slimscroll.min.js"></script>
 
     <!-- Datatables JS -->
     <script src="/plugins/datatables/jquery.dataTables.min.js"></script>

@@ -16,6 +16,7 @@ const path = require("path");
 const multer = require("multer");
 const upload = multer();
 const axios = require("axios");
+const FormData = require("form-data");
 
 router.use(flash());
 router.use(authRoutes);
@@ -97,17 +98,17 @@ const audioStorage = multer.diskStorage({
     fs.mkdir(dir, { recursive: true }).then(() => cb(null, dir));
   },
   filename: (req, file, cb) => {
-    cb(null, `session-${req.body.appointmentId}-${Date.now()}.webm`);
+    cb(null, `session-${req.body.appointmentId}-${Date.now()}.mp3`);
   },
 });
 
 const audioUpload = multer({
   storage: audioStorage,
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === "audio/webm") {
+    if (file.mimetype === "audio/mp3" || file.mimetype === "audio/mpeg") {
       cb(null, true);
     } else {
-      cb(new Error("Only audio/webm files are allowed"), false);
+      cb(new Error("only MP3 files are allowed"), false);
     }
   },
   limits: { fileSize: 50 * 1024 * 1024 },
@@ -164,6 +165,40 @@ router.post(
       };
 
       await appointment.save();
+
+      const formData = new FormData();
+
+      formData.append("file", fs.createReadStream(req.file.path), {
+        filename: req.file.filename,
+        contentType: "audio/mp3",
+      });
+
+      try {
+        const response = await axios.post(
+          "http://localhost:8003/diarize",
+          formData,
+          {
+            headers: formData.getHeaders(),
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity,
+          }
+        );
+
+        const diarizationResult = response.data.result;
+
+        res.json({
+          success: true,
+          message: "Recording saved and diarized successfully",
+          diarization: diarizationResult,
+        });
+      } catch (err) {
+        console.error("Diarization error:", err.message);
+        res.json({
+          success: true,
+          message: "Recording saved but diarization failed",
+          diarization: null,
+        });
+      }
 
       res.json({ success: true, message: "Recording saved successfully" });
     } catch (error) {
@@ -669,6 +704,7 @@ router.get("/dashboard", isLoggedIn, async function (req, res) {
 
       return {
         ...appt._doc,
+        videocallended: appt.videocallended || false,
         formattedDate: moment(appt.date).format("DD MMM YYYY"),
         timeRange: `${moment(appt.time, "HH:mm").format("h:mm A")} - ${moment(
           appt.time,
@@ -886,6 +922,93 @@ router.get("/video-call/:id", isLoggedIn, async (req, res) => {
     });
     req.flash("error", "Internal Server Error");
     res.redirect("/client/dashboard");
+  }
+});
+
+router.get("/therapy-reports", isLoggedIn, async function (req, res) {
+  try {
+    const patient = await patientModel.findOne({ email: req.user.email });
+    const appointments = await AppointmentModel.find({
+      patientId: patient._id,
+    });
+
+    const reportIds = appointments.map((appt) => appt._id.toString());
+    const reports = await mongoose.connection.db
+      .collection("after_therapy_reports")
+      .find({
+        sessionId: { $in: reportIds },
+      })
+      .toArray();
+
+    const populatedReports = await Promise.all(
+      reports.map(async (report) => {
+        const appointment = await AppointmentModel.findById(
+          report.sessionId
+        ).populate("therapistId", "firstName lastName profilePicture");
+
+        return {
+          ...report,
+          therapistName: appointment?.therapistId
+            ? `${appointment.therapistId.firstName} ${appointment.therapistId.lastName}`
+            : "Unknown",
+          therapistProfilePicture:
+            appointment?.therapistId?.profilePicture ||
+            "/img/doctors/doctor-thumb-01.jpg",
+          formattedDate: moment(report.timestamp).format("MMM D, YYYY"),
+        };
+      })
+    );
+
+    res.render("patient/therapy-reports", {
+      patient,
+      reports: populatedReports,
+      messages: req.flash(),
+    });
+  } catch (error) {
+    console.error("Error fetching therapy reports:", error);
+    req.flash("error", "Error fetching therapy reports");
+    res.redirect("/client/dashboard");
+  }
+});
+
+router.get("/therapy-reports/:id", isLoggedIn, async function (req, res) {
+  try {
+    const patient = await patientModel.findOne({ email: req.user.email });
+    const report = await mongoose.connection.db
+      .collection("after_therapy_reports")
+      .findOne({
+        _id: new mongoose.Types.ObjectId(req.params.id),
+      });
+
+    if (!report) {
+      req.flash("error", "Report not found");
+      return res.redirect("/client/therapy-reports");
+    }
+
+    const appointment = await AppointmentModel.findOne({
+      _id: report.sessionId,
+      patientId: patient._id,
+    }).populate("therapistId", "firstName lastName profilePicture");
+
+    if (!appointment) {
+      req.flash("error", "Unauthorized access to report");
+      return res.redirect("/client/therapy-reports");
+    }
+
+    res.render("patient/therapy-report-view", {
+      patient,
+      report,
+      therapistName: `${appointment.therapistId.firstName} ${appointment.therapistId.lastName}`,
+      therapistProfilePicture:
+        appointment.therapistId.profilePicture ||
+        "/img/doctors/doctor-thumb-01.jpg",
+      formattedDate: moment(report.timestamp).format("MMMM D, YYYY"),
+      messages: req.flash(),
+    });
+  } catch (error) {
+    console.error("Error fetching therapy report:", error);
+    req.flash("error", "Error fetching therapy report");
+    res.redirect("/client/therapy-reports");
   }
 });
 
