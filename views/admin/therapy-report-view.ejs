@@ -10,6 +10,8 @@
     
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="/css/feathericon.min.css" />
+
     
     <!-- Fontawesome CSS -->
     <link rel="stylesheet" href="/plugins/fontawesome/css/fontawesome.min.css" />
@@ -172,11 +174,8 @@
                   <div class="row">
                     <div class="col-md-6">
                       <p><strong>Patient:</strong> <%= patientName %></p>
-                      <p><strong>Therapist:</strong> <%= therapistName %></p>
                     </div>
-                    <div class="col-md-6">
-                      <p><strong>Report Date:</strong> <%= new Date(report.timestamp).toLocaleDateString() %></p>
-                    </div>
+                    <p><strong>Therapist:</strong> <%= therapistName %></p>
                   </div>
                 </div>
               </div>
@@ -189,34 +188,34 @@
                   <div class="row">
                     <div class="col-md-12">
                       <h5>Summary</h5>
-                      <p><%= report.reportContent.summary %></p>
+                      <p><%= report.summary %></p>
                       
                       <h5 class="mt-4">Key Discussion Themes</h5>
-                      <p><%= report.reportContent.key_discussion_themes %></p>
+                      <p><%= report.key_discussion_themes %></p>
                       
                       <h5 class="mt-4">Recommendations and Next Steps</h5>
-                      <p><%= report.reportContent.recommendations_and_next_steps %></p>
+                      <p><%= report.recommendations_and_next_steps %></p>
                       
                       <h5 class="mt-4">Session Mood Progression</h5>
-                      <p><%= report.reportContent.session_mood_progression %></p>
+                      <p><%= report.session_mood_progression %></p>
                       
                       <h5 class="mt-4">Key Quotes or Phrases</h5>
-                      <p><%= report.reportContent.key_quotes_or_phrases %></p>
+                      <p><%= report.key_quotes_or_phrases %></p>
                       
                       <h5 class="mt-4">Coping Mechanisms Discussed</h5>
-                      <p><%= report.reportContent.coping_mechanisms_discussed %></p>
+                      <p><%= report.coping_mechanisms_discussed %></p>
                       
                       <h5 class="mt-4">Patient Goals</h5>
-                      <p><%= report.reportContent.patient_goals %></p>
+                      <p><%= report.patient_goals %></p>
                       
                       <h5 class="mt-4">Follow-up Questions for Next Session</h5>
-                      <p><%= report.reportContent.followup_questions_for_next_session %></p>
+                      <p><%= report.followup_questions_for_next_session %></p>
                       
                       <h5 class="mt-4">Triggers Mentioned</h5>
-                      <p><%= report.reportContent.triggers_mentioned %></p>
+                      <p><%= report.triggers_mentioned %></p>
                       
                       <h5 class="mt-4">Relationship Dynamics</h5>
-                      <p><%= report.reportContent.relationship_dynamics %></p>
+                      <p><%= report.relationship_dynamics %></p>
                     </div>
                   </div>
                 </div>

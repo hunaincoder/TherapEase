@@ -1,79 +1,211 @@
-<!-- static/upload.html -->
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Upload Audio</title>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload Audio File for Therapy Session Analysis</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1 { color: #2c3e50; }
-        form { margin-top: 20px; }
-        input[type="file"] { margin-bottom: 10px; }
-        button { padding: 10px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #2980b9; }
-        #loading { display: none; margin-top: 10px; }
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .upload-container {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .file-input {
+        margin-bottom: 20px;
+        display: block;
+        width: 100%;
+      }
+      button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      button:hover {
+        background-color: #2980b9;
+      }
+      button:disabled {
+        background-color: #95a5a6;
+        cursor: not-allowed;
+      }
+      #processingMessage {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-left: 4px solid #17a2b8;
+        font-style: italic;
+      }
+      .status-info {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 4px;
+      }
+      .appointment-id {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 15px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Upload Audio File for Therapy Session Analysis</h1>
-    <form id="uploadForm">
-        <input type="file" id="audioFile" accept=".mp3" required />
-        <button type="submit">Upload and Analyze</button>
-        <div id="loading">Processing... Please wait.</div>
-    </form>
+    
+    <div class="upload-container">
+      <div id="appointmentIdDisplay" class="appointment-id"></div>
+      
+      <input
+        type="file"
+        id="audioFile"
+        class="file-input"
+        accept="audio/mp3,audio/mpeg,audio/webm"
+      />
+      
+      <button id="uploadButton">Upload and Analyze</button>
+      
+      <div id="processingMessage" style="display: none">
+        Processing your audio... This may take a few minutes. Please wait.
+      </div>
+      
+      <div id="statusInfo" class="status-info"></div>
+    </div>
 
     <script>
-        document.getElementById("uploadForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const fileInput = document.getElementById("audioFile");
-            const loadingIndicator = document.getElementById("loading");
-            const submitButton = document.querySelector("button[type='submit']");
+      async function loadAudioFile() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const appointmentId = urlParams.get("appointmentId");
+        const statusInfo = document.getElementById("statusInfo");
+        const appointmentIdDisplay = document.getElementById("appointmentIdDisplay");
+        
+        if (appointmentId) {
+          sessionStorage.setItem("appointmentId", appointmentId);
+          console.log("Saved appointmentId to session storage:", appointmentId);
+          appointmentIdDisplay.textContent = `Appointment ID: ${appointmentId}`;
+        } else {
+          statusInfo.textContent = "Warning: No appointment ID found in URL. Report saving may fail.";
+          statusInfo.style.backgroundColor = "#fff3cd";
+        }
+        
+        const uploadButton = document.getElementById("uploadButton");
+        const processingMessage = document.getElementById("processingMessage");
+        const filePath = urlParams.get("file");
+        const audioUrl = filePath ? "http://localhost:3000" + filePath : null;
+        const fileInput = document.getElementById("audioFile");
+
+        if (filePath) {
+          try {
+            statusInfo.textContent = "Loading audio file from server...";
+            statusInfo.style.backgroundColor = "#d1ecf1";
             
-            // Disable button and show loading
-            submitButton.disabled = true;
-            loadingIndicator.style.display = "block";
+            const response = await fetch(audioUrl);
+            if (!response.ok) throw new Error("Failed to fetch audio file");
+            const blob = await response.blob();
+            const file = new File([blob], filePath.split("/").pop(), {
+              type: "audio/mp3",
+            });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+            
+            console.log("Loaded audio file:", file.name);
+            statusInfo.textContent = `Successfully loaded audio file: ${file.name}`;
+            statusInfo.style.backgroundColor = "#d4edda";
+          } catch (err) {
+            console.error("Error loading audio file:", err);
+            statusInfo.textContent = `Error loading audio file: ${err.message}`;
+            statusInfo.style.backgroundColor = "#f8d7da";
+          }
+        }
 
-            try {
-                const file = fileInput.files[0];
-                const formData = new FormData();
-                formData.append("file", file);
+        uploadButton.addEventListener("click", async () => {
+          if (!fileInput.files.length) {
+            statusInfo.textContent = "Please select an audio file";
+            statusInfo.style.backgroundColor = "#f8d7da";
+            return;
+          }
 
-                // Step 1: Diarize the audio
-                const diarizeResponse = await fetch("/diarize", {
-                    method: "POST",
-                    body: formData,
-                });
+          const currentAppointmentId = sessionStorage.getItem("appointmentId");
+          if (!currentAppointmentId) {
+            statusInfo.textContent = "No appointment ID found. Please reload the page or try again.";
+            statusInfo.style.backgroundColor = "#f8d7da";
+            return;
+          }
 
-                if (!diarizeResponse.ok) {
-                    const error = await diarizeResponse.json();
-                    throw new Error(error.detail || "Failed to process audio");
-                }
+          uploadButton.disabled = true;
+          processingMessage.style.display = "block";
+          statusInfo.textContent = "Processing audio...";
+          statusInfo.style.backgroundColor = "#d1ecf1";
 
-                const diarizationData = await diarizeResponse.json();
+          const formData = new FormData();
+          formData.append("file", fileInput.files[0]);
 
-                // Step 2: Generate report
-                const reportResponse = await fetch("/generate_report", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ diarization_result: diarizationData.result }),
-                });
+          try {
+            statusInfo.textContent = "Step 1/2: Analyzing speakers in audio...";
+            const response = await fetch("http://localhost:8003/diarize", {
+              method: "POST",
+              body: formData,
+            });
 
-                if (!reportResponse.ok) {
-                    const error = await reportResponse.json();
-                    throw new Error(error.detail || "Failed to generate report");
-                }
-
-                const reportData = await reportResponse.json();
-                
-                // Store report and redirect
-                sessionStorage.setItem("finalReport", reportData.report);
-                window.location.href = "/static/report.html";
-            } catch (err) {
-                alert("Error: " + err.message);
-            } finally {
-                submitButton.disabled = false;
-                loadingIndicator.style.display = "none";
+            if (!response.ok) {
+              throw new Error("Diarization failed: " + (await response.text()));
             }
+
+            const result = await response.json();
+            console.log("Diarization result:", result);
+
+            statusInfo.textContent = "Step 2/2: Generating therapy report...";
+            const reportResponse = await fetch(
+              "http://localhost:8003/generate_report",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ diarization_result: result.result }),
+              }
+            );
+
+            if (!reportResponse.ok) {
+              throw new Error(
+                "Report generation failed: " + (await reportResponse.text())
+              );
+            }
+
+            const reportResult = await reportResponse.json();
+            console.log("Report generated successfully");
+
+            sessionStorage.setItem("finalReport", reportResult.report);
+            statusInfo.textContent = "Report generated successfully! Redirecting to report page...";
+            statusInfo.style.backgroundColor = "#d4edda";
+
+            setTimeout(() => {
+              window.location.href = `/static/report.html?appointmentId=${currentAppointmentId}`;
+            }, 1500);
+            
+          } catch (err) {
+            console.error("Error processing audio:", err);
+            statusInfo.textContent = `Error processing audio: ${err.message}`;
+            statusInfo.style.backgroundColor = "#f8d7da";
+            uploadButton.disabled = false;
+            processingMessage.style.display = "none";
+          }
         });
+      }
+
+      window.onload = loadAudioFile;
     </script>
-</body>
+  </body>
 </html>

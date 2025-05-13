@@ -10,6 +10,7 @@
 
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="/img/logo.png" />
+    <link rel="stylesheet" href="/css/feathericon.min.css" />
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css" />
@@ -205,10 +206,7 @@
                               
                             </div>
                             <div class="col-md-6">
-                              <p>
-                                <strong>Report Date:</strong> <%= new
-                                Date(report.timestamp).toLocaleDateString() %>
-                              </p>
+                              <p><strong>Report Date:</strong> <%= formattedDate %></p>
                             </div>
                           </div>
                         </div>
@@ -222,11 +220,11 @@
                           <div class="row">
                             <div class="col-md-12">
                               <h5>Summary</h5>
-                              <p><%= report.reportContent.summary %></p>
+                              <p><%= report.summary %></p>
 
                               <h5 class="mt-4">Key Discussion Themes</h5>
                               <p>
-                                <%= report.reportContent.key_discussion_themes
+                                <%= report.key_discussion_themes
                                 %>
                               </p>
 
@@ -235,49 +233,49 @@
                               </h5>
                               <p>
                                 <%=
-                                report.reportContent.recommendations_and_next_steps
+                                report.recommendations_and_next_steps
                                 %>
                               </p>
 
                               <h5 class="mt-4">Session Mood Progression</h5>
                               <p>
                                 <%=
-                                report.reportContent.session_mood_progression %>
+                                report.session_mood_progression %>
                               </p>
 
                               <h5 class="mt-4">Key Quotes or Phrases</h5>
                               <p>
-                                <%= report.reportContent.key_quotes_or_phrases
+                                <%= report.key_quotes_or_phrases
                                 %>
                               </p>
 
                               <h5 class="mt-4">Coping Mechanisms Discussed</h5>
                               <p>
                                 <%=
-                                report.reportContent.coping_mechanisms_discussed
+                                report.coping_mechanisms_discussed
                                 %>
                               </p>
 
                               <h5 class="mt-4">Patient Goals</h5>
-                              <p><%= report.reportContent.patient_goals %></p>
+                              <p><%= report.patient_goals %></p>
 
                               <h5 class="mt-4">
                                 Follow-up Questions for Next Session
                               </h5>
                               <p>
                                 <%=
-                                report.reportContent.followup_questions_for_next_session
+                                report.followup_questions_for_next_session
                                 %>
                               </p>
 
                               <h5 class="mt-4">Triggers Mentioned</h5>
                               <p>
-                                <%= report.reportContent.triggers_mentioned %>
+                                <%= report.triggers_mentioned %>
                               </p>
 
                               <h5 class="mt-4">Relationship Dynamics</h5>
                               <p>
-                                <%= report.reportContent.relationship_dynamics
+                                <%= report.relationship_dynamics
                                 %>
                               </p>
                             </div>

@@ -1,5 +1,7 @@
 # main.py
+from fastapi import Body
 import datetime
+from typing import Union, Dict, Any
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import os
@@ -89,13 +91,32 @@ async def generate_after_therapy_report(data: DiarizationResult):
 
 
 class ReportData(BaseModel):
-    report: str
-
+    report: Union[Dict[str, Any], str]
+    appointmentId: str
 
 @app.post("/save_report")
-async def save_report(report: dict):
+async def save_report(data: ReportData):
+    """
+    Save a therapy session report to the database.
+    The report can be either a string or a dictionary.
+    """
     try:
-        result = collection.insert_one(report)
+        if not data.appointmentId:
+            raise HTTPException(
+                status_code=400, detail="Appointment ID is required")
+        
+        report_data = {}
+        
+        if isinstance(data.report, str):
+            report_data["report_text"] = data.report
+        else:
+            report_data = data.report
+        
+        report_data["sessionId"] = data.appointmentId
+        report_data["createdAt"] = datetime.datetime.now()
+        
+        result = collection.insert_one(report_data)
         return {"message": "Report saved", "id": str(result.inserted_id)}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500, detail=f"Error saving report: {str(e)}")

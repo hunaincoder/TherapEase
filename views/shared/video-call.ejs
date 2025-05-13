@@ -253,208 +253,146 @@
       };
       const timerInterval = setInterval(updateTimer, 1000);
 
+      function convertToMp3(audioBuffer) {
+        const left = audioBuffer.getChannelData(0);
+        const right = audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : left;
 
-  function convertToMp3(audioBuffer) {
-    const left = audioBuffer.getChannelData(0);
-    const right = audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : left;
+        const leftPCM = new Int16Array(left.length);
+        const rightPCM = new Int16Array(right.length);
+        for (let i = 0; i < left.length; i++) {
+          leftPCM[i] = Math.max(-32768, Math.min(32767, left[i] * 32768));
+          rightPCM[i] = Math.max(-32768, Math.min(32767, right[i] * 32768));
+        }
 
-    const leftPCM = new Int16Array(left.length);
-    const rightPCM = new Int16Array(right.length);
-    for (let i = 0; i < left.length; i++) {
-      leftPCM[i] = Math.max(-32768, Math.min(32767, left[i] * 32768));
-      rightPCM[i] = Math.max(-32768, Math.min(32767, right[i] * 32768));
-    }
+        const channels = audioBuffer.numberOfChannels;
+        const mp3encoder = new lamejs.Mp3Encoder(channels, audioBuffer.sampleRate, 128);
+        const sampleBlockSize = 1152;
+        const mp3Data = [];
 
-    const channels = audioBuffer.numberOfChannels;
-    const mp3encoder = new lamejs.Mp3Encoder(channels, audioBuffer.sampleRate, 128);
-    const sampleBlockSize = 1152;
-    const mp3Data = [];
+        for (let i = 0; i < leftPCM.length; i += sampleBlockSize) {
+          const leftChunk = leftPCM.subarray(i, Math.min(i + sampleBlockSize, leftPCM.length));
+          const rightChunk = rightPCM.subarray(i, Math.min(i + sampleBlockSize, rightPCM.length));
+          const mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk);
+          if (mp3buf.length > 0) mp3Data.push(mp3buf);
+        }
 
-    for (let i = 0; i < leftPCM.length; i += sampleBlockSize) {
-      const leftChunk = leftPCM.subarray(i, Math.min(i + sampleBlockSize, leftPCM.length));
-      const rightChunk = rightPCM.subarray(i, Math.min(i + sampleBlockSize, rightPCM.length));
-      const mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk);
-      if (mp3buf.length > 0) mp3Data.push(mp3buf);
-    }
+        const mp3buf = mp3encoder.flush();
+        if (mp3buf.length > 0) mp3Data.push(mp3buf);
 
-    const mp3buf = mp3encoder.flush();
-    if (mp3buf.length > 0) mp3Data.push(mp3buf);
+        return new Blob(mp3Data, { type: 'audio/mp3' });
+      }
 
-    return new Blob(mp3Data, { type: 'audio/mp3' });
-  }
+      async function saveRecording() {
+        if (recordedChunks.length === 0) {
+          console.log("No recorded chunks available");
+          return false;
+        }
 
+        const webmBlob = new Blob(recordedChunks, { type: 'audio/webm' });
 
-// Add this to your TherapEase Video Session page (paste.txt)
-// Update the saveRecording function to ensure the audio processing works correctly
+        try {
+          const arrayBuffer = await webmBlob.arrayBuffer();
 
-async function saveRecording() {
-  if (recordedChunks.length === 0) {
-    console.log("No recorded chunks available");
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+          const leftChannel = audioBuffer.getChannelData(0);
+          const isSilent = leftChannel.every(sample => Math.abs(sample) < 0.0001);
+          if (isSilent) {
+            console.warn('Audio is silent. Not uploading.');
+            showStatus('Audio is silent. Not uploading.', 'error');
+            return false;
+          }
+
+          const mp3Blob = convertToMp3(audioBuffer);
+
+          const formData = new FormData();
+          formData.append('audio', mp3Blob, `session-${appointmentId}-${Date.now()}.mp3`);
+          formData.append('appointmentId', appointmentId);
+          formData.append('userId', userId);
+          formData.append('isTherapist', isTherapist);
+
+          showStatus('Saving recording...', 'connecting');
+          console.log("Uploading audio recording with size:", mp3Blob.size);
+const response = await fetch('/client/save-recording', {
+    method: 'POST',
+    body: formData
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Upload response error:', response.status, errorText);
+    showStatus(`Upload failed with status ${response.status}`, 'error');
     return false;
   }
 
-  const webmBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+  if (isTherapist) {
+    window.location.href = response.url; // Use the redirect URL from the response
+    return true;
+  }
 
-  try {
-    // Step 1: Convert to ArrayBuffer
-    const arrayBuffer = await webmBlob.arrayBuffer();
-
-    // Step 2: Decode audio
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-    // Optional: Check for silence
-    const leftChannel = audioBuffer.getChannelData(0);
-    const isSilent = leftChannel.every(sample => Math.abs(sample) < 0.0001);
-    if (isSilent) {
-      console.warn('Audio is silent. Not uploading.');
-      showStatus('Audio is silent. Not uploading.', 'error');
-      return false;
-    }
-
-    // Step 3: Convert to MP3
-    const mp3Blob = convertToMp3(audioBuffer);
-
-    // Step 4: Upload MP3 blob - Add error handling and debugging
-    const formData = new FormData();
-    formData.append('audio', mp3Blob, `session-${appointmentId}-${Date.now()}.mp3`);
-    formData.append('appointmentId', appointmentId);
-    formData.append('userId', userId);
-    formData.append('isTherapist', isTherapist);
-
-    showStatus('Saving and processing recording...', 'connecting');
-    console.log("Uploading audio recording with size:", mp3Blob.size);
-
-    const response = await fetch('/client/save-recording', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Upload response error:', response.status, errorText);
-      showStatus(`Upload failed with status ${response.status}`, 'error');
-      return false;
-    }
-
-    const result = await response.json();
-    console.log("Recording upload result:", result);
-    
-    if (result.success) {
-      showStatus('Recording saved successfully', 'connected');
-      
-      // If there's diarization data and we're the therapist, store it in localStorage instead of sessionStorage
-      if (result.diarization && isTherapist) {
-        // Use localStorage instead of sessionStorage for persistence
-        localStorage.setItem("diarizationResult", result.diarization);
-        console.log("Diarization result saved to localStorage");
-        
-        try {
-          // Generate the report using the diarization result
-          const reportResponse = await fetch('http://localhost:8003/generate_report', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ diarization_result: result.diarization })
-          });
-          
-          if (!reportResponse.ok) {
-            const reportErrorText = await reportResponse.text();
-            console.error('Report generation error:', reportResponse.status, reportErrorText);
-            showStatus('Failed to generate report', 'error');
-            return true; // Still return true since recording was saved
+          if (!isTherapist) {
+            const result = await response.json();
+            console.log("Recording upload result:", result);
+            if (result.success) {
+              showStatus('Recording saved successfully', 'connected');
+              recordedChunks = [];
+              return true;
+            } else {
+              showStatus('Failed to save recording: ' + result.message, 'error');
+              return false;
+            }
           }
-          
-          const reportData = await reportResponse.json();
-          
-          if (reportData.report) {
-            localStorage.setItem("finalReport", reportData.report);
-            console.log("Final report saved to localStorage");
-            showStatus('Report generated successfully', 'connected');
-          }
-        } catch (reportErr) {
-          console.error('Error during report generation:', reportErr);
-          showStatus('Error generating report', 'error');
+          return true;
+
+        } catch (err) {
+          console.error('Error during conversion/upload:', err);
+          showStatus('Error saving recording: ' + err.message, 'error');
+          return false;
         }
       }
-      
-      recordedChunks = [];
-      return true;
-    } else {
-      showStatus('Failed to save recording: ' + result.message, 'error');
-      return false;
-    }
-
-  } catch (err) {
-    console.error('Error during conversion/upload:', err);
-    showStatus('Error saving recording: ' + err.message, 'error');
-    return false;
-  }
-}
 
 async function endCall() {
   showStatus('Ending session...', 'connecting');
   
   try {
-    // Stop recording if it's still active
     if (isRecording && mediaRecorder) {
       mediaRecorder.stop();
-      // Add a small delay to allow the mediaRecorder.onstop event to fire
       await new Promise(resolve => setTimeout(resolve, 500));
       isRecording = false;
-    } else {
-      // If recording already stopped, ensure chunks are saved
-      await saveRecording();
     }
-    
-    // Close peer connection
+
+    const saveSuccess = await saveRecording();
+
     if (pc) {
       pc.close();
       pc = null;
     }
     
-    // Stop local media tracks
     if (localStream) {
       localStream.getTracks().forEach(track => track.stop());
     }
     
-    // Disconnect socket
     if (socket && socket.connected) {
       socket.disconnect();
     }
     
     clearInterval(timerInterval);
     
-    // For therapists, wait for diarization and redirect to report
-    if (isTherapist) {
-      showStatus('Processing session audio...', 'connecting');
-      try {
-        // Wait a moment for the audio to finish processing
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Double check if we have diarization data
-        const diarizationData = localStorage.getItem("diarizationResult");
-        if (!diarizationData) {
-          console.warn("No diarization data found before redirect");
-        } else {
-          console.log("Diarization data found, length:", diarizationData.length);
-        }
-        
-        // Redirect to report page
-        window.location.href = `http://localhost:8003/static/report.html?appointmentId=${appointmentId}`;
-      } catch (err) {
-        console.error('Error during post-session processing:', err);
-        alert("There was an error processing the session audio. Redirecting to appointment list.");
-        window.location.href = '/therapist/appointment-list';
-      }
-    } else {
-      // For clients, just redirect to dashboard
+    if (isTherapist && saveSuccess) {
+      // Get the file path from the response if available
+      const filePath = '/audio/recordings/session-' + appointmentId + '-' + Date.now() + '.mp3';
+      window.location.href = `http://localhost:8003/static/upload.html?file=${encodeURIComponent(filePath)}`;
+    } else if (!isTherapist) {
       window.location.href = '/client/dashboard';
+    } else {
+      // Fallback if something went wrong
+      window.location.href = isTherapist ? '/therapist/appointment-list' : '/client/dashboard';
     }
+
   } catch (error) {
     console.error("Error in endCall function:", error);
-    alert("There was an error ending the call. Please check the console for details.");
+    showStatus('Error ending session: ' + error.message, 'error');
     // Redirect anyway for safety
     window.location.href = isTherapist ? '/therapist/appointment-list' : '/client/dashboard';
   }

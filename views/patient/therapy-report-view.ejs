@@ -199,7 +199,7 @@
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-12">
-                      <p><%= report.reportContent.summary %></p>
+                      <p><%= report.summary %></p>
                     </div>
                   </div>
                 </div>
@@ -212,8 +212,8 @@
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-12">
-                      <% if (report.reportContent.key_discussion_themes) { %>
-                        <% const themes = report.reportContent.key_discussion_themes.split('\n-').filter(t => t.trim()); %>
+                      <% if (report.key_discussion_themes) { %>
+                        <% const themes = report.key_discussion_themes.split('\n-').filter(t => t.trim()); %>
                         <ul>
                           <% themes.forEach(theme => { %>
                             <li><%= theme.replace(/^-/, '').trim() %></li>
@@ -234,8 +234,8 @@
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-12">
-                      <% if (report.reportContent.recommendations_and_next_steps) { %>
-                        <% const recommendations = report.reportContent.recommendations_and_next_steps.split('\n-').filter(r => r.trim()); %>
+                      <% if (report.recommendations_and_next_steps) { %>
+                        <% const recommendations = report.recommendations_and_next_steps.split('\n-').filter(r => r.trim()); %>
                         <ul>
                           <% recommendations.forEach(rec => { %>
                             <li><%= rec.replace(/^-/, '').trim() %></li>
@@ -256,7 +256,7 @@
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-12">
-                      <p><%= report.reportContent.session_mood_progression || 'No mood progression recorded.' %></p>
+                      <p><%= report.session_mood_progression || 'No mood progression recorded.' %></p>
                     </div>
                   </div>
                 </div>
@@ -269,8 +269,8 @@
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-12">
-                      <% if (report.reportContent.key_quotes_or_phrases) { %>
-                        <% const quotes = report.reportContent.key_quotes_or_phrases.split('\n-').filter(q => q.trim()); %>
+                      <% if (report.key_quotes_or_phrases) { %>
+                        <% const quotes = report.key_quotes_or_phrases.split('\n-').filter(q => q.trim()); %>
                         <ul>
                           <% quotes.forEach(quote => { %>
                             <li><%= quote.replace(/^-/, '').trim() %></li>
@@ -291,8 +291,8 @@
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-12">
-                      <% if (report.reportContent.coping_mechanisms_discussed) { %>
-                        <% const mechanisms = report.reportContent.coping_mechanisms_discussed.split('\n-').filter(m => m.trim()); %>
+                      <% if (report.coping_mechanisms_discussed) { %>
+                        <% const mechanisms = report.coping_mechanisms_discussed.split('\n-').filter(m => m.trim()); %>
                         <ul>
                           <% mechanisms.forEach(mechanism => { %>
                             <li><%= mechanism.replace(/^-/, '').trim() %></li>
@@ -313,7 +313,7 @@
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-12">
-                      <p><%= report.reportContent.patient_goals || 'No patient goals recorded.' %></p>
+                      <p><%= report.patient_goals || 'No patient goals recorded.' %></p>
                     </div>
                   </div>
                 </div>
@@ -326,8 +326,8 @@
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-12">
-                      <% if (report.reportContent.followup_questions_for_next_session) { %>
-                        <% const questions = report.reportContent.followup_questions_for_next_session.split('\n-').filter(q => q.trim()); %>
+                      <% if (report.followup_questions_for_next_session) { %>
+                        <% const questions = report.followup_questions_for_next_session.split('\n-').filter(q => q.trim()); %>
                         <ul>
                           <% questions.forEach(question => { %>
                             <li><%= question.replace(/^-/, '').trim() %></li>
@@ -348,7 +348,7 @@
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-12">
-                      <p><%= report.reportContent.triggers_mentioned || 'No triggers mentioned.' %></p>
+                      <p><%= report.triggers_mentioned || 'No triggers mentioned.' %></p>
                     </div>
                   </div>
                 </div>
@@ -361,7 +361,7 @@
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-12">
-                      <p><%= report.reportContent.relationship_dynamics || 'No relationship dynamics recorded.' %></p>
+                      <p><%= report.relationship_dynamics || 'No relationship dynamics recorded.' %></p>
                     </div>
                   </div>
                 </div>

@@ -215,8 +215,7 @@
                         <tr>
                           <th>Patient</th>
                           <th>Therapist</th>
-                          <th>Session Date</th>
-                          <th>Report Date</th>
+                          
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -231,14 +230,7 @@
                         <tr>
                           <td><%= report.patientName %></td>
                           <td><%= report.therapistName %></td>
-                          <td>
-                            <% const sessionDate = new Date(report.timestamp) %>
-                            <%= sessionDate.toLocaleDateString() %>
-                          </td>
-                          <td>
-                            <% const reportDate = new Date(report.timestamp) %>
-                            <%= reportDate.toLocaleDateString() %>
-                          </td>
+                          
                           <td>
                             <a
                               href="/therapy-reports/<%= report._id %>"

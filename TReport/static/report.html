@@ -67,105 +67,55 @@
       #saveBtn:hover {
         background-color: #27ae60;
       }
+      .status-message {
+        text-align: center;
+        padding: 10px;
+        margin: 15px 0;
+        border-radius: 4px;
+        display: none;
+      }
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
     </style>
   </head>
   <body>
     <h1>After-Therapy Session Report</h1>
+    <div id="statusMessage" class="status-message"></div>
     <div id="reportContainer"></div>
     <button id="saveBtn">Save Edits</button>
     <a href="/" class="back-button">Back to Upload</a>
 
     <script>
-      document.addEventListener("DOMContentLoaded", async () => {
+      document.addEventListener("DOMContentLoaded", () => {
+        const reportText = sessionStorage.getItem("finalReport");
         const container = document.getElementById("reportContainer");
-        const saveBtn = document.getElementById("saveBtn");
         const urlParams = new URLSearchParams(window.location.search);
-        const appointmentId = urlParams.get("appointmentId");
+        const appointmentId = urlParams.get("appointmentId") || sessionStorage.getItem("appointmentId");
 
-        // Function to display status messages
-        function showStatus(message, isError = false) {
-          container.innerHTML = `
-      <div class="${isError ? "error" : "loading"}">
-        ${!isError ? '<div class="spinner"></div>' : ""}
-        <p>${message}</p>
-      </div>
-    `;
+        console.log("Retrieved appointmentId:", appointmentId);
+
+        if (!appointmentId) {
+          showStatusMessage("Appointment ID is missing! Please go back and try again.", "error");
+          return;
         }
 
-        showStatus("Loading therapy session report...");
-        console.log("Report page loaded for appointment ID:", appointmentId);
+        sessionStorage.setItem("appointmentId", appointmentId);
 
-        // First check if we have the report in localStorage instead of sessionStorage
-        let reportText = localStorage.getItem("finalReport");
-        console.log("Found report in localStorage:", !!reportText);
-
-        // If no report is available yet, check if we have diarization results to process
         if (!reportText) {
-          const diarizationResult = localStorage.getItem("diarizationResult");
-          console.log(
-            "Found diarization result in localStorage:",
-            !!diarizationResult
-          );
-
-          if (diarizationResult) {
-            try {
-              showStatus("Generating report from session audio...");
-
-              // Generate report from diarization result
-              const response = await fetch(
-                "http://localhost:8003/generate_report",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    diarization_result: diarizationResult,
-                  }),
-                }
-              );
-
-              if (!response.ok) {
-                throw new Error(`Server responded with ${response.status}`);
-              }
-
-              const data = await response.json();
-              if (data.report) {
-                reportText = data.report;
-                localStorage.setItem("finalReport", reportText);
-                console.log("Generated and saved new report");
-              } else {
-                showStatus(
-                  "Failed to generate report from session audio.",
-                  true
-                );
-                console.error("No report in API response");
-                return;
-              }
-            } catch (error) {
-              console.error("Error generating report:", error);
-              showStatus(
-                `Error processing session data: ${error.message}`,
-                true
-              );
-              return;
-            }
-          } else {
-            console.error("No diarization data found");
-            showStatus(
-              "No session data found. Please upload a session first.",
-              true
-            );
-            return;
-          }
+          container.innerHTML =
+            "<p>No report data found. Please upload a session first.</p>";
+          return;
         }
 
-        // Clear loading indicator
-        container.innerHTML = "";
-
-        // Split the report into sections
         const sections = reportText.split("\n\n");
-        console.log(`Splitting report into ${sections.length} sections`);
 
         sections.forEach((section) => {
           if (!section.trim()) return;
@@ -192,58 +142,94 @@
           sectionDiv.appendChild(contentDiv);
           container.appendChild(sectionDiv);
         });
+      });
 
-        saveBtn.addEventListener("click", async () => {
-          saveBtn.disabled = true;
-          saveBtn.textContent = "Saving...";
+      function showStatusMessage(message, type) {
+        const statusMessage = document.getElementById("statusMessage");
+        statusMessage.textContent = message;
+        statusMessage.className = `status-message ${type}`;
+        statusMessage.style.display = "block";
+        
+        if (type === "success") {
+          setTimeout(() => {
+            statusMessage.style.display = "none";
+          }, 3000);
+        }
+      }
 
-          const sections = document.querySelectorAll(".report-section");
-          const reportData = {
+      document.getElementById("saveBtn").addEventListener("click", () => {
+        const sections = document.querySelectorAll(".report-section");
+        const reportData = {};
+
+        sections.forEach((section) => {
+          const key = section
+            .querySelector(".section-title")
+            .textContent.toLowerCase()
+            .replace(/\s+/g, "_");
+          const value = section
+            .querySelector(".section-content")
+            .textContent.trim();
+          reportData[key] = value;
+        });
+
+        const reportText = sessionStorage.getItem("finalReport");
+
+        const reportObject = {
+          report: reportText,
+          ...reportData 
+        };
+
+        const appointmentId = sessionStorage.getItem("appointmentId");
+
+        if (!appointmentId) {
+          showStatusMessage("Appointment ID is missing!", "error");
+          return;
+        }
+
+        console.log("Using appointmentId:", appointmentId);
+        
+        const saveBtn = document.getElementById("saveBtn");
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Saving...";
+        showStatusMessage("Saving report...", "success");
+
+        fetch("http://localhost:8003/save_report", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            report: reportObject,
             appointmentId: appointmentId,
-            createdAt: new Date().toISOString(),
-          };
-
-          sections.forEach((section) => {
-            const key = section
-              .querySelector(".section-title")
-              .textContent.toLowerCase()
-              .replace(/\s+/g, "_"); // e.g. "Primary Concern" → "primary_concern"
-            const value = section
-              .querySelector(".section-content")
-              .textContent.trim();
-            reportData[key] = value;
-          });
-
-          try {
-            const response = await fetch("http://localhost:8003/save_report", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(reportData),
-            });
-
-            const data = await response.json();
+          }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              return response.json().then(data => {
+                throw new Error(`Failed to save report: ${JSON.stringify(data)}`);
+              });
+            }
+            return response.json();
+          })
+          .then((data) => {
             if (data.message === "Report saved") {
-              alert("Report successfully saved to database!");
-
-              // Clear localStorage
-              localStorage.removeItem("finalReport");
-              localStorage.removeItem("diarizationResult");
+              showStatusMessage("Report successfully saved! Redirecting to dashboard...", "success");
+              setTimeout(() => {
+                window.location.href = "http://localhost:3000/therapist/dashboard";
+              }, 2000);
             } else {
-              alert(
-                "Failed to save the report: " + (data.detail || "Unknown error")
-              );
+              showStatusMessage("Failed to save the report.", "error");
               console.error(data);
             }
-          } catch (error) {
-            alert("Error saving report: " + error.message);
+          })
+          .catch((error) => {
+            showStatusMessage(`Error saving report: ${error.message}`, "error");
             console.error(error);
-          } finally {
+          })
+          .finally(() => {
             saveBtn.disabled = false;
             saveBtn.textContent = "Save Edits";
-          }
-        });
+          });
       });
     </script>
   </body>

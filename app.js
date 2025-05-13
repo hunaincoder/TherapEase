@@ -9,6 +9,8 @@ const moment = require("moment-timezone");
 const flash = require("connect-flash");
 const ConnectMongo = require("./config/DB");
 const mongoose = require("mongoose");
+const cors = require("cors");
+
 require("dotenv").config();
 const {
   scheduleAppointmentStatusUpdate,
@@ -27,6 +29,13 @@ var app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST"],
+  })
+);
+app.use("/audio", express.static(path.join(__dirname, "assets/audio")));
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");

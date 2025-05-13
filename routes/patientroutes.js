@@ -92,6 +92,8 @@ function extractProblem(primaryConcern, recommendedScale) {
   return null;
 }
 
+let recordingCount = 1;
+
 const audioStorage = multer.diskStorage({
   destination: async (req, file, cb) => {
     try {
@@ -104,7 +106,9 @@ const audioStorage = multer.diskStorage({
     }
   },
   filename: (req, file, cb) => {
-    cb(null, `session-${req.body.appointmentId}-${Date.now()}.mp3`);
+    const newFilename = `recording${recordingCount}.mp3`;
+    recordingCount++;
+    cb(null, newFilename);
   },
 });
 
@@ -128,7 +132,6 @@ const audioUpload = multer({
       );
     }
   },
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
 });
 
 const handleAudioUpload = (req, res, next) => {
@@ -213,7 +216,6 @@ router.post(
 
       console.log("File saved:", req.file.path);
 
-      // Save recording info to appointment
       appointment.recording = {
         path: `/audio/recordings/${req.file.filename}`,
         recordedBy: new mongoose.Types.ObjectId(userId),
@@ -224,61 +226,22 @@ router.post(
       await appointment.save();
       console.log("Appointment updated with recording info");
 
-      // Process with diarization if therapist
       if (isTherapist === "true") {
-        try {
-          console.log("Starting diarization process");
-          const formData = new FormData();
-          const fileStream = await fs.readFile(req.file.path);
-
-          formData.append("file", fileStream, {
-            filename: req.file.filename,
-            contentType: "audio/mp3",
-          });
-
-          console.log("Sending file to diarization service");
-          const response = await axios.post(
-            "http://localhost:8003/diarize",
-            formData,
-            {
-              headers: {
-                ...formData.getHeaders(),
-              },
-              maxBodyLength: Infinity,
-              maxContentLength: Infinity,
-              timeout: 120000, // 2 minute timeout for diarization
-            }
-          );
-
-          console.log("Diarization successful");
-          const diarizationResult = response.data.result;
-
-          return res.json({
-            success: true,
-            message: "Recording saved and diarized successfully",
-            diarization: diarizationResult,
-          });
-        } catch (err) {
-          console.error("Diarization error:", err.message);
-          // Still return success since we saved the recording
-          return res.json({
-            success: true,
-            message: "Recording saved but diarization failed: " + err.message,
-            error: err.message,
-            diarization: null,
-          });
-        }
+        const filePath = encodeURIComponent(
+          `/audio/recordings/${req.file.filename}`
+        );  
+        return res.redirect(
+          `http://localhost:8003/static/upload.html?appointmentId=${appointmentId}&file=${filePath}`
+        );
       }
 
       res.json({ success: true, message: "Recording saved successfully" });
     } catch (error) {
       console.error("Error saving recording:", error);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "Failed to save recording: " + error.message,
-        });
+      res.status(500).json({
+        success: false,
+        message: "Failed to save recording: " + error.message,
+      });
     }
   }
 );
