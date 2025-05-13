@@ -24,8 +24,6 @@ db = client["test"]
 collection = db["after_therapy_reports"]
 
 
-
-
 app = FastAPI(title="Gemini Audio Diarization API")
 
 app.add_middleware(
@@ -37,19 +35,23 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+
 @app.get("/")
 def read_root():
     return FileResponse("static/upload.html")
+
 
 # Configure the GenAI client
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 MODEL_NAME = "gemini-1.5-pro-latest"  # Updated to a more recent model
 
+
 @app.post("/diarize")
 async def diarize_audio(file: UploadFile = File(...)):
     try:
         if not file.filename.lower().endswith('.mp3'):
-            raise HTTPException(status_code=400, detail="Only MP3 files are supported")
+            raise HTTPException(
+                status_code=400, detail="Only MP3 files are supported")
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
             tmp.write(await file.read())
@@ -61,27 +63,35 @@ async def diarize_audio(file: UploadFile = File(...)):
         os.remove(tmp_path)
 
         diarization_result = parse_diarization_result(response.text)
-        diarization_result_by_speaker = group_diarization_result_by_speaker(diarization_result)
-        result_string = convert_diarization_result_to_string(diarization_result_by_speaker)
+        diarization_result_by_speaker = group_diarization_result_by_speaker(
+            diarization_result)
+        result_string = convert_diarization_result_to_string(
+            diarization_result_by_speaker)
         return {"result": result_string}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 class DiarizationResult(BaseModel):
     diarization_result: str
+
 
 @app.post("/generate_report")
 async def generate_after_therapy_report(data: DiarizationResult):
     try:
         model = genai.GenerativeModel(model_name=MODEL_NAME)
-        response = model.generate_content([AFTER_THERAPY_REPORT_PROMPT, data.diarization_result])
+        response = model.generate_content(
+            [AFTER_THERAPY_REPORT_PROMPT, data.diarization_result])
         return {"report": response.text.strip()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 class ReportData(BaseModel):
     report: str
+
+
 @app.post("/save_report")
 async def save_report(report: dict):
     try:
